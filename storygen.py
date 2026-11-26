@@ -10,10 +10,10 @@ import re
 import socket
 import subprocess
 import time
-from urllib.error import HTTPError, URLError
+from urllib.error import URLError
 from urllib.request import Request, urlopen
 
-from jsonschema import Draft202012Validator
+from jsonschema import Draft202012Validator, ValidationError
 
 
 ROOT = Path(__file__).resolve().parent
@@ -21,6 +21,30 @@ HOME = Path.home()
 SIGNATURES = {
     "market": "Original editorial cartoon, strong plum outlines, warm ivory paper, bright ochre fruit, teal leaves, rounded simple silhouettes.",
     "paper": "Standalone explanatory cartoon with warm cut-paper silhouettes, dark outlines, and minimal decoration.",
+}
+OUTPUT_GRAMMAR = {
+    "type": "object",
+    "properties": {
+        "title": {"type": "string"},
+        "visual": {"type": "object", "additionalProperties": True},
+        "script": {"type": "array", "items": {
+            "type": "object", "properties": {
+                "id": {"type": "string"}, "text": {"type": "string"},
+                "caption": {"type": "string"}, "pause_after_ms": {"type": "integer"},
+                "critical_spoken": {"type": "array", "items": {"type": "array", "items": {"type": "string"}}},
+            }, "required": ["id", "text"], "additionalProperties": False,
+        }},
+        "beats": {"type": "array", "items": {
+            "type": "object", "properties": {
+                "id": {"type": "string"}, "parent": {"type": "string"},
+                "cue": {"type": "object", "additionalProperties": True},
+                "panel": {"type": "object", "additionalProperties": True},
+            }, "required": ["id", "cue", "panel"], "additionalProperties": False,
+        }},
+        "instructional": {"type": "object", "additionalProperties": True},
+    },
+    "required": ["title", "visual", "script", "beats", "instructional"],
+    "additionalProperties": False,
 }
 
 
@@ -160,6 +184,7 @@ def write(args):
     if actual != config["sha256"]:
         raise ValueError("writer checkpoint hash mismatch")
     meta = {"brief": brief, "model": config, "skill_sha256": hashlib.sha256(skill.encode()).hexdigest(),
+            "runner_sha256": hashlib.sha256(Path(__file__).read_bytes()).hexdigest(),
             "seed": 437, "temperature": .6, "top_p": .95, "max_tokens": 3300, "voice": args.voice}
     if (out / "writer.json").exists() and read(out / "writer.json") != meta:
         raise ValueError("cannot resume with a changed brief or writer configuration")
@@ -179,7 +204,8 @@ def write(args):
                 t = time.monotonic()
                 data = {"messages": [{"role": "user", "content": prompt}],
                         "seed": meta["seed"], "temperature": meta["temperature"], "top_p": meta["top_p"],
-                        "max_tokens": meta["max_tokens"], "response_format": {"type": "json_object"}}
+                        "max_tokens": meta["max_tokens"],
+                        "response_format": {"type": "json_schema", "schema": OUTPUT_GRAMMAR}}
                 result = json.loads(request(endpoint + "/v1/chat/completions", data, timeout=240))
                 save(artifact, {"seconds": time.monotonic() - t, "response": result})
                 result = read(artifact)
@@ -190,11 +216,8 @@ def write(args):
                 validate(story)
             except (ValueError, KeyError, TypeError) as exc:
                 errors.append(str(exc))
-            except Exception as exc:
-                from jsonschema import ValidationError
-                if not isinstance(exc, ValidationError):
-                    raise
-                errors.append(f"{list(exc.path)}: {exc.message}")
+            except ValidationError as exc:
+                errors.append(f"{list(exc.path)}: {exc.message[:500]}")
             else:
                 save(out / "story.json", story)
                 return story

@@ -1,0 +1,11 @@
+{
+  "topic": "Two buses leave together",
+  "takeaway": "Compare the full journey, including time spent waiting.",
+  "required_facts": [
+    "The blue bus arrives after a nineteen-minute ride and no wait.",
+    "The red bus waits four minutes and rides for twelve minutes.",
+    "Compare both from the same start. Red arrives three minutes earlier."
+  ],
+  "audience": "A beginner",
+  "signature": "paper"
+}
