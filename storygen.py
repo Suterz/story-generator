@@ -83,7 +83,10 @@ def generation_schema(*, communication=False):
     panel["required"] = ["op", "objective", "instruction", "overlays"]
     session["required"] = ["story_context", "visual_signature", "graphic_theme"]
     if communication:
-        for name in ("style_ref_ids", "legacy_input", "legacy_premise", "legacy_context"):
+        # Communication plans keep their evaluated comparisons separately.
+        # The renderer's session checks only support the specific legacy
+        # equal-groups operand contract, not general editorial arithmetic.
+        for name in ("style_ref_ids", "legacy_input", "legacy_premise", "legacy_context", "checks"):
             session["properties"].pop(name, None)
     schema = json.loads(json.dumps(OUTPUT_GRAMMAR))
     if communication:
@@ -443,6 +446,8 @@ def write(args):
     if (out / "story.json").exists():
         return validate_native(validate(read(out / "story.json")))
     if (out / "writer-refusal.json").exists():
+        if generic:
+            raise CommunicationReview(read(out / "writer-refusal.json")["diagnostics"][-1])
         raise ValueError("writer previously withheld this brief; original diagnostics saved")
     with model.open("rb") as asset:
         actual = hashlib.file_digest(asset, "sha256").hexdigest()
@@ -550,6 +555,8 @@ def write(args):
                 if generic:
                     if any(k in story["visual"] for k in ("style_ref_ids", "legacy_input", "legacy_premise", "legacy_context")):
                         raise ValueError("use the supplied signature; this brief did not supply uploaded style references or a legacy story")
+                    if story["visual"].get("checks"):
+                        raise ValueError("keep editorial calculations out of the frame session checks")
                     story["max_ms"] = brief["max_duration_ms"]
                 choose_artwork(story, brief)
                 if generic and any(n["kind"] == "verbatim" for n in brief["source_notes"]):
@@ -571,7 +578,13 @@ def write(args):
                 save(out / "story.json", story)
                 return story
     save(out / "writer-refusal.json", {"diagnostics": errors})
+    if generic:
+        raise CommunicationReview(errors[-1])
     raise ValueError("writer did not produce a supported story: " + errors[-1])
+
+
+class CommunicationReview(ValueError):
+    pass
 
 
 def render(args, story):
@@ -656,6 +669,11 @@ def main():
             print(json.dumps(error.result, indent=2))
         except UnsupportedBrief as error:
             result = {"status": "unsupported", "reason": str(error), "render_submitted": False}
+            save(args.out / "result.json", result)
+            print(json.dumps(result, indent=2))
+        except CommunicationReview as error:
+            result = {"status": "writer_refusal", "stage": "writing", "reason": str(error),
+                      "render_submitted": False}
             save(args.out / "result.json", result)
             print(json.dumps(result, indent=2))
 
