@@ -17,6 +17,7 @@ from jsonschema import Draft202012Validator, ValidationError
 
 from arithmetic import checked_comparisons
 from graphics import COUNTER_ROW, expand_counter_rows
+from spoken_money import normalize_story_money
 
 
 ROOT = Path(__file__).resolve().parent
@@ -434,7 +435,7 @@ def write(args):
                 story = json.loads(result["response"]["choices"][0]["message"]["content"])
                 story["voice_profile"] = args.voice
                 story["visual"]["visual_signature"] = SIGNATURES[brief["signature"]]
-                validate_native(validate(compile_story(story)))
+                validate_native(validate(compile_story(normalize_story_money(story))))
                 check_editorial_conclusion(story, comparisons)
             except (ValueError, KeyError, TypeError) as exc:
                 errors.append(str(exc))
