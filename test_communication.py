@@ -28,7 +28,7 @@ class CommunicationTests(unittest.TestCase):
     def test_missing_input_is_typed_and_reusable(self):
         brief, _ = normalize(json.loads((EXAMPLES / "missing-rules.json").read_text()), SIGNATURES)
         response = {"choices": [{"message": {"content":
-                    '{"missing":[{"question":"What rule governs phone calls?"}]}'}}]}
+                    '{"decision":"blocked","question":"What rule governs phone calls?"}'}}]}
         with TemporaryDirectory() as directory, patch("storygen.request", return_value=json.dumps(response)) as request:
             out = Path(directory)
             for _ in range(2):

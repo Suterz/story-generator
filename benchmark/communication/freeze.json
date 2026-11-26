@@ -1,0 +1,35 @@
+{
+  "counts": {
+    "development": {
+      "comparison": 10,
+      "education": 12,
+      "announcement": 10,
+      "demonstration": 10,
+      "persuasion": 8,
+      "narrative": 10
+    },
+    "validation": {
+      "education": 4,
+      "demonstration": 4,
+      "announcement": 3,
+      "comparison": 3,
+      "persuasion": 3,
+      "narrative": 3
+    },
+    "sealed": {
+      "education": 4,
+      "demonstration": 4,
+      "announcement": 3,
+      "comparison": 3,
+      "persuasion": 3,
+      "narrative": 3
+    }
+  },
+  "sha256": {
+    "development": "28c74d683374af4e8704f83b45c2f0bee438605da74fbb294585f6737aca932f",
+    "validation": "1dfecc82506a6bc12c3972de84876691bfa8df1b55b559496e814fafa1ac340e",
+    "sealed": "0463726e426f4f69e09b1de3e236c3e8b32218d1873edab4ba669bd731ad9092"
+  },
+  "legacy_sha256": "134cc96e0d287ee49ad93aa69618bb80769b6d8fbd89475668ab8af2cee53d93",
+  "rubric_sha256": "857a48e1f6c671a0522eb1fa2d24bd0ef487b77a75371672c6edbc44a1632e98"
+}
