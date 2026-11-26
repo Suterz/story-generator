@@ -7,7 +7,7 @@ from unittest.mock import patch
 
 from communication import NeedsInput, UnsupportedBrief, check_supplied_authority, extract, intent_hash, normalize
 from communication_sweep import corpus, digest
-from storygen import SIGNATURES, generation_schema, load_brief
+from storygen import SIGNATURES, check_communication_anchors, generation_schema, load_brief
 
 ROOT = Path(__file__).parent
 EXAMPLES = ROOT / "examples/carriage"
@@ -79,3 +79,10 @@ class CommunicationTests(unittest.TestCase):
         a, b = (json.loads((EXAMPLES / f"{case}.json").read_text()) for case in ("wayfinding", "empathy"))
         self.assertNotEqual(a.pop("objective"), b.pop("objective"))
         self.assertEqual(a, b)
+
+    def test_overlay_uses_the_accepted_parent_surface(self):
+        story = json.loads((EXAMPLES / "contract-story.json").read_text())
+        check_communication_anchors(story)
+        story["beats"][1]["panel"]["overlays"][0]["at"] = "made-up.face"
+        with self.assertRaisesRegex(ValueError, "is not grounded"):
+            check_communication_anchors(story)

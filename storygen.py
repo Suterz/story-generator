@@ -345,6 +345,27 @@ def check_editorial_conclusion(story, comparisons):
         raise ValueError("the last sentence names an overall winner across opposing criteria; name the criterion")
 
 
+def check_communication_anchors(story):
+    """Catch invented overlay anchors when no controlled layout can provide them."""
+    available = {}
+    for beat in story["beats"]:
+        panel = beat["panel"]
+        parent = beat.get("parent")
+        inherited = available.get(parent, set()) if panel["op"] in {"overlay_only", "focus"} else set()
+        if panel.get("layout") or panel.get("fallback_layout") or inherited is None:
+            # Controlled geometry produces its own instance anchors; the
+            # native frame service is the authority for those assets.
+            available[beat["id"]] = None
+            continue
+        anchors = inherited | panel.get("anchors", {}).keys()
+        available[beat["id"]] = anchors
+        for overlay in panel.get("overlays", []):
+            for key in ("at", "from", "to"):
+                target = overlay.get(key)
+                if isinstance(target, str) and target not in anchors | {"safe.top", "safe.bottom"}:
+                    raise ValueError(f"{beat['id']}: overlay target {target!r} is not grounded; declare the intended surface on the clean scene")
+
+
 @contextmanager
 def writer(args, model, log):
     with args.lease.open("a") as lock:
@@ -585,6 +606,7 @@ def write(args):
                 else:
                     validate_native(validate(compile_story(normalize_story_money(story))))
                 if generic:
+                    check_communication_anchors(story)
                     text = " ".join(u["text"] for u in story["script"])
                     if any(n["kind"] == "verbatim" and n["text"] not in text for n in brief["source_notes"]):
                         raise ValueError("approved verbatim wording is missing from the spoken script")

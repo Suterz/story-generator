@@ -2,6 +2,8 @@
 
 ## 2026-11-26 — Generic brief contract and comparison baseline
 
+- `102bf6f`: observed later beats with invented millisecond cues and an answer embargo grafted onto a rhetorical hook. The generic planner can choose a prediction interval; if it does not, the generation schema excludes that block. Legacy lesson grammar stays intact. Rerun the objective-only pair to find out whether this is enough.
+- The second narration of the authored contract reused both accepted hashes and moved the sign cut from frame 101 to frame 158. Gallery: `v4/v4.7 - Communication storyteller/REVIEW.md`. This is renderer integration evidence, not a model-authored pass.
 - `f36f064` authored contract control exported in 7.83 s. The clean door is recognizable; the crescent appears on the same door at frame 101, without the caption hiding it. Both panels accepted on candidate zero. Unprompted ASR of the delivered MP4 matches the source transcript; no human listening claim.
 - `e1c90c0` recovered the explicitly supplied prohibition and original spelling in the rough transcript. The successful rough and structured normalized objects have the same SHA-256. `c7ac984` blocked the missing policy before writer startup and without a video receipt.
 - The first generated wayfinding story invented a style reference and added a wish for a peaceful trip. Skill v2 asks for the actual sign overlay on unchanged art, and prohibits implied outcomes. Early v2 pair failures still included invented arithmetic operands and invalid IDs; `ecf5f35` removes unrelated frame checks without changing either renderer. Later runs must be independently inspected.
