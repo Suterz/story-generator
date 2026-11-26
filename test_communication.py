@@ -5,7 +5,7 @@ from types import SimpleNamespace
 import unittest
 from unittest.mock import patch
 
-from communication import NeedsInput, UnsupportedBrief, check_supplied_authority, intent_hash, normalize
+from communication import NeedsInput, UnsupportedBrief, check_supplied_authority, extract, intent_hash, normalize
 from storygen import SIGNATURES, generation_schema, load_brief
 
 ROOT = Path(__file__).parent
@@ -46,3 +46,17 @@ class CommunicationTests(unittest.TestCase):
         with self.assertRaises(UnsupportedBrief):
             normalize({**brief, "language": "de"}, SIGNATURES)
         self.assertEqual(normalize({**brief, "max_duration_ms": 13000}, SIGNATURES)[0]["max_duration_ms"], 13000)
+
+    def test_rough_round_trip_preserves_an_explicit_prohibition(self):
+        rough = (EXAMPLES / "rough.txt").read_text()
+        structured = json.loads((EXAMPLES / "wayfinding.json").read_text())
+        brief = {**structured, "audience": "commuters on the platform", "tone": "calm and direct",
+                 "objective": structured["objective"].rstrip("."), "takeaway": structured["takeaway"].rstrip("."),
+                 "source_notes": [{"kind": "fact", "text": structured["source_notes"][0]["text"].rstrip(".")}]}
+        provenance = {f"/{k}": {"origin": "supplied", "excerpt": rough.split(". ")[0]}
+                      for k in brief if k not in {"schema_version", "source_notes", "tone"}}
+        provenance["/tone"] = {"origin": "supplied", "excerpt": "Calm and direct"}
+        provenance["/source_notes/0"] = {"origin": "supplied", "excerpt": brief["source_notes"][0]["text"]}
+        actual, origins = extract(rough, lambda _prompt: {"brief": brief, "provenance": provenance}, SIGNATURES)
+        self.assertEqual(actual, normalize(structured, SIGNATURES)[0])
+        self.assertEqual(origins["/source_notes/1"]["excerpt"], "Do not state carriage rules.")

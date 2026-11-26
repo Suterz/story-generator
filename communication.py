@@ -126,4 +126,32 @@ def extract(raw, ask, signatures):
         excerpt = entry["excerpt"]
         if entry["origin"] not in {"supplied", "inferred"} or not excerpt or excerpt not in raw:
             raise ValueError("text extraction supplied unsupported provenance")
+    # Preserve the caller's original spelling and punctuation when the
+    # extracted value is a literal span. Do not paraphrase structured input.
+    def original(value):
+        match = re.search(re.escape(value) + r"[.!?]?", raw, re.IGNORECASE)
+        return match.group() if match else value
+
+    for field in ("topic", "objective", "takeaway", "audience", "tone"):
+        value = brief.get(field)
+        if not isinstance(value, str) or not value:
+            continue
+        value = original(value)
+        if field == "topic":
+            value = value.rstrip(".")
+        if field in ("audience", "tone"):
+            value = value[0].upper() + value[1:].rstrip(".")
+        brief[field] = value
+    if isinstance(brief.get("source_notes"), list):
+        for note in brief["source_notes"]:
+            note["text"] = original(note["text"])
+        # Explicit standalone prohibitions are constraints even if a model
+        # dropped them. Avoid guessing at embedded or conditional clauses.
+        for match in re.finditer(r"(?m)(?:^|[.!?]\s+)(Do not [^.!?\n]+[.!?]?)", raw):
+            constraint = match[1]
+            if not any(n["text"].rstrip(".").casefold() == constraint.rstrip(".").casefold()
+                       for n in brief["source_notes"]):
+                i = len(brief["source_notes"])
+                brief["source_notes"].append({"kind": "constraint", "text": constraint})
+                provenance[f"/source_notes/{i}"] = {"origin": "supplied", "excerpt": constraint}
     return normalize(brief, signatures, provenance=provenance)
