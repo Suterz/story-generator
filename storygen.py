@@ -25,7 +25,7 @@ from spoken_money import normalize_story_money
 
 ROOT = Path(__file__).resolve().parent
 SKILL = ROOT / "skills/lesson-writer/v4/SKILL.md"
-COMMUNICATION_SKILL = ROOT / "skills/communication-writer/v4/SKILL.md"
+COMMUNICATION_SKILL = ROOT / "skills/communication-writer/v5/SKILL.md"
 HOME = Path.home()
 SIGNATURES = {
     "market": "Original editorial cartoon, strong plum outlines, warm ivory paper, bright ochre fruit, teal leaves, rounded simple silhouettes.",
