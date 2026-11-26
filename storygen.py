@@ -89,6 +89,11 @@ def generation_schema(*, communication=False, prediction=True):
         # equal-groups operand contract, not general editorial arithmetic.
         for name in ("style_ref_ids", "legacy_input", "legacy_premise", "legacy_context", "checks", "canvas"):
             session["properties"].pop(name, None)
+        # Runtime applies the account signature. A scene without graphics
+        # may use the renderer's empty overlay default.
+        session["required"].remove("visual_signature")
+        session["properties"].pop("visual_signature")
+        panel["required"].remove("overlays")
     schema = json.loads(json.dumps(OUTPUT_GRAMMAR))
     if communication:
         schema["required"].remove("instructional")
@@ -105,6 +110,8 @@ def generation_schema(*, communication=False, prediction=True):
                 props[key] = {"anyOf": [option for option in props[key]["anyOf"]
                                        if option.get("type") != "null"]}
         props["type"] = {"const": kind}
+        if communication and kind in {"text", "label"}:
+            props["text"] = {"type": "string", "minLength": 1}
         if shape:
             props["shape"] = {"const": shape}
         return {"type": "object", "properties": props,
@@ -124,8 +131,8 @@ def generation_schema(*, communication=False, prediction=True):
     if communication:
         graphics.append({
             "type": "object",
-            "properties": {"type": {"const": "text"}, "text": {"type": "string"},
-                           "surface": {"type": "string"}, "fact": {"type": "string"}},
+            "properties": {"type": {"const": "text"}, "text": {"type": "string", "minLength": 1},
+                           "surface": {"type": "string", "minLength": 1}, "fact": {"type": "string"}},
             "required": ["type", "text", "surface"], "additionalProperties": False,
         })
     schema["$defs"]["Overlay"] = {"anyOf": graphics}

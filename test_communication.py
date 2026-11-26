@@ -121,3 +121,6 @@ class CommunicationTests(unittest.TestCase):
         schema = generation_schema(communication=True)
         self.assertIn("opening", schema["required"])
         self.assertNotIn("cue", schema["properties"]["opening"]["properties"])
+        self.assertNotIn("overlays", schema["properties"]["opening"]["properties"]["panel"]["required"])
+        self.assertNotIn("visual_signature", schema["properties"]["visual"]["required"])
+        self.assertIn("visual_signature", generation_schema()["properties"]["visual"]["required"])
