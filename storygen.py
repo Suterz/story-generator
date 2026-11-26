@@ -72,7 +72,7 @@ OUTPUT_GRAMMAR = {
 }
 
 
-def generation_schema(*, communication=False):
+def generation_schema(*, communication=False, prediction=True):
     # Use the versioned renderer properties, with a small authored subset.
     video = read(ROOT / "schemas/Video.json")
     session = read(ROOT / "schemas/Session.json")
@@ -122,6 +122,8 @@ def generation_schema(*, communication=False):
     ]}
     schema["properties"]["visual"] = session
     schema["properties"]["instructional"] = {"$ref": "#/$defs/Instructional"}
+    if communication and not prediction:
+        del schema["properties"]["instructional"]
     beat = schema["properties"]["beats"]["items"]["properties"]
     starts = {"type": "object", "properties": {"at_utterance_start": {"type": "string"}},
               "required": ["at_utterance_start"], "additionalProperties": False}
@@ -275,6 +277,8 @@ def validate(story):
                 raise ValueError(f"{key}: part targeting fields apply only to arrows")
         cue = b["cue"]
         if pos:
+            if "ms" in cue:
+                raise ValueError(f"{key}: use a spoken phrase or authored utterance start after the opening")
             parts = words(cue["phrase"])
             utterance = words(script[cue["utterance_id"]]["text"])
             indexes = [i for i in range(len(utterance)) if utterance[i:i + len(parts)] == parts]
@@ -456,6 +460,11 @@ def write(args):
     save(out / "writer.json", meta)
     errors = []
     with writer(args, model, out / "llama.log") as endpoint:
+        plan_schema = EDITORIAL_SCHEMA
+        if generic:
+            plan_schema = {**EDITORIAL_SCHEMA,
+                           "properties": {**EDITORIAL_SCHEMA["properties"], "prediction": {"type": "boolean"}},
+                           "required": [*EDITORIAL_SCHEMA["required"], "prediction"]}
         plan_file = out / "editorial-plan.json"
         if plan_file.exists():
             plan = read(plan_file)
@@ -467,7 +476,9 @@ def write(args):
                 editorial = (
                     "Return a JSON communication plan: in notes name the intended viewer effect, a natural opening, "
                     "the decisive visual evidence and what stays visible, and a distinct worthwhile ending. "
-                    "Use only approved facts, preserve exact wording, and don't force a prediction. "
+                    "Use only approved facts, preserve exact wording, and don't force a prediction. Set prediction "
+                    "true only if showing clues, then waiting silently for a learner to guess a result is the best "
+                    "way to communicate this objective. For wayfinding, a rhetorical question is not a prediction. "
                     "Comparisons is empty unless the topic itself requires a quantitative comparison. "
                     "Expressions contain numbers and + - * / only, never timestamps, units or duration budgets. Brief:\n"
                     + json.dumps({k: brief[k] for k in ("topic", "objective", "takeaway", "audience", "tone", "source_notes")},
@@ -488,12 +499,13 @@ def write(args):
             data = {"messages": [{"role": "user", "content": editorial}], "seed": meta["seed"],
                     "temperature": .3, "top_p": .95, "max_tokens": 650,
                     "response_format": {"type": "json_schema", "json_schema": {
-                        "name": "lesson_editor", "schema": EDITORIAL_SCHEMA}}}
+                        "name": "lesson_editor", "schema": plan_schema}}}
             save(plan_receipt, {"request_sha256": hashlib.sha256(editorial.encode()).hexdigest()})
             plan = json.loads(request(endpoint + "/v1/chat/completions", data, timeout=120))
             save(plan_file, plan)
         checklist = json.loads(plan["choices"][0]["message"]["content"])
-        Draft202012Validator(EDITORIAL_SCHEMA).validate(checklist)
+        Draft202012Validator(plan_schema).validate(checklist)
+        prediction = checklist.get("prediction", True)
         if generic:
             comparisons = []
             for item in checklist["comparisons"]:
@@ -516,7 +528,12 @@ def write(args):
                 if receipt.exists():
                     raise RuntimeError(f"writer attempt {attempt} was interrupted; no duplicate generation")
                 if generic:
-                    prompt = skill + "\nReturn JSON with title, visual, script and beats. Add instructional only for a real prediction.\n"
+                    prompt = skill + "\nReturn JSON with title, visual, script and beats.\n"
+                    if not prediction:
+                        prompt += "The editorial plan chose no prediction. Omit instructional. "
+                    prompt += ('Timing example: first beat cue {"ms":0}; any later beat cue '
+                               '{"at_utterance_start":"id-of-spoken-utterance"}. '
+                               "Do not invent millisecond estimates for later beats.\n")
                 else:
                     prompt = skill + "\nRead this unrelated format example. Do not copy its values or topic:\n" + example
                     prompt += "\nReturn one JSON object with title, visual, script, beats, and instructional.\n"
@@ -542,7 +559,7 @@ def write(args):
                         "max_tokens": meta["max_tokens"],
                         "response_format": {"type": "json_schema", "json_schema": {
                             "name": "communication_story" if generic else "lesson_story",
-                            "schema": generation_schema(communication=generic)}}}
+                            "schema": generation_schema(communication=generic, prediction=prediction)}}}
                 save(receipt, {"attempt": attempt, "request_sha256": hashlib.sha256(
                     json.dumps(data, sort_keys=True).encode()).hexdigest()})
                 result = json.loads(request(endpoint + "/v1/chat/completions", data, timeout=240))
@@ -553,6 +570,8 @@ def write(args):
                 story["voice_profile"] = args.voice
                 story["visual"]["visual_signature"] = SIGNATURES[brief["visual_signature" if generic else "signature"]]
                 if generic:
+                    if not prediction and "instructional" in story:
+                        raise ValueError("the editorial plan does not have a prediction interval")
                     if any(k in story["visual"] for k in ("style_ref_ids", "legacy_input", "legacy_premise", "legacy_context")):
                         raise ValueError("use the supplied signature; this brief did not supply uploaded style references or a legacy story")
                     if story["visual"].get("checks"):
