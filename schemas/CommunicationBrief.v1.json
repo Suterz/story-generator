@@ -1,0 +1,29 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "CommunicationBrief v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "topic", "objective", "takeaway", "source_notes"],
+  "properties": {
+    "schema_version": {"const": "1.0"},
+    "topic": {"$ref": "#/$defs/text"},
+    "objective": {"$ref": "#/$defs/text"},
+    "takeaway": {"$ref": "#/$defs/text"},
+    "audience": {"$ref": "#/$defs/text"},
+    "tone": {"$ref": "#/$defs/text"},
+    "source_notes": {
+      "type": "array", "maxItems": 40,
+      "items": {
+        "type": "object", "additionalProperties": false, "required": ["kind", "text"],
+        "properties": {
+          "kind": {"enum": ["note", "fact", "verbatim", "constraint"]},
+          "text": {"$ref": "#/$defs/text"}
+        }
+      }
+    },
+    "language": {"type": "string", "minLength": 2, "maxLength": 35},
+    "max_duration_ms": {"type": "integer", "minimum": 1000, "maximum": 44999},
+    "visual_signature": {"$ref": "#/$defs/text"}
+  },
+  "$defs": {"text": {"type": "string", "minLength": 1, "maxLength": 2000}}
+}

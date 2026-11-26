@@ -1,0 +1,12 @@
+{
+  "schema_version": "1.0",
+  "topic": "Finding the quiet carriage",
+  "objective": "Help commuters find the quiet carriage.",
+  "takeaway": "Look for the crescent on the carriage door.",
+  "audience": "Commuters on the platform",
+  "tone": "Calm and direct",
+  "source_notes": [
+    {"kind": "fact", "text": "A crescent on the carriage door identifies the quiet carriage."},
+    {"kind": "constraint", "text": "Do not state carriage rules."}
+  ]
+}
