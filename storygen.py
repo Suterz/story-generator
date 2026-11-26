@@ -66,7 +66,16 @@ def generation_schema():
               "required": ["at_utterance_start"], "additionalProperties": False}
     beat["cue"] = {"anyOf": [{"$ref": "#/$defs/Milliseconds"}, starts, {"$ref": "#/$defs/Phrase"}]}
     beat["panel"] = panel
-    return schema
+    def grammar_subset(node):
+        # b6500 cannot translate every regex supported by JSON Schema.
+        # Full schema validation still runs after generation.
+        if isinstance(node, dict):
+            return {key: grammar_subset(value) for key, value in node.items() if key != "pattern"}
+        if isinstance(node, list):
+            return [grammar_subset(value) for value in node]
+        return node
+
+    return grammar_subset(schema)
 
 
 def read(path):
@@ -118,6 +127,8 @@ def compile_story(story):
     scenes = {}
     for beat in story["beats"]:
         panel = beat["panel"]
+        if not isinstance(panel, dict):
+            raise ValueError("each beat needs a panel object with op, instruction, objective and overlays")
         scene = scenes[beat["parent"]] if beat.get("parent") else beat["id"]
         if panel.get("scene_id", scene) != scene and beat.get("parent"):
             raise ValueError("an existing scene must preserve its parent's scene_id")
