@@ -86,7 +86,7 @@ v=encode(pictures,[(0,144,0),(144,270,1)],(1080,1920),30,270,out/'narration.wav'
     save(out / "outcome.json", {"state": "succeeded", "download_sha256": sha(out / "video.mp4")})
 
 
-def record_pause(out, toolroot, video_repo, url, request):
+def record_pause(out, toolroot, video_repo, url, request, *, submit=True):
     """Repeat exactly the same PCM; add silence only before 'slowly'."""
     text = "The door opened slowly."
     speech = toolroot / "speech"
@@ -116,9 +116,10 @@ def record_pause(out, toolroot, video_repo, url, request):
             w.writeframes(pcm + b"\0" * 96000 + pcm[:split] + b"\0" * 96000 + pcm[split:])
         save(out / "pause-proof.json", {"repeated_pcm_sha256": hashlib.sha256(pcm).hexdigest(),
                                        "second_pass_inserted_silence_ms": 1000, "split_sample": split // 2})
-    subprocess.run([str(toolroot / "venvs/video-renderer/bin/python"), "-B",
-                    str(video_repo / "benchmark/replay_recording.py"), str(request), str(result),
-                    "--out", str(out), "--url", url], check=True, timeout=1200)
+    if submit:
+        subprocess.run([str(toolroot / "venvs/video-renderer/bin/python"), "-B",
+                        str(video_repo / "benchmark/replay_recording.py"), str(request), str(result),
+                        "--out", str(out), "--url", url], check=True, timeout=1200)
 
 
 def main():
@@ -150,6 +151,8 @@ def main():
             if not request.exists():
                 save(request, DESIGNS[slot]())
         if a.prepare:
+            if slot == "12":
+                record_pause(folder, a.toolroot, a.video, a.video_url, request, submit=False)
             continue
         if not any((initial / name).exists() for name in ("outcome.json", "result.json", "writer-refusal.json", "cli.json")):
             continue
