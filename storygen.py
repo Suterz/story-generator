@@ -98,10 +98,18 @@ def generation_schema(*, communication=False, prediction=True):
     if communication:
         schema["required"].remove("instructional")
     schema["$defs"] = {**video["$defs"], **session.pop("$defs", {}), **panel.pop("$defs", {})}
+    if communication:
+        utterance = schema["$defs"]["Utterance"]["properties"]
+        schema["properties"]["script"]["items"]["properties"]["pause_after_ms"] = utterance["pause_after_ms"]
     instruction = schema["$defs"]["Instructional"]
     instruction["properties"].pop("required_facts")
     instruction["required"].remove("required_facts")
     graphic_props = schema["$defs"]["Overlay"]["properties"]
+
+    def pair(minimum, maximum, *, open_minimum=False):
+        bound = "exclusiveMinimum" if open_minimum else "minimum"
+        return {"type": "array", "minItems": 2, "maxItems": 2,
+                "items": {"type": "number", bound: minimum, "maximum": maximum}}
 
     def graphic(kind, required, optional=(), shape=None):
         props = {k: graphic_props[k] for k in (*required, *optional, "fact")}
@@ -115,12 +123,14 @@ def generation_schema(*, communication=False, prediction=True):
             # A text mark inside generated art should use the semantic
             # surface form below rather than inventing an anchor ID.
             props["at"] = {"anyOf": [
-                {"type": "array", "minItems": 2, "maxItems": 2,
-                 "items": {"type": "number", "minimum": 0, "maximum": 1}},
+                pair(0, 1),
                 {"enum": ["safe.top", "safe.bottom"]},
             ]}
         if shape:
             props["shape"] = {"const": shape}
+        if communication and shape in {"rect", "disc"}:
+            props["at"] = pair(0, 1)
+            props["extent"] = pair(0, 0.9, open_minimum=True)
         return {"type": "object", "properties": props,
                 "required": ["type", *required, *(["shape"] if shape else [])],
                 "additionalProperties": False}

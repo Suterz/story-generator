@@ -130,11 +130,20 @@ class CommunicationTests(unittest.TestCase):
         overlay["at"] = "invented-door-id"
         self.assertFalse(d.is_valid(draft))
         panel = draft["beats"][0]["panel"]
+        panel["overlays"] = [{"type": "shape", "shape": "disc", "at": [0.5, 0.5], "extent": [0.25, 0.25]}]
+        self.assertTrue(d.is_valid(draft), list(d.iter_errors(draft)))
+        panel["overlays"][0]["at"] = "0.5,0.5"
+        self.assertFalse(d.is_valid(draft))
+        panel["overlays"][0]["at"] = [0.5, 0.5]
+        panel["overlays"][0]["extent"] = [0, 0.25]
+        self.assertFalse(d.is_valid(draft))
         panel["overlays"] = []
         self.assertFalse(d.is_valid(draft))
         panel.pop("overlays")
         panel["op"] = "clear_overlays"
         self.assertTrue(d.is_valid(draft), list(d.iter_errors(draft)))
+        draft["script"][0]["pause_after_ms"] = 4000
+        self.assertFalse(d.is_valid(draft))
 
     def test_explicit_skill_version_preserves_its_own_identity(self):
         self.assertEqual(communication_skill("v6").parent.name, "v6")
