@@ -48,6 +48,25 @@ OUTPUT_GRAMMAR = {
 }
 
 
+def generation_schema():
+    # Use the versioned renderer properties, with a small authored subset.
+    video = read(ROOT / "schemas/Video.json")
+    session = read(ROOT / "schemas/Session.json")
+    panel = read(ROOT / "schemas/Panel.json")
+    panel["properties"].pop("key")
+    panel["properties"].pop("parent_panel_id")
+    panel["required"] = ["op", "scene_id", "objective", "instruction", "overlays"]
+    session["required"] = ["story_context", "visual_signature", "graphic_theme"]
+    schema = json.loads(json.dumps(OUTPUT_GRAMMAR))
+    schema["$defs"] = {**video["$defs"], **session.pop("$defs", {}), **panel.pop("$defs", {})}
+    schema["properties"]["visual"] = session
+    schema["properties"]["instructional"] = {"$ref": "#/$defs/Instructional"}
+    beat = schema["properties"]["beats"]["items"]["properties"]
+    beat["cue"] = {"anyOf": [{"$ref": "#/$defs/Milliseconds"}, {"$ref": "#/$defs/Phrase"}]}
+    beat["panel"] = panel
+    return schema
+
+
 def read(path):
     return json.loads(path.read_text())
 
@@ -205,7 +224,7 @@ def write(args):
                 data = {"messages": [{"role": "user", "content": prompt}],
                         "seed": meta["seed"], "temperature": meta["temperature"], "top_p": meta["top_p"],
                         "max_tokens": meta["max_tokens"],
-                        "response_format": {"type": "json_schema", "schema": OUTPUT_GRAMMAR}}
+                        "response_format": {"type": "json_schema", "schema": generation_schema()}}
                 result = json.loads(request(endpoint + "/v1/chat/completions", data, timeout=240))
                 save(artifact, {"seconds": time.monotonic() - t, "response": result})
                 result = read(artifact)
