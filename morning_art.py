@@ -147,12 +147,17 @@ def bird(x,y):
 
 def hopping():
     fixed = [stroke(10,60,90,60),label("SAME CAMERA",50,74)]
-    return three("08",fixed+bird(24,55)+[label("1",25,66)],fixed+bird(50,38)+[label("2",51,66)],
-                 [stroke(10,60,90,60)]+bird(24,55)+bird(50,38)+bird(73,55)+
-                 [label(str(i),x,66) for i,x in enumerate((24,50,73),1)]+[label("LOW · HIGH · LOW",50,76,"value")],
+    s = three("08",fixed+bird(24,55)+[label("1",25,66)],fixed+bird(50,38)+[label("2",51,66)],
+                 fixed+bird(73,55)+[label("3",74,66)],
                  [("Keep the camera still. Take one picture with the paper bird low.","First still: low"),
                   ("Move it forward and up for the next picture.","Second still: high"),
-                  ("Then bring it down a little farther ahead. Play the three pictures in order and it hops.","Low, high, low.")])
+                  ("Then bring it down a little farther ahead.","Third still: low")])
+    s["script"].append({"id":"s3","text":"Play them in order and the bird seems to hop.","caption":"Low, high, low."})
+    final = {**s["beats"][-1]["panel"],
+             "overlays":[stroke(10,60,90,60)]+bird(24,55)+bird(50,38)+bird(73,55)+
+                        [label(str(i),x,66) for i,x in enumerate((24,50,73),1)]+[label("LOW · HIGH · LOW",50,76,"value")]}
+    s["beats"].append({"id":"b3","parent":"b2","cue":{"utterance_id":"s3","phrase":"Play them in order"},"panel":final})
+    return s
 
 
 def poster():
