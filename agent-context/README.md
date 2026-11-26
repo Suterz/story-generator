@@ -1,5 +1,12 @@
 # Communication iteration
 
+## 2026-11-26 — Visual authoring invariants
+
+- `81968f5`: a v6 draft drew `counter_rows` where it needed the crescent. Reject that use over generated art; preserve paper counts. Retest both carriage objectives, library entrance, and grouping.
+- `225d170`, `ac5a6e7`: preflight now catches prose expected answers for binary review and unsupported anchored glyphs. Existing native review said `yes` twice against expected “Yes, the commuter is visible on the platform.” The approved crescent fixture supports `☾`; the v5 submission's `🌙` and `👆` do not have installed glyph coverage.
+- `e8e723c` skill v6 asks for blank clean art when introducing a mark, an exact check answer, and a necessary visual change per beat. No verified model-authored export from the targeted pair at the time of writing. Comparison jobs are detached; preserve first attempts and keep validation/sealed unopened until choices are justified.
+- Sol reviewed eleven more anonymous first drafts as text (five meet, five need revision, one overclaims). Neither model in the early carriage comparison delivered the empathy objective cleanly. Gallery: `v4/v4.7 - Communication storyteller/REVIEW.md`.
+
 ## 2026-11-26 — Authoring and first blind judgments
 
 - `d72c587` preserves the first narration for blind review even when preflight rejects its storyboard. Sol reviewed nine first scripts without model names or briefs, then revealed the independent expectations: four script passes, four revisions, and the incorrect pennant rotation. Text only; no voice delivery judgment or video passes. Gallery: `v4/v4.7 - Communication storyteller/REVIEW.md`.
