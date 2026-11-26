@@ -1,5 +1,10 @@
 # Communication iteration
 
+## 2026-11-27 — Four-model surface transfer
+
+- The frozen v8 surface-grammar transfer on C01/C02/C03 had ten writer refusals and two Nemo returns below 30 seconds. Sol independently rejected both exports: C01 never shows the sign and implies a peaceful journey; C02 reveals a thin crescent at 12.40 s that straddles the door trim. Decoded phone frames and transcript/timing evidence are archived in the XPS communication gallery, with hash-bound verdicts in the run store. Neither export establishes a default or passing intent pair.
+- The separately frozen 20-video showcase has its own first-submission store, renderer endpoint, and XPS review package. Showcase assists do not enter the benchmark.
+
 ## 2026-11-26 — Match narration and authored marks
 
 - v6 and v7 held runtime, Mistral Small, Heart, and C01/C02/C03 constant. All six were withheld before rendering. v6 often used count circles; v7 more often described graphic overlays that it never authored. Keep the current default; style wording alone did not pass.
