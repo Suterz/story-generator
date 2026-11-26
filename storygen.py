@@ -175,6 +175,17 @@ def read(path):
     return json.loads(path.read_text())
 
 
+def communication_skill(version=None):
+    if version is None:
+        return COMMUNICATION_SKILL
+    if not re.fullmatch(r"v[1-9]\d*", version):
+        raise ValueError("communication skill must be a version such as v6")
+    path = COMMUNICATION_SKILL.parent.parent / version / "SKILL.md"
+    if not path.is_file():
+        raise ValueError(f"unknown communication skill {version}")
+    return path
+
+
 def save(path, data):
     tmp = path.with_suffix(".tmp")
     with tmp.open("w") as stream:
@@ -501,6 +512,20 @@ def check_visual_answers(story):
                                      "details in the question and use 'yes' or 'no' alone as expected")
 
 
+def check_meaningful_overlays(story):
+    panels = {}
+    for beat in story["beats"]:
+        panel = beat["panel"]
+        parent = panels.get(beat.get("parent"))
+        # Overlay-only rendering copies the same clean art. Empty on both
+        # sides cannot add what the beat claims. Real removals still work.
+        if (panel["op"] == "overlay_only" and parent is not None and
+                not (parent.get("overlays") or panel.get("overlays"))):
+            raise ValueError(f"{beat['id']}: this overlay-only beat draws nothing. Add the actual visible "
+                             "change or keep playing the previous beat during these words.")
+        panels[beat["id"]] = panel
+
+
 def bind_opening(story):
     """Compile the authored opening scene to the renderer's fixed first beat."""
     if set(story["opening"]) != {"id", "panel"} or "op" in story["opening"]["panel"]:
@@ -556,7 +581,7 @@ def write(args):
     brief, generic = load_brief(args, model, config)
     if generic:
         check_supplied_authority(brief)
-    skill_path = COMMUNICATION_SKILL if generic else SKILL
+    skill_path = communication_skill(args.communication_skill) if generic else SKILL
     skill = skill_path.read_text()
     example = (SKILL.parent / "annotated-example.json").read_text()
     meta = {"brief": brief, "model": config, "skill_sha256": hashlib.sha256(skill.encode()).hexdigest(),
@@ -715,6 +740,7 @@ def write(args):
                 if generic:
                     check_communication_anchors(story)
                     check_visual_answers(story)
+                    check_meaningful_overlays(story)
                     text = " ".join(u["text"] for u in story["script"])
                     if any(n["kind"] == "verbatim" and n["text"] not in text for n in brief["source_notes"]):
                         raise ValueError("approved verbatim wording is missing from the spoken script")
@@ -780,6 +806,7 @@ def main():
     p.add_argument("--lease", type=Path, default=HOME / "ai/storyboard-build/v2/gpu.lock")
     p.add_argument("--voice", choices=("heart", "ryan"), default="ryan")
     p.add_argument("--raw-text", action="store_true", help="read a rough brief from a text file or stdin (-)")
+    p.add_argument("--communication-skill", help="version of the shared communication skill to test")
     p.add_argument("--validator-python", type=Path, help="Python with the renderer dependencies")
     p.add_argument("--frames-repo", type=Path, help="frames-renderer checkout matching the server")
     p.add_argument("--video-repo", type=Path, help="video-renderer checkout matching the server")

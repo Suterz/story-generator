@@ -7,7 +7,7 @@ from unittest.mock import patch
 
 from communication import NeedsInput, UnsupportedBrief, check_supplied_authority, extract, intent_hash, normalize
 from communication_sweep import corpus, digest
-from storygen import SIGNATURES, bind_opening, check_communication_anchors, check_visual_answers, compile_story, compile_surfaces, generation_schema, load_brief, validate
+from storygen import SIGNATURES, bind_opening, check_communication_anchors, check_meaningful_overlays, check_visual_answers, communication_skill, compile_story, compile_surfaces, generation_schema, load_brief, validate
 
 ROOT = Path(__file__).parent
 EXAMPLES = ROOT / "examples/carriage"
@@ -95,6 +95,21 @@ class CommunicationTests(unittest.TestCase):
         check["expected"] = "Yes, the sign is visible and free of obstructions."
         with self.assertRaisesRegex(ValueError, "all required visual details in the question"):
             check_visual_answers(story)
+
+    def test_empty_reveal_cannot_claim_a_new_mark_but_real_removals_work(self):
+        story = json.loads((EXAMPLES / "contract-story.json").read_text())
+        check_meaningful_overlays(story)
+        a, b = [beat["panel"] for beat in story["beats"]]
+        mark = b.pop("overlays")
+        with self.assertRaisesRegex(ValueError, "draws nothing"):
+            check_meaningful_overlays(story)
+        a["overlays"] = mark
+        check_meaningful_overlays(story)
+
+    def test_explicit_skill_version_preserves_its_own_identity(self):
+        self.assertEqual(communication_skill("v6").parent.name, "v6")
+        with self.assertRaisesRegex(ValueError, "must be"):
+            communication_skill("../lesson-writer/v4")
 
     def test_cue_correction_identifies_the_actual_spoken_ids(self):
         story = json.loads((EXAMPLES / "contract-story.json").read_text())

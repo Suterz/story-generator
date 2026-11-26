@@ -8,7 +8,7 @@ from pathlib import Path
 import subprocess
 import sys
 
-from storygen import COMMUNICATION_SKILL, ROOT, read, save
+from storygen import ROOT, communication_skill, read, save
 
 LEGACY = {"B04": "education", "B05": "education", "B16": "education",
           "B18": "education", "B01": "comparison", "B03": "comparison"}
@@ -53,7 +53,7 @@ def run(args):
     provenance = {
         "model": args.model, "model_pin": read(ROOT / "models.json")[args.model],
         "voice": "heart", "writer": commit(ROOT), "frames": commit(args.frames), "video": commit(args.video),
-        "endpoint": args.video_url, "skill_sha256": digest(COMMUNICATION_SKILL),
+        "endpoint": args.video_url, "skill_sha256": digest(communication_skill(args.communication_skill)),
         "rubric_sha256": rubric_sha, "evaluator": "openai/gpt-6.2-sol",
     }
     if args.partition == "sealed":
@@ -116,6 +116,8 @@ def run(args):
                "--out", str(folder), "--model", args.model, "--voice", "heart",
                "--video-url", args.video_url, "--validator-python", str(args.validator_python),
                "--frames-repo", str(args.frames), "--video-repo", str(args.video)]
+        if args.communication_skill:
+            cmd.extend(("--communication-skill", args.communication_skill))
         with (folder / "run.log").open("a") as log:
             result = subprocess.run(cmd, stdout=log, stderr=subprocess.STDOUT)
         print(key, result.returncode, flush=True)
@@ -130,6 +132,7 @@ def main():
     p.add_argument("--broader", action="store_true")
     p.add_argument("--id", dest="ids", action="append")
     p.add_argument("--model", required=True)
+    p.add_argument("--communication-skill")
     p.add_argument("--video-url", required=True)
     args = p.parse_args()
     args.out.mkdir(parents=True, exist_ok=True)
