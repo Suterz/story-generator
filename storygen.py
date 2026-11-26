@@ -60,6 +60,9 @@ def generation_schema():
     session["required"] = ["story_context", "visual_signature", "graphic_theme"]
     schema = json.loads(json.dumps(OUTPUT_GRAMMAR))
     schema["$defs"] = {**video["$defs"], **session.pop("$defs", {}), **panel.pop("$defs", {})}
+    instruction = schema["$defs"]["Instructional"]
+    instruction["properties"].pop("required_facts")
+    instruction["required"].remove("required_facts")
     graphic_props = schema["$defs"]["Overlay"]["properties"]
 
     def graphic(kind, required, optional=(), shape=None):
@@ -176,7 +179,21 @@ def compile_story(story):
         if not tokens:
             raise ValueError("utterance-start cue has no spoken words")
         beat["cue"] = {"utterance_id": key, "phrase": " ".join(tokens[:min(4, len(tokens))]), "occurrence": 1}
+    rule = story.get("instructional")
+    if rule and "required_facts" not in rule:
+        visible = prediction_panel(story, rule)
+        rule["required_facts"] = [item["fact"] for item in visible["panel"].get("overlays", [])
+                                  if item.get("fact")]
+        if not rule["required_facts"]:
+            raise ValueError("mark the question's actual visible clues using overlay fact IDs")
     return story
+
+
+def prediction_panel(story, rule):
+    order = [u["id"] for u in story["script"]]
+    question = order.index(rule["question_utterance"])
+    return next(b for b in reversed(story["beats"])
+                if "ms" in b["cue"] or order.index(b["cue"]["utterance_id"]) <= question)
 
 
 def validate(story):
@@ -226,8 +243,7 @@ def validate(story):
         answer = seen[rule["answer_beat"]]
         if order.index(answer["cue"]["utterance_id"]) <= order.index(question["id"]):
             raise ValueError("answer beat is not after the question")
-        active = next(b for b in reversed(story["beats"])
-                      if "ms" in b["cue"] or order.index(b["cue"]["utterance_id"]) <= order.index(question["id"]))
+        active = prediction_panel(story, rule)
         marks = {item.get("fact") for item in active["panel"].get("overlays", [])}
         if not set(rule["required_facts"]) <= marks:
             raise ValueError("question panel does not draw each instructional required_facts overlay")
@@ -272,8 +288,8 @@ def write(args):
     out = args.out
     brief = read(args.input)
     brief_rule(brief)
-    skill = (ROOT / "skills/lesson-writer/v2/SKILL.md").read_text()
-    example = (ROOT / "skills/lesson-writer/v2/annotated-example.json").read_text()
+    skill = (ROOT / "skills/lesson-writer/v3/SKILL.md").read_text()
+    example = (ROOT / "skills/lesson-writer/v3/annotated-example.json").read_text()
     config = read(ROOT / "models.json")[args.model]
     model = args.models / config["file"]
     meta = {"brief": brief, "model": config, "skill_sha256": hashlib.sha256(skill.encode()).hexdigest(),
@@ -326,8 +342,9 @@ def write(args):
                 prompt += "\nReturn one JSON object with title, visual, script, beats, and instructional.\n"
                 prompt += "Brief:\n" + json.dumps(brief, ensure_ascii=False)
                 prompt += "\nCheck the plan against the brief, then write the complete teachable answer and actual overlays:\n" + (checks or "")
-                prompt += ("\nUse required_facts to name only clues drawn in the opening, not facts introduced by the reveal. "
-                           "Include literal visible text in every text overlay. Put exact answers in the reveal, attached to the right objects.")
+                prompt += ("\nGive an overlay fact ID only to a clue actually drawn before the question; "
+                           "the compiler records those IDs. Include literal visible text in every text overlay. "
+                           "Put exact answers in the reveal, attached to the right objects.")
                 prompt += "\nUse this exact visual signature: " + SIGNATURES[brief["signature"]]
                 if errors:
                     prompt += "\nCorrect this validation failure without changing any required fact: " + errors[-1]
@@ -396,7 +413,7 @@ def main():
     p.add_argument("input", type=Path)
     p.add_argument("--out", type=Path, required=True)
     p.add_argument("--video-url", default="http://127.0.0.1:8893")
-    p.add_argument("--model", choices=("qwen", "mistral", "deepseek"), default="qwen")
+    p.add_argument("--model", choices=tuple(read(ROOT / "models.json")), default="qwen")
     p.add_argument("--models", type=Path, default=HOME / "ai/storyboard-rehearsal/writer/models")
     p.add_argument("--runtime", type=Path, default=HOME / "ai/storyboard-rehearsal/writer/runtime/build/bin/llama-server")
     p.add_argument("--lease", type=Path, default=HOME / "ai/storyboard-build/v2/gpu.lock")

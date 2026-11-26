@@ -22,5 +22,13 @@
     "license": "MIT; retain Apache-2.0 base model notices",
     "file": "DeepSeek-R1-Distill-Qwen-14B-Q4_K_M.gguf",
     "sha256": "0b319bd0572f2730bfe11cc751defe82045fad5085b4e60591ac2cd2d9633181"
+  },
+  "mistral-small": {
+    "source": "bartowski/mistralai_Mistral-Small-3.2-24B-Instruct-2506-GGUF",
+    "revision": "b3592d09be469bedab6be51f577824b3b6b76ba1",
+    "upstream": "mistralai/Mistral-Small-3.2-24B-Instruct-2506@95a6d26c4bfb886c58daf9d3f7332c857cb27b43",
+    "license": "Apache-2.0",
+    "file": "mistralai_Mistral-Small-3.2-24B-Instruct-2506-Q4_K_M.gguf",
+    "sha256": "80f5bda68f156f12650ca03a0a2dbfae06a215ac41caa773b8631a479f82415e"
   }
 }

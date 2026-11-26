@@ -1,0 +1,53 @@
+{
+  "title": "How much of the ribbon is blue?",
+  "visual": {
+    "story_context": "The marked ribbon is split into equal parts.",
+    "visual_signature": "Flat ivory paper and thick outlines.",
+    "graphic_theme": "atlas"
+  },
+  "script": [
+    {"id": "setup", "text": "This ribbon has four equal sections. The first two are blue."},
+    {"id": "question", "text": "What fraction is blue?", "caption": "What fraction is blue?", "pause_after_ms": 1700},
+    {"id": "reveal", "text": "Two out of four. The blue sections cover half the ribbon.", "caption": ""}
+  ],
+  "beats": [
+    {
+      "id": "opening", "cue": {"ms": 0},
+      "panel": {
+        "op": "new_scene", "paper_scene": true,
+        "objective": "Establish four equal sections and their two groups",
+        "instruction": "Hold the same marked strip through the question",
+        "overlays": [
+          {"type": "shape", "shape": "rect", "at": [0.245,0.43], "extent": [0.155,0.12], "ink": "ink", "fact": "first-blue"},
+          {"type": "shape", "shape": "rect", "at": [0.415,0.43], "extent": [0.155,0.12], "ink": "ink", "fact": "second-blue"},
+          {"type": "shape", "shape": "rect", "at": [0.585,0.43], "extent": [0.155,0.12], "ink": "pale"},
+          {"type": "shape", "shape": "rect", "at": [0.755,0.43], "extent": [0.155,0.12], "ink": "pale"},
+          {"type": "segment", "from": [0.16,0.55], "to": [0.84,0.55], "divisions": 4, "fact": "four-gaps"}
+        ]
+      }
+    },
+    {
+      "id": "answer", "parent": "opening", "cue": {"at_utterance_start": "reveal"},
+      "panel": {
+        "op": "overlay_only",
+        "objective": "Connect the proportion to the same visible strip",
+        "instruction": "Keep the strip and scale; add the fraction",
+        "overlays": [
+          {"type": "shape", "shape": "rect", "at": [0.245,0.43], "extent": [0.155,0.12], "ink": "ink"},
+          {"type": "shape", "shape": "rect", "at": [0.415,0.43], "extent": [0.155,0.12], "ink": "ink"},
+          {"type": "shape", "shape": "rect", "at": [0.585,0.43], "extent": [0.155,0.12], "ink": "pale"},
+          {"type": "shape", "shape": "rect", "at": [0.755,0.43], "extent": [0.155,0.12], "ink": "pale"},
+          {"type": "segment", "from": [0.16,0.55], "to": [0.84,0.55], "divisions": 4},
+          {"type": "text", "at": [0.50,0.70], "text": "2 OF 4 = ONE HALF", "role": "value"}
+        ]
+      }
+    }
+  ],
+  "instructional": {
+    "question_utterance": "question",
+    "answer_beat": "answer",
+    "minimum_ms": 1250,
+    "region": [0.12,0.30,0.88,0.75],
+    "spoken_answer_phrases": ["Two out of four"]
+  }
+}
