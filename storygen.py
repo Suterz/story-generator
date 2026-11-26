@@ -9,6 +9,7 @@ import os
 import re
 import socket
 import subprocess
+import sys
 import time
 from urllib.error import URLError
 from urllib.request import Request, urlopen
@@ -289,7 +290,9 @@ def validate(story):
 def validate_native(story):
     python = os.environ.get("STORYGEN_VALIDATOR_PYTHON")
     sources = os.environ.get("STORYGEN_RENDERER_SOURCES")
-    if not python or not sources:
+    if bool(python) != bool(sources):
+        raise ValueError("native preflight requires both the validator Python and renderer source paths")
+    if not python:
         return story
     result = subprocess.run([python, "-B", str(ROOT / "native_preflight.py")],
                               input=json.dumps(story), text=True, capture_output=True,
@@ -491,7 +494,19 @@ def main():
     p.add_argument("--runtime", type=Path, default=HOME / "ai/storyboard-rehearsal/writer/runtime/build/bin/llama-server")
     p.add_argument("--lease", type=Path, default=HOME / "ai/storyboard-build/v2/gpu.lock")
     p.add_argument("--voice", choices=("heart", "ryan"), default="ryan")
+    p.add_argument("--validator-python", type=Path, help="Python with the renderer dependencies")
+    p.add_argument("--frames-repo", type=Path, help="frames-renderer checkout matching the server")
+    p.add_argument("--video-repo", type=Path, help="video-renderer checkout matching the server")
     args = p.parse_args()
+    native = (args.validator_python, args.frames_repo, args.video_repo)
+    if any(native):
+        if not all(native):
+            p.error("--validator-python, --frames-repo and --video-repo must be supplied together")
+        os.environ["STORYGEN_VALIDATOR_PYTHON"] = str(args.validator_python.resolve())
+        os.environ["STORYGEN_RENDERER_SOURCES"] = os.pathsep.join(
+            str(root.resolve() / "src") for root in (args.frames_repo, args.video_repo))
+    if not os.environ.get("STORYGEN_VALIDATOR_PYTHON") and not os.environ.get("STORYGEN_RENDERER_SOURCES"):
+        print("Using schema-only validation; native renderer preflight is not configured.", file=sys.stderr)
     args.out.mkdir(parents=True, exist_ok=True)
     with (args.out / ".run.lock").open("a") as lock:
         fcntl.flock(lock, fcntl.LOCK_EX | fcntl.LOCK_NB)

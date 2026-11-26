@@ -4,6 +4,8 @@ Local English lesson briefs to renderer requests. A brief is a JSON file with
 `topic`, `takeaway`, `required_facts`, `audience`, and a named `signature`.
 See `examples/market/brief.json`. The writer and renderer expose separate
 failure evidence; a valid story or playable video has not passed adjudication.
+Start with [agent context](agent-context.md) for the tested renderer combination
+and the writer's current limitations.
 
 ## Install on the workstation
 
@@ -33,7 +35,7 @@ hf download "$(jq -r ".${model}.source" models.json)" \
 
 `storygen.py` verifies the file against the manifest every time it starts a new
 generation. It runs one local model with an 8192-token context and releases the
-shared GPU lock before submitting to video. It uses the v2 skill, nested API
+shared GPU lock before submitting to video. It uses the v4 skill, nested API
 schemas, and at most one corrective generation on a concrete validation error.
 Keep weights and output stores outside the checkout.
 
@@ -41,9 +43,15 @@ Keep weights and output stores outside the checkout.
 .venv/bin/python -B storygen.py write examples/market/brief.json \
   --models "$MODEL_DIR" --runtime "$LLAMA_SERVER" --out "$RUN/market-story"
 .venv/bin/python -B storygen.py run examples/market/brief.json \
-  --models "$MODEL_DIR" --runtime "$LLAMA_SERVER" --video-url http://127.0.0.1:8893 \
+  --models "$MODEL_DIR" --runtime "$LLAMA_SERVER" --video-url "$STAGED_VIDEO_URL" \
+  --validator-python "$RENDERER_PYTHON" --frames-repo "$FRAMES_REPO" --video-repo "$VIDEO_REPO" \
   --out "$RUN/market-video"
 ```
+
+Use the native preflight options together for full contract and phone-label
+checks. Without them the CLI warns that it performs schema-only validation.
+The writer proposes stories; independently inspect the delivered lesson before
+using it.
 
 The staged renderer pair must support `GET /v2/submissions/{key}`. A resumed
 directory recovers by GET instead of repeating a submitted render. Case notes,
