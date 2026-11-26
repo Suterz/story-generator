@@ -264,7 +264,7 @@ def postcard():
     def cup(x,y,s):
         w=s*10; h=s*5
         return [ellipse(x+w,y-h*.4,w*.62,h*.65,"ink"),poly((x-w,y-h),(x+w,y-h),(x+w*.75,y+h),(x-w*.75,y+h),ink="ink"),
-                poly((x+w*.48,y-h),(x+w*.67,y-h),(x+w*.58,y-h*.64),ink="pale")]
+                poly((x+w*.39,y-h),(x+w*.77,y-h),(x+w*.58,y-h*.54),ink="pale")]
     a=[box(13,30,87,66,"pale"),stroke(13,57,87,57),*cup(49,44,1.35),*person(22,57),*person(76,57)]
     b=[box(14,31,86,66,"pale")]+outline(14,31,86,66)+cup(40,48,1)+[stroke(63,34,63,61),box(71,36,80,41,"accent"),label("HOME",73,53)]
     s=three("20",a,b,[
