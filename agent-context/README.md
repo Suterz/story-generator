@@ -1,5 +1,11 @@
 # Communication iteration
 
+## 2026-11-26 — Match narration and authored marks
+
+- v6 and v7 held runtime, Mistral Small, Heart, and C01/C02/C03 constant. All six were withheld before rendering. v6 often used count circles; v7 more often described graphic overlays that it never authored. Keep the current default; style wording alone did not pass.
+- `69e7253` constrains overlay-only drafts to actual overlays or paper counter rows, with an explicit operation for removing graphics. The first new wayfinding draft emitted graphics but used a moon emoji and an invented anchor. Preflight withheld it. `0331a72` skill v8 now teaches exact plain marks and grounded placement on the actual surface. Test original and transfer; no renderer edit.
+- Sol independently reviewed 35 more anonymized first-script drafts: 19 meet, 11 revise, 5 factual errors. Total **34 meet / 26 revise / 8 fact errors** across 68 mixed experimental drafts. Text only, not a model ranking or export pass. Gallery `v4/v4.7 - Communication storyteller/REVIEW.md`.
+
 ## 2026-11-26 — Matched intent and clean-art transfer
 
 - `2c66b48`: the empathy storyboard asked grounding for a plate never put in its clean-art instructions. With just that instruction corrected, the identical-PCM replay grounded the plate once, but the phone frame did not clearly read as a train platform; the opening was still withheld. Retain that image and test C01/C02/C03 from the original briefs.
