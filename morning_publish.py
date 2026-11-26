@@ -55,6 +55,8 @@ def main():
                     "--include=writer-refusal.json", "--include=story.json", "--include=manifest.json",
                     "--include=submission.json", "--include=gallery.json", "--include=receipt.json",
                     "--include=cli.json", "--include=phone.png", "--include=pause-proof.json",
+                    "--include=mux-speech.json", "--include=writer-attempt-*.json",
+                    "--include=incorrect-accepted.json", "--include=operational.json",
                     "--exclude=*", f"{a.host}:{a.remote}/", str(evidence / "Runs")], check=True, timeout=100)
     briefs = get(evidence / "Frozen briefs.json")
     freeze = get(evidence / "Freeze.json")
@@ -72,6 +74,7 @@ def main():
         f"writer `{freeze['story'][:7]}`, frames `{freeze['frames'][:7]}`, video `{freeze['video'][:7]}`.",
         "This is a review showcase, separate from the benchmark and its sealed set.",
         "Sol inspected decoded phone frames and scripts/independent transcript where available. "
+        "The evidence folder distinguishes transcripts of the delivered MP4 from source-audio checks. "
         "Warmth, perceived pacing, and emotional impact are for your listening review.",
     ]
     for slot, row in briefs.items():
