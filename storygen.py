@@ -24,7 +24,7 @@ from spoken_money import normalize_story_money
 
 ROOT = Path(__file__).resolve().parent
 SKILL = ROOT / "skills/lesson-writer/v4/SKILL.md"
-COMMUNICATION_SKILL = ROOT / "skills/communication-writer/v2/SKILL.md"
+COMMUNICATION_SKILL = ROOT / "skills/communication-writer/v3/SKILL.md"
 HOME = Path.home()
 SIGNATURES = {
     "market": "Original editorial cartoon, strong plum outlines, warm ivory paper, bright ochre fruit, teal leaves, rounded simple silhouettes.",
@@ -111,7 +111,7 @@ def generation_schema(*, communication=False, prediction=True):
                 "additionalProperties": False}
 
     text = ("at", "text")
-    schema["$defs"]["Overlay"] = {"anyOf": [
+    graphics = [
         graphic("text", text, ["role"]),
         graphic("label", text, ["role"]),
         graphic("arrow", ["from", "to"], ["part_target", "part_relation", "target_region", "target_rgb"]),
@@ -119,7 +119,15 @@ def generation_schema(*, communication=False, prediction=True):
         graphic("shape", ["at", "extent"], ["ink"], "rect"),
         graphic("shape", ["at", "extent"], ["ink"], "disc"),
         graphic("shape", ["vertices"], ["ink"], "polygon"),
-    ]}
+    ]
+    if communication:
+        graphics.append({
+            "type": "object",
+            "properties": {"type": {"const": "text"}, "text": {"type": "string"},
+                           "surface": {"type": "string"}, "fact": {"type": "string"}},
+            "required": ["type", "text", "surface"], "additionalProperties": False,
+        })
+    schema["$defs"]["Overlay"] = {"anyOf": graphics}
     schema["properties"]["visual"] = session
     schema["properties"]["instructional"] = {"$ref": "#/$defs/Instructional"}
     if communication and not prediction:
@@ -459,6 +467,34 @@ def load_brief(args, model, config):
     return brief, True
 
 
+def compile_surfaces(story):
+    """Bind a writer-authored text placement to its nearest clean reference."""
+    clean_panels = {}
+    previous = None
+    for beat in story["beats"]:
+        panel = beat["panel"]
+        if panel["op"] == "overlay_only":
+            source = clean_panels.get(beat.get("parent") or previous)
+        elif panel["op"] in {"new_scene", "edit_scene"} and not panel.get("paper_scene") and not panel.get("layout"):
+            source = panel
+        else:
+            source = None
+        clean_panels[beat["id"]] = source
+        previous = beat["id"]
+        for overlay in panel.get("overlays", []):
+            if "surface" not in overlay:
+                continue
+            if source is None or "at" in overlay or overlay["type"] != "text":
+                raise ValueError(f"{beat['id']}: a semantic surface needs a generated clean scene and no other position")
+            description = overlay.pop("surface").strip()
+            if not description:
+                raise ValueError(f"{beat['id']}: name the visible surface for the sign")
+            key = "surface-" + hashlib.sha256(description.encode()).hexdigest()[:12] + ".face"
+            source.setdefault("anchors", {})[key] = description
+            overlay["at"] = key
+    return story
+
+
 def write(args):
     out = args.out
     config = read(ROOT / "models.json")[args.model]
@@ -612,6 +648,7 @@ def write(args):
                     # the authored panels are normalized, not pixel sizes.
                     story["visual"].pop("canvas", None)
                     story["max_ms"] = brief["max_duration_ms"]
+                    compile_surfaces(story)
                 choose_artwork(story, brief)
                 if generic and any(n["kind"] == "verbatim" for n in brief["source_notes"]):
                     # Exact supplied wording takes precedence over spoken

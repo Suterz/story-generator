@@ -7,7 +7,7 @@ from unittest.mock import patch
 
 from communication import NeedsInput, UnsupportedBrief, check_supplied_authority, extract, intent_hash, normalize
 from communication_sweep import corpus, digest
-from storygen import SIGNATURES, check_communication_anchors, compile_story, generation_schema, load_brief
+from storygen import SIGNATURES, check_communication_anchors, compile_story, compile_surfaces, generation_schema, load_brief, validate
 
 ROOT = Path(__file__).parent
 EXAMPLES = ROOT / "examples/carriage"
@@ -93,3 +93,16 @@ class CommunicationTests(unittest.TestCase):
         story["beats"][1]["cue"] = {"at_utterance_start": "intro"}
         with self.assertRaisesRegex(ValueError, "actual script ID: platform, sign"):
             compile_story(story)
+
+    def test_writer_surface_compiles_into_the_existing_frame_contract(self):
+        story = json.loads((EXAMPLES / "contract-story.json").read_text())
+        story["beats"][0]["panel"].pop("anchors")
+        overlay = story["beats"][1]["panel"]["overlays"][0]
+        overlay.pop("at")
+        overlay["surface"] = "Whole blank sign plate on the train door"
+        compiled = validate(compile_story(compile_surfaces(story)))
+        parent, child = [b["panel"] for b in compiled["beats"]]
+        target = child["overlays"][0]["at"]
+        self.assertTrue(target.endswith(".face"))
+        self.assertEqual(parent["anchors"][target], "Whole blank sign plate on the train door")
+        self.assertNotIn("surface", child["overlays"][0])
