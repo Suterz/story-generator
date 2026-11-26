@@ -88,7 +88,8 @@ def pottery():
         return [box(14,57,44,61,"pale"),box(18,61,21,67),box(38,61,41,67),
                 box(56,41,88,44),box(56,53,88,56),box(56,65,88,68),box(57,40,60,68),
                 box(85,40,88,68),label("COUNTER",28,71),label("BLUE SHELF",72,71)] + (
-                    cup+[arrow(46,48,58,51),label("TODAY",73,34,"value")] if active else [])
+                    cup+[arrow(46,48,58,51),label("TODAY",73,34,"value")] if active else [
+                        poly((22,48),(36,48),(34,56),(24,56),ink="accent"),ellipse(36,50,6,3.4,"accent")])
     s=three("04",drawing(False),drawing(True),[
         ("Here to collect your pottery? We've moved pickup for today.","Pickup has moved"),
         ("Skip the counter. Your pottery is on the blue shelf.","Today: blue shelf")])
@@ -130,10 +131,12 @@ def crop():
 def board():
     grid=outline(25,30,75,62)+[stroke(50,30,50,62),stroke(25,46,75,46)]
     lower=[ellipse(37.5,54,13,7.3,"pale"),ellipse(62.5,54,13,7.3,"pale")]
-    return three("07",grid+lower+[ellipse(37.5,38,13,7.3,"accent"),ellipse(62.5,38,13,7.3),label("SHARE AN EDGE",50,72)],
-                 grid+lower+[ellipse(37.5,38,13,7.3),ellipse(62.5,38,13,7.3,"accent"),label("TOP TWO SWAPPED",50,72,"value")],[
+    s = three("07",grid+lower+[ellipse(37.5,38,13,7.3,"accent"),ellipse(62.5,38,13,7.3,"ink"),label("SHARE AN EDGE",50,72)],
+                 grid+lower+[ellipse(37.5,38,13,7.3,"ink"),ellipse(62.5,38,13,7.3,"accent"),label("TOP TWO SWAPPED",50,72,"value")],[
         ("In this game, swap two tokens only if their squares share an edge. Diagonal is out.","Share an edge."),
         ("Swap orange with its neighbor on the right. The lower row stays put.","Only the top two move.")])
+    s["visual"]["graphic_theme"] = "atlas"
+    return s
 
 
 def bird(x,y):
@@ -231,7 +234,7 @@ def seed():
     def pack(x,y):
         return [box(x-10,y-9,x+10,y+9,"accent"),poly((x-7,y-7),(x,y-2),(x+7,y-7),ink="pale"),
                 label("BEANS",x,y+4)]
-    return three("16",table+pack(33,36),table+pack(66,43)+[label("ONE LABELED PACKET",50,77,"value")],[
+    return three("16",table+pack(33,36),table+pack(66,44)+[label("ONE LABELED PACKET",50,77,"value")],[
         ("First seed swap? You don't need a whole collection.","First seed swap?"),
         ("Bring one labeled packet to the welcome table. One is enough to get started.","One labeled packet.")])
 
@@ -267,9 +270,13 @@ def postcard():
                 poly((x+w*.39,y-h),(x+w*.77,y-h),(x+w*.58,y-h*.54),ink="pale")]
     a=[box(13,30,87,66,"pale"),stroke(13,57,87,57),*cup(49,44,1.35),*person(22,57),*person(76,57)]
     b=[box(14,31,86,66,"pale")]+outline(14,31,86,66)+cup(40,48,1)+[stroke(63,34,63,61),box(71,36,80,41,"accent"),label("HOME",73,53)]
-    s=three("20",a,b,[
+    sent=[box(27,41,73,69,"ink"),box(31,46,69,49,"accent"),
+          box(34,29,66,47,"pale"),*cup(47,39,.83),box(59,32,63,35,"accent"),
+          arrow(75,38,62,45)]
+    s=three("20",a,b,sent,[
         ("Dad always gave me the blue cup. The chipped one, for tea at the kitchen table.",""),
-        ("I drew that cup on a postcard. Some days, that's all I need to say: I miss home.","")])
+        ("I drew that cup on a postcard for home.",""),
+        ("Some days, that's all I need to say: I miss you.","")])
     s["visual"]["graphic_theme"]="atlas"
     return s
 
