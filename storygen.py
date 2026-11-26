@@ -15,12 +15,29 @@ from urllib.request import Request, urlopen
 
 from jsonschema import Draft202012Validator, ValidationError
 
+from arithmetic import checked_comparisons
+
 
 ROOT = Path(__file__).resolve().parent
 HOME = Path.home()
 SIGNATURES = {
     "market": "Original editorial cartoon, strong plum outlines, warm ivory paper, bright ochre fruit, teal leaves, rounded simple silhouettes.",
     "paper": "Standalone explanatory cartoon with warm cut-paper silhouettes, dark outlines, and minimal decoration.",
+}
+MEASUREMENT = {
+    "type": "object", "properties": {"name": {"type": "string"}, "expression": {"type": "string"}},
+    "required": ["name", "expression"], "additionalProperties": False,
+}
+EDITORIAL_SCHEMA = {
+    "type": "object",
+    "properties": {
+        "notes": {"type": "string"},
+        "comparisons": {"type": "array", "maxItems": 8, "items": {
+            "type": "object", "properties": {"a": MEASUREMENT, "b": MEASUREMENT, "unit": {"type": "string"}},
+            "required": ["a", "b", "unit"], "additionalProperties": False,
+        }},
+    },
+    "required": ["notes", "comparisons"], "additionalProperties": False,
 }
 OUTPUT_GRAMMAR = {
     "type": "object",
@@ -317,19 +334,28 @@ def write(args):
             if plan_receipt.exists():
                 raise RuntimeError("editorial planning was interrupted; no duplicate generation")
             editorial = (
-                "Return a short editor's checklist for a beginner lesson. Write four bullets: "
-                "the original givens, the independently checked final answer with exact numbers/units, "
-                "what is visible before the question, and what physically changes at the reveal. "
-                "If doing arithmetic, recompute it and distinguish totals from rates. "
-                "Use the correct subject in each comparison. Do not write JSON or a story yet.\n" +
+                "Return a JSON editor's checklist for a beginner lesson. In notes state the given values, "
+                "what the learner must infer, what must be visible before the question, "
+                "and what physically changes at reveal. For each quantitative comparison, add two named "
+                "quantities a and b as numeric expressions, with exactly the same unit for both. "
+                "Use only the quantities from the brief, numbers and + - * /. The comparator computes "
+                "which is smaller; do not put a guessed winner in notes. Use separate comparisons for "
+                "total price and price per item, or elapsed time when waiting is part of the journey. "
+                "If there is no quantitative comparison, provide an empty comparisons list.\n" +
                 json.dumps(brief, ensure_ascii=False)
             )
             data = {"messages": [{"role": "user", "content": editorial}], "seed": meta["seed"],
-                    "temperature": .3, "top_p": .95, "max_tokens": 420}
+                    "temperature": .3, "top_p": .95, "max_tokens": 650,
+                    "response_format": {"type": "json_schema", "json_schema": {
+                        "name": "lesson_editor", "schema": EDITORIAL_SCHEMA}}}
             save(plan_receipt, {"request_sha256": hashlib.sha256(editorial.encode()).hexdigest()})
             plan = json.loads(request(endpoint + "/v1/chat/completions", data, timeout=120))
             save(plan_file, plan)
-        checks = plan["choices"][0]["message"]["content"]
+        checklist = json.loads(plan["choices"][0]["message"]["content"])
+        Draft202012Validator(EDITORIAL_SCHEMA).validate(checklist)
+        comparisons = checked_comparisons(checklist["comparisons"])
+        save(out / "checked-comparisons.json", comparisons)
+        checks = checklist["notes"] + "\nExact computations and ordering:\n" + json.dumps(comparisons, ensure_ascii=False)
         for attempt in range(2):
             artifact = out / f"writer-attempt-{attempt}.json"
             if artifact.exists():
