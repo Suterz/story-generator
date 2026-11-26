@@ -127,14 +127,20 @@ def compile_story(story):
     """Resolve authored ancestry and utterance starts into API identifiers."""
     texts = {u["id"]: u["text"] for u in story["script"]}
     scenes = {}
+    previous = None
     for beat in story["beats"]:
         panel = beat["panel"]
         if not isinstance(panel, dict):
             raise ValueError("each beat needs a panel object with op, instruction, objective and overlays")
+        if panel.get("op") != "new_scene" and not beat.get("parent") and previous is not None:
+            # Edit and overlay explicitly continue the existing scene. The
+            # immediate preceding beat is the default source of that artwork.
+            beat["parent"] = previous
         scene = scenes[beat["parent"]] if beat.get("parent") else beat["id"]
         if panel.get("scene_id", scene) != scene and beat.get("parent"):
             raise ValueError("an existing scene must preserve its parent's scene_id")
         scenes[beat["id"]] = panel.setdefault("scene_id", scene)
+        previous = beat["id"]
         cue = beat["cue"]
         if "at_utterance_start" not in cue:
             continue
@@ -234,35 +240,62 @@ def writer(args, model, log):
 
 def write(args):
     out = args.out
-    if (out / "story.json").exists():
-        return validate(read(out / "story.json"))
     brief = read(args.input)
     brief_rule(brief)
     skill = (ROOT / "skills/lesson-writer/v2/SKILL.md").read_text()
     example = (ROOT / "skills/lesson-writer/v2/annotated-example.json").read_text()
     config = read(ROOT / "models.json")[args.model]
     model = args.models / config["file"]
-    with model.open("rb") as asset:
-        actual = hashlib.file_digest(asset, "sha256").hexdigest()
-    if actual != config["sha256"]:
-        raise ValueError("writer checkpoint hash mismatch")
     meta = {"brief": brief, "model": config, "skill_sha256": hashlib.sha256(skill.encode()).hexdigest(),
             "runner_sha256": hashlib.sha256(Path(__file__).read_bytes()).hexdigest(),
             "example_sha256": hashlib.sha256(example.encode()).hexdigest(),
             "seed": 437, "temperature": .6, "top_p": .95, "max_tokens": 3300, "voice": args.voice}
     if (out / "writer.json").exists() and read(out / "writer.json") != meta:
         raise ValueError("cannot resume with a changed brief or writer configuration")
+    if (out / "story.json").exists():
+        return validate(read(out / "story.json"))
+    if (out / "writer-refusal.json").exists():
+        raise ValueError("writer previously withheld this brief; original diagnostics saved")
+    with model.open("rb") as asset:
+        actual = hashlib.file_digest(asset, "sha256").hexdigest()
+    if actual != config["sha256"]:
+        raise ValueError("writer checkpoint hash mismatch")
     save(out / "writer.json", meta)
     errors = []
     with writer(args, model, out / "llama.log") as endpoint:
+        plan_file = out / "editorial-plan.json"
+        if plan_file.exists():
+            plan = read(plan_file)
+        else:
+            plan_receipt = out / "editorial-plan.receipt.json"
+            if plan_receipt.exists():
+                raise RuntimeError("editorial planning was interrupted; no duplicate generation")
+            editorial = (
+                "Return a short editor's checklist for a beginner lesson. Write four bullets: "
+                "the original givens, the independently checked final answer with exact numbers/units, "
+                "what is visible before the question, and what physically changes at the reveal. "
+                "If doing arithmetic, recompute it and distinguish totals from rates. "
+                "Use the correct subject in each comparison. Do not write JSON or a story yet.\n" +
+                json.dumps(brief, ensure_ascii=False)
+            )
+            data = {"messages": [{"role": "user", "content": editorial}], "seed": meta["seed"],
+                    "temperature": .3, "top_p": .95, "max_tokens": 420}
+            save(plan_receipt, {"request_sha256": hashlib.sha256(editorial.encode()).hexdigest()})
+            plan = json.loads(request(endpoint + "/v1/chat/completions", data, timeout=120))
+            save(plan_file, plan)
+        checks = plan["choices"][0]["message"]["content"]
         for attempt in range(2):
             artifact = out / f"writer-attempt-{attempt}.json"
             if artifact.exists():
                 result = read(artifact)
             else:
+                receipt = artifact.with_suffix(".receipt.json")
+                if receipt.exists():
+                    raise RuntimeError(f"writer attempt {attempt} was interrupted; no duplicate generation")
                 prompt = skill + "\nRead this unrelated format example. Do not copy its values or topic:\n" + example
                 prompt += "\nReturn one JSON object with title, visual, script, beats, and instructional.\n"
                 prompt += "Brief:\n" + json.dumps(brief, ensure_ascii=False)
+                prompt += "\nCheck the plan against the brief, then write the complete teachable answer and actual overlays:\n" + (checks or "")
                 prompt += "\nUse this exact visual signature: " + SIGNATURES[brief["signature"]]
                 if errors:
                     prompt += "\nCorrect this validation failure without changing any required fact: " + errors[-1]
@@ -272,6 +305,8 @@ def write(args):
                         "max_tokens": meta["max_tokens"],
                         "response_format": {"type": "json_schema", "json_schema": {
                             "name": "lesson_story", "schema": generation_schema()}}}
+                save(receipt, {"attempt": attempt, "request_sha256": hashlib.sha256(
+                    json.dumps(data, sort_keys=True).encode()).hexdigest()})
                 result = json.loads(request(endpoint + "/v1/chat/completions", data, timeout=240))
                 save(artifact, {"seconds": time.monotonic() - t, "response": result})
                 result = read(artifact)
@@ -293,8 +328,6 @@ def write(args):
 
 def render(args, story):
     out = args.out
-    if (out / "outcome.json").exists():
-        return read(out / "outcome.json")
     digest = hashlib.sha256(json.dumps(story, sort_keys=True).encode()).hexdigest()
     key = "storygen-" + hashlib.sha256(f"{out.resolve()}:{digest}".encode()).hexdigest()
     receipt = out / "submission.json"
@@ -303,6 +336,8 @@ def render(args, story):
     if receipt.exists():
         if read(receipt) != info:
             raise ValueError("cannot resume with a different story or endpoint")
+        if (out / "outcome.json").exists():
+            return read(out / "outcome.json")
         status = json.loads(request(f"{base}/v2/submissions/{key}"))
     else:
         save(receipt, info)
