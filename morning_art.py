@@ -261,7 +261,7 @@ def lost():
     bench=[box(44,43,88,47),box(48,47,54,66),box(80,47,86,66)]
     return three("17",bench+mitten(22,50)+mitten(73,31,False),bench+mitten(22,50)+mitten(73,31,False)+mitten(66,59)+[arrow(48,73,61,61)],[
         ("One mitten. Where's the other? Not the one with the dot.","Which one matches?",1000),
-        ("There. Same zigzag.","")])
+        ("There. Same zigzag.","There. Same zigzag.")])
 
 
 def chair():
@@ -272,7 +272,9 @@ def chair():
                     stroke(63,55,71,55),stroke(71,55,73,66)]
     return three("18",fixed+seated+guest+bag(63,54),fixed+seated+guest+bag(36,69),
                  fixed+seated+guest_seated+bag(36,69),[
-         ("There was one chair left. A bag sat on it.","",1000),("Without a word.","",950),("Someone else sat down.","",1300)])
+         ("There was one chair left. A bag sat on it.","One chair left, with a bag on it.",1000),
+         ("Without a word.","Without a word.",950),
+         ("Someone else sat down.","Someone else sat down.",1300)])
 
 
 def postcard():
@@ -286,9 +288,9 @@ def postcard():
           box(34,29,66,47,"pale"),*cup(47,39,.83),box(59,32,63,35,"accent"),
           arrow(75,38,62,45)]
     s=three("20",a,b,sent,[
-        ("Dad always gave me the blue cup. The chipped one, for tea at the kitchen table.",""),
-        ("I drew that cup on a postcard for home.",""),
-        ("Some days, that's all I need to say: I miss you.","")])
+        ("Dad always gave me the blue cup. The chipped one, for tea at the kitchen table.","Dad gave me the chipped blue cup."),
+        ("I drew that cup on a postcard for home.","I drew the cup on a postcard."),
+        ("Some days, that's all I need to say: I miss you.","I miss you.")])
     s["visual"]["graphic_theme"]="atlas"
     return s
 
