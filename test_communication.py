@@ -128,6 +128,8 @@ class CommunicationTests(unittest.TestCase):
         target = child["overlays"][0]["at"]
         self.assertTrue(target.endswith(".face"))
         self.assertEqual(parent["anchors"][target], "Whole blank sign plate on the train door")
+        self.assertIn("Include this unobstructed surface in the clean art: Whole blank sign plate on the train door.", parent["instruction"])
+        self.assertNotIn("☾", parent["instruction"])
         self.assertNotIn("surface", child["overlays"][0])
 
     def test_compiled_count_circles_cannot_stand_in_for_a_generated_door_mark(self):

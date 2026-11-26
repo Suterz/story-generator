@@ -569,7 +569,16 @@ def compile_surfaces(story):
             if not description:
                 raise ValueError(f"{beat['id']}: name the visible surface for the sign")
             key = "surface-" + hashlib.sha256(description.encode()).hexdigest()[:12] + ".face"
-            source.setdefault("anchors", {})[key] = description
+            anchors = source.setdefault("anchors", {})
+            if key not in anchors:
+                # A grounding query can only find something the clean-scene
+                # artist was asked to include. Keep the exact printed mark
+                # out of the diffusion prompt; composition owns that mark.
+                source["instruction"] += (
+                    f"\nInclude this unobstructed surface in the clean art: {description}. "
+                    "Leave the surface free of lettering or symbols for the overlay."
+                )
+            anchors[key] = description
             overlay["at"] = key
     return story
 
