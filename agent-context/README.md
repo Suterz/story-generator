@@ -4,6 +4,7 @@
 
 - v6 and v7 held runtime, Mistral Small, Heart, and C01/C02/C03 constant. All six were withheld before rendering. v6 often used count circles; v7 more often described graphic overlays that it never authored. Keep the current default; style wording alone did not pass.
 - `69e7253` constrains overlay-only drafts to actual overlays or paper counter rows, with an explicit operation for removing graphics. The first new wayfinding draft emitted graphics but used a moon emoji and an invented anchor. Preflight withheld it. `0331a72` skill v8 now teaches exact plain marks and grounded placement on the actual surface. Test original and transfer; no renderer edit.
+- The v8 wayfinding draft used the right glyph `☾` but still gave `at: train_door` without declaring the anchor. `1b03297` changes the generic draft grammar so text can use explicit coordinates/safe margins or the semantic `surface` form; it does not change renderer input or legacy authoring. The four-model C01/C02/C03 transfer is running.
 - Sol independently reviewed 35 more anonymized first-script drafts: 19 meet, 11 revise, 5 factual errors. Total **34 meet / 26 revise / 8 fact errors** across 68 mixed experimental drafts. Text only, not a model ranking or export pass. Gallery `v4/v4.7 - Communication storyteller/REVIEW.md`.
 
 ## 2026-11-26 — Matched intent and clean-art transfer
