@@ -29,6 +29,10 @@ def fetch(host, remote, dest):
 
 
 def first_outcome(path):
+    rejected = path / "incorrect-accepted.json"
+    if rejected.exists():
+        record = get(rejected)
+        return "incorrect_accepted", record.get("reason")
     for name in ("outcome", "result", "writer-refusal", "cli"):
         file = path / f"{name}.json"
         if file.exists():
@@ -51,7 +55,9 @@ def main():
     watch = root / "Watch first"
     watch.mkdir(exist_ok=True)
     evidence.mkdir(exist_ok=True)
-    subprocess.run(["rsync", "-a", "--include=*/", "--include=outcome.json", "--include=result.json",
+    subprocess.run(["rsync", "-a", "--prune-empty-dirs",
+                    "--include=/first/", "--include=/assisted/", "--include=/assisted-refined/",
+                    "--exclude=/*", "--include=*/", "--include=outcome.json", "--include=result.json",
                     "--include=writer-refusal.json", "--include=story.json", "--include=manifest.json",
                     "--include=submission.json", "--include=gallery.json", "--include=receipt.json",
                     "--include=cli.json", "--include=phone.png", "--include=pause-proof.json",
@@ -73,6 +79,7 @@ def main():
         f"The independent first run used **{freeze['model']} / skill {freeze['skill']} / {freeze['voice']}**, "
         f"writer `{freeze['story'][:7]}`, frames `{freeze['frames'][:7]}`, video `{freeze['video'][:7]}`.",
         "This is a review showcase, separate from the benchmark and its sealed set.",
+        "Writer refusals are preserved in the first-submission results; native preflight withholds their invalid requests before a renderer POST.",
         "Sol inspected decoded phone frames and scripts/independent transcript where available. "
         "The evidence folder distinguishes transcripts of the delivered MP4 from source-audio checks. "
         "Warmth, perceived pacing, and emotional impact are for your listening review.",
