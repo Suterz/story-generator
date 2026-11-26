@@ -45,7 +45,12 @@ def commit(path):
 
 def run(args):
     manifest = read(ROOT / "benchmark/communication/freeze.json")
-    assert digest(args.dataset) == manifest["sha256"][args.partition], "dataset does not match frozen partition"
+    if digest(args.dataset) != manifest["sha256"][args.partition]:
+        raise ValueError("dataset does not match frozen partition")
+    if digest(ROOT / "benchmark/communication/RUBRIC.md") != manifest["rubric_sha256"]:
+        raise ValueError("evaluation rubric does not match frozen partition")
+    if digest(ROOT / "benchmark/first20.tsv") != manifest["legacy_sha256"]:
+        raise ValueError("legacy inputs do not match frozen development partition")
     if args.partition == "sealed" and not args.selection:
         raise ValueError("sealed run requires the frozen selection record")
     all_items = corpus(args.dataset, args.partition == "development")

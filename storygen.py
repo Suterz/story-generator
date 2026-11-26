@@ -394,21 +394,28 @@ def load_brief(args, model, config):
         return prior["brief"], True
     if args.raw_text:
         receipt = out / "normalization-receipt.json"
-        if receipt.exists():
-            raise RuntimeError("normalization was interrupted; no duplicate model request")
-        with model.open("rb") as asset:
-            if hashlib.file_digest(asset, "sha256").hexdigest() != config["sha256"]:
-                raise ValueError("normalizer checkpoint hash mismatch")
-        with writer(args, model, out / "normalizer.log") as endpoint:
-            def ask(prompt):
-                save(receipt, identity)
-                payload = {"messages": [{"role": "user", "content": prompt}], "seed": 437,
-                           "temperature": 0, "max_tokens": 2200,
-                           "response_format": {"type": "json_object"}}
-                response = json.loads(request(endpoint + "/v1/chat/completions", payload, timeout=150))
-                save(out / "normalization-model.json", response)
-                return json.loads(response["choices"][0]["message"]["content"])
-            brief, origins = extract(raw, ask, SIGNATURES)
+        response_path = out / "normalization-model.json"
+        if receipt.exists() and read(receipt) != identity:
+            raise ValueError("cannot resume text extraction with different input or model")
+        if not response_path.exists():
+            if receipt.exists():
+                raise RuntimeError("normalization was interrupted; no duplicate model request")
+            with model.open("rb") as asset:
+                if hashlib.file_digest(asset, "sha256").hexdigest() != config["sha256"]:
+                    raise ValueError("normalizer checkpoint hash mismatch")
+            with writer(args, model, out / "normalizer.log") as endpoint:
+                def ask(prompt):
+                    save(receipt, identity)
+                    payload = {"messages": [{"role": "user", "content": prompt}], "seed": 437,
+                               "temperature": 0, "max_tokens": 2200,
+                               "response_format": {"type": "json_object"}}
+                    response = json.loads(request(endpoint + "/v1/chat/completions", payload, timeout=150))
+                    save(response_path, response)
+                    return json.loads(response["choices"][0]["message"]["content"])
+                brief, origins = extract(raw, ask, SIGNATURES)
+        else:
+            brief, origins = extract(raw, lambda _: json.loads(
+                read(response_path)["choices"][0]["message"]["content"]), SIGNATURES)
     else:
         brief, origins = normalize(incoming, SIGNATURES)
     save(out / "normalized-brief.json", brief)
