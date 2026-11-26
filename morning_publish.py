@@ -61,6 +61,8 @@ def main():
                     "--exclude=/*", "--include=*/", "--include=outcome.json", "--include=result.json",
                     "--include=writer-refusal.json", "--include=story.json", "--include=manifest.json",
                     "--include=submission.json", "--include=gallery.json", "--include=receipt.json",
+                    "--include=ack.json", "--include=frame-session.json",
+                    "--include=frame?-status.json", "--include=panel-?.json",
                     "--include=cli.json", "--include=phone.png", "--include=pause-proof.json",
                     "--include=mux-speech.json", "--include=writer-attempt-*.json",
                     "--include=mux-pause-proof.json", "--include=mux-bell-proof.json",
