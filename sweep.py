@@ -24,6 +24,7 @@ def main():
     p.add_argument("--video", type=Path, required=True)
     p.add_argument("--write-only", action="store_true")
     p.add_argument("--validator-python", type=Path)
+    p.add_argument("--voice", choices=("heart", "ryan"), default="ryan")
     p.add_argument("--id", action="append", dest="ids")
     a = p.parse_args()
     project = Path(__file__).resolve().parent
@@ -39,7 +40,7 @@ def main():
               "skill_sha256": fingerprint(SKILL),
               "evaluator_sha256": fingerprint(project / "inspect_run.py"),
               "mode": "write" if a.write_only else "run", "video_url": a.video_url,
-              "native_validation": a.validator_python is not None}
+              "native_validation": a.validator_python is not None, "voice_profile": a.voice}
     env = os.environ.copy()
     if a.validator_python is not None:
         env["STORYGEN_VALIDATOR_PYTHON"] = str(a.validator_python)
@@ -61,7 +62,7 @@ def main():
         save(folder / "oracle.json", dict(family=family, provenance=provenance, question=question,
                                          answer=answer, visible=visible))
         command = [sys.executable, "-B", str(project / "storygen.py"), config["mode"], str(brief),
-                   "--out", str(folder), "--model", a.model, "--video-url", a.video_url]
+                   "--out", str(folder), "--model", a.model, "--video-url", a.video_url, "--voice", a.voice]
         with (folder / "run.log").open("a") as log:
             result = subprocess.run(command, env=env, stdout=log, stderr=subprocess.STDOUT)
         print(case, result.returncode, flush=True)

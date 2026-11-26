@@ -268,6 +268,20 @@ def validate(story):
         marks = {item.get("fact") for item in active["panel"].get("overlays", [])}
         if not set(rule["required_facts"]) <= marks:
             raise ValueError("question panel does not draw each instructional required_facts overlay")
+        for phrase in rule.get("spoken_answer_phrases", []):
+            sought = words(phrase)
+            if len(sought) < 2:
+                raise ValueError("a spoken answer phrase needs at least two actual words")
+            found = []
+            for index, utterance in enumerate(script.values()):
+                line = words(utterance["text"])
+                found.extend((index, offset) for offset in range(len(line))
+                             if line[offset:offset + len(sought)] == sought)
+            if not found:
+                raise ValueError(f"spoken answer phrase {phrase!r} must occur verbatim in the narration")
+            onset = answer["cue"]
+            if any(index < order.index(onset["utterance_id"]) for index, _ in found):
+                raise ValueError(f"spoken answer phrase {phrase!r} occurs in an earlier utterance")
     return story
 
 
