@@ -217,7 +217,10 @@ def compile_story(story):
             # Edit and overlay explicitly continue the existing scene. The
             # immediate preceding beat is the default source of that artwork.
             beat["parent"] = previous
-        scene = scenes[beat["parent"]] if beat.get("parent") else beat["id"]
+        parent = beat.get("parent")
+        if parent and parent not in scenes:
+            raise ValueError(f"{beat['id']}: parent {parent!r} is not an earlier beat ID; earlier beats: {', '.join(scenes) or 'none'}")
+        scene = scenes[parent] if parent else beat["id"]
         if panel.get("scene_id", scene) != scene and beat.get("parent"):
             raise ValueError("an existing scene must preserve its parent's scene_id")
         scenes[beat["id"]] = panel.setdefault("scene_id", scene)
@@ -228,6 +231,8 @@ def compile_story(story):
         if set(cue) != {"at_utterance_start"}:
             raise ValueError("utterance-start cue cannot have other fields")
         key = cue["at_utterance_start"]
+        if key not in texts:
+            raise ValueError(f"{beat['id']}: cue refers to {key!r}; use an actual script ID: {', '.join(texts)}")
         tokens = words(texts[key])
         if not tokens:
             raise ValueError("utterance-start cue has no spoken words")
@@ -280,6 +285,8 @@ def validate(story):
             if "ms" in cue:
                 raise ValueError(f"{key}: use a spoken phrase or authored utterance start after the opening")
             parts = words(cue["phrase"])
+            if cue["utterance_id"] not in script:
+                raise ValueError(f"{key}: cue must use an actual script ID: {', '.join(script)}")
             utterance = words(script[cue["utterance_id"]]["text"])
             indexes = [i for i in range(len(utterance)) if utterance[i:i + len(parts)] == parts]
             n = cue.get("occurrence")

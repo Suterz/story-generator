@@ -7,7 +7,7 @@ from unittest.mock import patch
 
 from communication import NeedsInput, UnsupportedBrief, check_supplied_authority, extract, intent_hash, normalize
 from communication_sweep import corpus, digest
-from storygen import SIGNATURES, check_communication_anchors, generation_schema, load_brief
+from storygen import SIGNATURES, check_communication_anchors, compile_story, generation_schema, load_brief
 
 ROOT = Path(__file__).parent
 EXAMPLES = ROOT / "examples/carriage"
@@ -86,3 +86,9 @@ class CommunicationTests(unittest.TestCase):
         story["beats"][1]["panel"]["overlays"][0]["at"] = "made-up.face"
         with self.assertRaisesRegex(ValueError, "is not grounded"):
             check_communication_anchors(story)
+
+    def test_cue_correction_identifies_the_actual_spoken_ids(self):
+        story = json.loads((EXAMPLES / "contract-story.json").read_text())
+        story["beats"][1]["cue"] = {"at_utterance_start": "intro"}
+        with self.assertRaisesRegex(ValueError, "actual script ID: platform, sign"):
+            compile_story(story)
