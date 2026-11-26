@@ -8,7 +8,7 @@ from pathlib import Path
 import subprocess
 import sys
 
-from storygen import save
+from storygen import SKILL, save
 
 
 def fingerprint(path):
@@ -36,7 +36,7 @@ def main():
     config = {"writer": commit(project), "frames": commit(a.frames), "video": commit(a.video),
               "dataset_sha256": fingerprint(dataset), "model": a.model, "case_ids": ids,
               "model_manifest_sha256": fingerprint(project / "models.json"),
-              "skill_sha256": fingerprint(project / "skills/lesson-writer/v3/SKILL.md"),
+              "skill_sha256": fingerprint(SKILL),
               "evaluator_sha256": fingerprint(project / "inspect_run.py"),
               "mode": "write" if a.write_only else "run", "video_url": a.video_url,
               "native_validation": a.validator_python is not None}

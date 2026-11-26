@@ -16,9 +16,11 @@ from urllib.request import Request, urlopen
 from jsonschema import Draft202012Validator, ValidationError
 
 from arithmetic import checked_comparisons
+from graphics import COUNTER_ROW, expand_counter_rows
 
 
 ROOT = Path(__file__).resolve().parent
+SKILL = ROOT / "skills/lesson-writer/v4/SKILL.md"
 HOME = Path.home()
 SIGNATURES = {
     "market": "Original editorial cartoon, strong plum outlines, warm ivory paper, bright ochre fruit, teal leaves, rounded simple silhouettes.",
@@ -73,6 +75,7 @@ def generation_schema():
     panel = read(ROOT / "schemas/Panel.json")
     panel["properties"].pop("key")
     panel["properties"].pop("parent_panel_id")
+    panel["properties"]["counter_rows"] = {"type": "array", "maxItems": 3, "items": COUNTER_ROW}
     panel["required"] = ["op", "objective", "instruction", "overlays"]
     session["required"] = ["story_context", "visual_signature", "graphic_theme"]
     schema = json.loads(json.dumps(OUTPUT_GRAMMAR))
@@ -177,6 +180,7 @@ def compile_story(story):
         panel = beat["panel"]
         if not isinstance(panel, dict):
             raise ValueError("each beat needs a panel object with op, instruction, objective and overlays")
+        expand_counter_rows(panel)
         if panel.get("op") != "new_scene" and not beat.get("parent") and previous is not None:
             # Edit and overlay explicitly continue the existing scene. The
             # immediate preceding beat is the default source of that artwork.
@@ -320,8 +324,8 @@ def write(args):
     out = args.out
     brief = read(args.input)
     brief_rule(brief)
-    skill = (ROOT / "skills/lesson-writer/v3/SKILL.md").read_text()
-    example = (ROOT / "skills/lesson-writer/v3/annotated-example.json").read_text()
+    skill = SKILL.read_text()
+    example = (SKILL.parent / "annotated-example.json").read_text()
     config = read(ROOT / "models.json")[args.model]
     model = args.models / config["file"]
     meta = {"brief": brief, "model": config, "skill_sha256": hashlib.sha256(skill.encode()).hexdigest(),
