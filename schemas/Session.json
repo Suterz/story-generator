@@ -1,0 +1,159 @@
+{
+  "$defs": {
+    "Asset": {
+      "properties": {
+        "kind": {
+          "const": "generated_cutout",
+          "title": "Kind",
+          "type": "string"
+        },
+        "visual": {
+          "title": "Visual",
+          "type": "string"
+        },
+        "seed": {
+          "default": 7,
+          "title": "Seed",
+          "type": "integer"
+        },
+        "anchors": {
+          "additionalProperties": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "items": {
+                  "type": "number"
+                },
+                "type": "array"
+              }
+            ]
+          },
+          "title": "Anchors",
+          "type": "object"
+        },
+        "keep_largest_component": {
+          "default": false,
+          "title": "Keep Largest Component",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "kind",
+        "visual"
+      ],
+      "title": "Asset",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "story_context": {
+      "maxLength": 8000,
+      "minLength": 1,
+      "title": "Story Context",
+      "type": "string"
+    },
+    "visual_signature": {
+      "maxLength": 8000,
+      "minLength": 1,
+      "title": "Visual Signature",
+      "type": "string"
+    },
+    "style_ref_ids": {
+      "items": {
+        "type": "string"
+      },
+      "maxItems": 3,
+      "title": "Style Ref Ids",
+      "type": "array"
+    },
+    "canvas": {
+      "default": [
+        1080,
+        1920
+      ],
+      "maxItems": 2,
+      "minItems": 2,
+      "prefixItems": [
+        {
+          "type": "integer"
+        },
+        {
+          "type": "integer"
+        }
+      ],
+      "title": "Canvas",
+      "type": "array"
+    },
+    "assets": {
+      "additionalProperties": {
+        "$ref": "#/$defs/Asset"
+      },
+      "title": "Assets",
+      "type": "object"
+    },
+    "values": {
+      "additionalProperties": {
+        "anyOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "integer"
+          }
+        ]
+      },
+      "title": "Values",
+      "type": "object"
+    },
+    "checks": {
+      "items": {
+        "additionalProperties": {
+          "type": "string"
+        },
+        "type": "object"
+      },
+      "title": "Checks",
+      "type": "array"
+    },
+    "legacy_input": {
+      "default": false,
+      "title": "Legacy Input",
+      "type": "boolean"
+    },
+    "graphic_theme": {
+      "anyOf": [
+        {
+          "enum": [
+            "paper",
+            "atlas"
+          ],
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Graphic Theme"
+    },
+    "legacy_premise": {
+      "default": "",
+      "title": "Legacy Premise",
+      "type": "string"
+    },
+    "legacy_context": {
+      "default": "",
+      "title": "Legacy Context",
+      "type": "string"
+    }
+  },
+  "required": [
+    "story_context",
+    "visual_signature"
+  ],
+  "title": "Session",
+  "type": "object"
+}

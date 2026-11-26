@@ -1,0 +1,794 @@
+{
+  "$defs": {
+    "ComponentClaim": {
+      "additionalProperties": false,
+      "properties": {
+        "region": {
+          "maxItems": 4,
+          "minItems": 4,
+          "prefixItems": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "number"
+            },
+            {
+              "type": "number"
+            },
+            {
+              "type": "number"
+            }
+          ],
+          "title": "Region",
+          "type": "array"
+        },
+        "rgb": {
+          "maxItems": 3,
+          "minItems": 3,
+          "prefixItems": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "integer"
+            },
+            {
+              "type": "integer"
+            }
+          ],
+          "title": "Rgb",
+          "type": "array"
+        },
+        "minimum_pixels": {
+          "maximum": 10000,
+          "minimum": 16,
+          "title": "Minimum Pixels",
+          "type": "integer"
+        },
+        "expected": {
+          "maximum": 40,
+          "minimum": 0,
+          "title": "Expected",
+          "type": "integer"
+        },
+        "extent_px": {
+          "anyOf": [
+            {
+              "maxItems": 2,
+              "minItems": 2,
+              "prefixItems": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "integer"
+                }
+              ],
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Extent Px"
+        }
+      },
+      "required": [
+        "region",
+        "rgb",
+        "minimum_pixels",
+        "expected"
+      ],
+      "title": "ComponentClaim",
+      "type": "object"
+    },
+    "DerivedAnchor": {
+      "properties": {
+        "derive": {
+          "const": "edge_toward",
+          "title": "Derive",
+          "type": "string"
+        },
+        "of": {
+          "title": "Of",
+          "type": "string"
+        },
+        "toward": {
+          "title": "Toward",
+          "type": "string"
+        }
+      },
+      "required": [
+        "derive",
+        "of",
+        "toward"
+      ],
+      "title": "DerivedAnchor",
+      "type": "object"
+    },
+    "Focus": {
+      "additionalProperties": false,
+      "properties": {
+        "anchor": {
+          "title": "Anchor",
+          "type": "string"
+        },
+        "zoom": {
+          "maximum": 5,
+          "minimum": 1.25,
+          "title": "Zoom",
+          "type": "number"
+        }
+      },
+      "required": [
+        "anchor",
+        "zoom"
+      ],
+      "title": "Focus",
+      "type": "object"
+    },
+    "Link": {
+      "additionalProperties": false,
+      "properties": {
+        "from": {
+          "title": "From",
+          "type": "string"
+        },
+        "to": {
+          "title": "To",
+          "type": "string"
+        }
+      },
+      "required": [
+        "from",
+        "to"
+      ],
+      "title": "Link",
+      "type": "object"
+    },
+    "Observation": {
+      "additionalProperties": false,
+      "properties": {
+        "question": {
+          "title": "Question",
+          "type": "string"
+        },
+        "expected": {
+          "title": "Expected",
+          "type": "string"
+        }
+      },
+      "required": [
+        "question",
+        "expected"
+      ],
+      "title": "Observation",
+      "type": "object"
+    },
+    "Overlay": {
+      "properties": {
+        "type": {
+          "enum": [
+            "text",
+            "arrow",
+            "marker",
+            "label",
+            "segment",
+            "shape"
+          ],
+          "title": "Type",
+          "type": "string"
+        },
+        "text": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Text"
+        },
+        "at": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "items": {
+                "type": "number"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "At"
+        },
+        "from": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "items": {
+                "type": "number"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "From"
+        },
+        "to": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "items": {
+                "type": "number"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "To"
+        },
+        "divisions": {
+          "anyOf": [
+            {
+              "maximum": 32,
+              "minimum": 1,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Divisions"
+        },
+        "shape": {
+          "anyOf": [
+            {
+              "enum": [
+                "rect",
+                "disc",
+                "polygon"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Shape"
+        },
+        "extent": {
+          "anyOf": [
+            {
+              "maxItems": 2,
+              "minItems": 2,
+              "prefixItems": [
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "number"
+                }
+              ],
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Extent"
+        },
+        "vertices": {
+          "anyOf": [
+            {
+              "items": {
+                "maxItems": 2,
+                "minItems": 2,
+                "prefixItems": [
+                  {
+                    "type": "number"
+                  },
+                  {
+                    "type": "number"
+                  }
+                ],
+                "type": "array"
+              },
+              "maxItems": 24,
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Vertices"
+        },
+        "ink": {
+          "default": "ink",
+          "enum": [
+            "ink",
+            "accent",
+            "pale"
+          ],
+          "title": "Ink",
+          "type": "string"
+        },
+        "role": {
+          "anyOf": [
+            {
+              "enum": [
+                "question",
+                "value",
+                "support"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Role"
+        },
+        "fact": {
+          "anyOf": [
+            {
+              "pattern": "^[a-zA-Z][\\w.-]{0,63}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Fact"
+        },
+        "part_target": {
+          "anyOf": [
+            {
+              "maxLength": 200,
+              "minLength": 3,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Part Target"
+        },
+        "part_relation": {
+          "default": "touch_surface",
+          "enum": [
+            "touch_surface",
+            "inside_region"
+          ],
+          "title": "Part Relation",
+          "type": "string"
+        },
+        "target_region": {
+          "anyOf": [
+            {
+              "maxItems": 4,
+              "minItems": 4,
+              "prefixItems": [
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "number"
+                }
+              ],
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Target Region"
+        },
+        "target_rgb": {
+          "anyOf": [
+            {
+              "maxItems": 3,
+              "minItems": 3,
+              "prefixItems": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "integer"
+                }
+              ],
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Target Rgb"
+        }
+      },
+      "required": [
+        "type"
+      ],
+      "title": "Overlay",
+      "type": "object"
+    },
+    "PathClaim": {
+      "additionalProperties": false,
+      "properties": {
+        "region": {
+          "maxItems": 4,
+          "minItems": 4,
+          "prefixItems": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "number"
+            },
+            {
+              "type": "number"
+            },
+            {
+              "type": "number"
+            }
+          ],
+          "title": "Region",
+          "type": "array"
+        },
+        "rgb": {
+          "maxItems": 3,
+          "minItems": 3,
+          "prefixItems": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "integer"
+            },
+            {
+              "type": "integer"
+            }
+          ],
+          "title": "Rgb",
+          "type": "array"
+        },
+        "start": {
+          "maxItems": 2,
+          "minItems": 2,
+          "prefixItems": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "number"
+            }
+          ],
+          "title": "Start",
+          "type": "array"
+        },
+        "end": {
+          "maxItems": 2,
+          "minItems": 2,
+          "prefixItems": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "number"
+            }
+          ],
+          "title": "End",
+          "type": "array"
+        },
+        "connected": {
+          "title": "Connected",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "region",
+        "rgb",
+        "start",
+        "end",
+        "connected"
+      ],
+      "title": "PathClaim",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "key": {
+      "pattern": "[A-Za-z][A-Za-z0-9_.-]{0,79}",
+      "title": "Key",
+      "type": "string"
+    },
+    "op": {
+      "enum": [
+        "new_scene",
+        "edit_scene",
+        "overlay_only",
+        "focus",
+        "layout_transition"
+      ],
+      "title": "Op",
+      "type": "string"
+    },
+    "scene_id": {
+      "pattern": "[A-Za-z][A-Za-z0-9_.-]{0,79}",
+      "title": "Scene Id",
+      "type": "string"
+    },
+    "parent_panel_id": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Parent Panel Id"
+    },
+    "revision_of": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Revision Of"
+    },
+    "objective": {
+      "maxLength": 5000,
+      "minLength": 1,
+      "title": "Objective",
+      "type": "string"
+    },
+    "instruction": {
+      "maxLength": 5000,
+      "minLength": 1,
+      "title": "Instruction",
+      "type": "string"
+    },
+    "change": {
+      "default": "",
+      "title": "Change",
+      "type": "string"
+    },
+    "keep": {
+      "default": "",
+      "title": "Keep",
+      "type": "string"
+    },
+    "seed": {
+      "default": 42,
+      "title": "Seed",
+      "type": "integer"
+    },
+    "anchors": {
+      "additionalProperties": {
+        "anyOf": [
+          {
+            "type": "string"
+          },
+          {
+            "$ref": "#/$defs/DerivedAnchor"
+          }
+        ]
+      },
+      "title": "Anchors",
+      "type": "object"
+    },
+    "overlays": {
+      "items": {
+        "$ref": "#/$defs/Overlay"
+      },
+      "maxItems": 40,
+      "title": "Overlays",
+      "type": "array"
+    },
+    "overlay_repairs": {
+      "items": {
+        "items": {
+          "$ref": "#/$defs/Overlay"
+        },
+        "type": "array"
+      },
+      "maxItems": 4,
+      "title": "Overlay Repairs",
+      "type": "array"
+    },
+    "layout": {
+      "anyOf": [
+        {
+          "additionalProperties": true,
+          "type": "object"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Layout"
+    },
+    "fallback_layout": {
+      "anyOf": [
+        {
+          "additionalProperties": true,
+          "type": "object"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Fallback Layout"
+    },
+    "clean_checks": {
+      "items": {
+        "$ref": "#/$defs/Observation"
+      },
+      "maxItems": 6,
+      "title": "Clean Checks",
+      "type": "array"
+    },
+    "composed_checks": {
+      "items": {
+        "$ref": "#/$defs/Observation"
+      },
+      "maxItems": 6,
+      "title": "Composed Checks",
+      "type": "array"
+    },
+    "expected_links": {
+      "anyOf": [
+        {
+          "items": {
+            "$ref": "#/$defs/Link"
+          },
+          "type": "array"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Expected Links"
+    },
+    "clear_of": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Clear Of",
+      "type": "array"
+    },
+    "focus": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/Focus"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    },
+    "paper_scene": {
+      "default": false,
+      "title": "Paper Scene",
+      "type": "boolean"
+    },
+    "action_claim": {
+      "anyOf": [
+        {
+          "maxLength": 400,
+          "minLength": 3,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Action Claim"
+    },
+    "require_fact_ids": {
+      "items": {
+        "type": "string"
+      },
+      "maxItems": 24,
+      "title": "Require Fact Ids",
+      "type": "array"
+    },
+    "moved_instances": {
+      "items": {
+        "type": "string"
+      },
+      "maxItems": 12,
+      "title": "Moved Instances",
+      "type": "array"
+    },
+    "inserted_instances": {
+      "items": {
+        "type": "string"
+      },
+      "maxItems": 12,
+      "title": "Inserted Instances",
+      "type": "array"
+    },
+    "component_claims": {
+      "items": {
+        "$ref": "#/$defs/ComponentClaim"
+      },
+      "maxItems": 8,
+      "title": "Component Claims",
+      "type": "array"
+    },
+    "path_claims": {
+      "items": {
+        "$ref": "#/$defs/PathClaim"
+      },
+      "maxItems": 6,
+      "title": "Path Claims",
+      "type": "array"
+    },
+    "retry_budget": {
+      "default": 2,
+      "maximum": 4,
+      "minimum": 0,
+      "title": "Retry Budget",
+      "type": "integer"
+    }
+  },
+  "required": [
+    "key",
+    "op",
+    "scene_id",
+    "objective",
+    "instruction"
+  ],
+  "title": "Panel",
+  "type": "object"
+}

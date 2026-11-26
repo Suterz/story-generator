@@ -1,0 +1,360 @@
+{
+  "$defs": {
+    "Beat": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "pattern": "^[A-Za-z][A-Za-z0-9_.-]{0,79}$",
+          "title": "Id",
+          "type": "string"
+        },
+        "cue": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Phrase"
+            },
+            {
+              "$ref": "#/$defs/Milliseconds"
+            }
+          ],
+          "title": "Cue"
+        },
+        "panel": {
+          "additionalProperties": true,
+          "title": "Panel",
+          "type": "object"
+        },
+        "parent": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Parent"
+        }
+      },
+      "required": [
+        "id",
+        "cue",
+        "panel"
+      ],
+      "title": "Beat",
+      "type": "object"
+    },
+    "Instructional": {
+      "additionalProperties": false,
+      "properties": {
+        "question_utterance": {
+          "title": "Question Utterance",
+          "type": "string"
+        },
+        "answer_beat": {
+          "title": "Answer Beat",
+          "type": "string"
+        },
+        "minimum_ms": {
+          "default": 1200,
+          "maximum": 10000,
+          "minimum": 250,
+          "title": "Minimum Ms",
+          "type": "integer"
+        },
+        "region": {
+          "maxItems": 4,
+          "minItems": 4,
+          "prefixItems": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "number"
+            },
+            {
+              "type": "number"
+            },
+            {
+              "type": "number"
+            }
+          ],
+          "title": "Region",
+          "type": "array"
+        },
+        "required_facts": {
+          "items": {
+            "type": "string"
+          },
+          "maxItems": 24,
+          "minItems": 1,
+          "title": "Required Facts",
+          "type": "array"
+        },
+        "spoken_answer_phrases": {
+          "items": {
+            "type": "string"
+          },
+          "maxItems": 6,
+          "title": "Spoken Answer Phrases",
+          "type": "array"
+        }
+      },
+      "required": [
+        "question_utterance",
+        "answer_beat",
+        "region",
+        "required_facts"
+      ],
+      "title": "Instructional",
+      "type": "object"
+    },
+    "Milliseconds": {
+      "additionalProperties": false,
+      "properties": {
+        "ms": {
+          "exclusiveMaximum": 45000,
+          "minimum": 0,
+          "title": "Ms",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "ms"
+      ],
+      "title": "Milliseconds",
+      "type": "object"
+    },
+    "Phrase": {
+      "additionalProperties": false,
+      "properties": {
+        "utterance_id": {
+          "title": "Utterance Id",
+          "type": "string"
+        },
+        "phrase": {
+          "title": "Phrase",
+          "type": "string"
+        },
+        "edge": {
+          "default": "start",
+          "enum": [
+            "start",
+            "end"
+          ],
+          "title": "Edge",
+          "type": "string"
+        },
+        "occurrence": {
+          "anyOf": [
+            {
+              "minimum": 1,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Occurrence"
+        },
+        "offset_ms": {
+          "default": 0,
+          "title": "Offset Ms",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "utterance_id",
+        "phrase"
+      ],
+      "title": "Phrase",
+      "type": "object"
+    },
+    "Utterance": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "text": {
+          "minLength": 1,
+          "title": "Text",
+          "type": "string"
+        },
+        "caption": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Caption"
+        },
+        "pause_after_ms": {
+          "default": 0,
+          "maximum": 3000,
+          "minimum": 0,
+          "title": "Pause After Ms",
+          "type": "integer"
+        },
+        "critical_spoken": {
+          "items": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "title": "Critical Spoken",
+          "type": "array"
+        },
+        "caption_not_before_beat": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Caption Not Before Beat"
+        }
+      },
+      "required": [
+        "id",
+        "text"
+      ],
+      "title": "Utterance",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "title": {
+      "title": "Title",
+      "type": "string"
+    },
+    "visual": {
+      "additionalProperties": true,
+      "title": "Visual",
+      "type": "object"
+    },
+    "script": {
+      "items": {
+        "$ref": "#/$defs/Utterance"
+      },
+      "maxItems": 40,
+      "minItems": 1,
+      "title": "Script",
+      "type": "array"
+    },
+    "beats": {
+      "items": {
+        "$ref": "#/$defs/Beat"
+      },
+      "maxItems": 40,
+      "minItems": 1,
+      "title": "Beats",
+      "type": "array"
+    },
+    "voice_profile": {
+      "anyOf": [
+        {
+          "enum": [
+            "ryan",
+            "heart",
+            "chatter",
+            "laura",
+            "jasper"
+          ],
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Voice Profile"
+    },
+    "fps": {
+      "default": 30,
+      "enum": [
+        24,
+        25,
+        30
+      ],
+      "title": "Fps",
+      "type": "integer"
+    },
+    "max_ms": {
+      "default": 29999,
+      "exclusiveMaximum": 45000,
+      "minimum": 1000,
+      "title": "Max Ms",
+      "type": "integer"
+    },
+    "closing_hold_ms": {
+      "default": 900,
+      "maximum": 5000,
+      "minimum": 0,
+      "title": "Closing Hold Ms",
+      "type": "integer"
+    },
+    "subtitle_font_size": {
+      "default": 46,
+      "maximum": 78,
+      "minimum": 24,
+      "title": "Subtitle Font Size",
+      "type": "integer"
+    },
+    "reuse_visuals_from": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Reuse Visuals From"
+    },
+    "reuse_recording_from": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Reuse Recording From"
+    },
+    "instructional": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/Instructional"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    }
+  },
+  "required": [
+    "title",
+    "visual",
+    "script",
+    "beats"
+  ],
+  "title": "Video",
+  "type": "object"
+}

@@ -1,0 +1,11 @@
+{
+  "topic": "Comparing two supermarket offers",
+  "takeaway": "The bag that costs less at checkout can cost more per orange.",
+  "required_facts": [
+    "Three oranges cost $6.",
+    "Five oranges cost $8.",
+    "Show the difference between total price and price per orange."
+  ],
+  "audience": "A beginner",
+  "signature": "market"
+}

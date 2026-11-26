@@ -1,0 +1,26 @@
+{
+  "qwen": {
+    "source": "bartowski/Qwen2.5-7B-Instruct-GGUF",
+    "revision": "8911e8a47f92bac19d6f5c64a2e2095bd2f7d031",
+    "upstream": "Qwen/Qwen2.5-7B-Instruct@a09a35458c702b33eeacc393d103063234e8bc28",
+    "license": "Apache-2.0",
+    "file": "Qwen2.5-7B-Instruct-Q4_K_M.gguf",
+    "sha256": "65b8fcd92af6b4fefa935c625d1ac27ea29dcb6ee14589c55a8f115ceaaa1423"
+  },
+  "mistral": {
+    "source": "bartowski/Mistral-Nemo-Instruct-2407-GGUF",
+    "revision": "a2dd64a0a76ea1bdb2bb6ab6fa5496b003c7c908",
+    "upstream": "mistralai/Mistral-Nemo-Instruct-2407@04d8a90549d23fc6bd7f642064003592df51e9b3",
+    "license": "Apache-2.0",
+    "file": "Mistral-Nemo-Instruct-2407-Q4_K_M.gguf",
+    "sha256": "7c1a10d202d8788dbe5628dc962254d10654c853cae6aaeca0618f05490d4a46"
+  },
+  "deepseek": {
+    "source": "bartowski/DeepSeek-R1-Distill-Qwen-14B-GGUF",
+    "revision": "9f5d77d401799416e0702290a691038b44012e0c",
+    "upstream": "deepseek-ai/DeepSeek-R1-Distill-Qwen-14B@1df8507178afcc1bef68cd8c393f61a886323761",
+    "license": "MIT; retain Apache-2.0 base model notices",
+    "file": "DeepSeek-R1-Distill-Qwen-14B-Q4_K_M.gguf",
+    "sha256": "0b319bd0572f2730bfe11cc751defe82045fad5085b4e60591ac2cd2d9633181"
+  }
+}
