@@ -267,6 +267,21 @@ def validate(story):
     return story
 
 
+def validate_native(story):
+    python = os.environ.get("STORYGEN_VALIDATOR_PYTHON")
+    sources = os.environ.get("STORYGEN_RENDERER_SOURCES")
+    if not python or not sources:
+        return story
+    result = subprocess.run([python, "-B", str(ROOT / "native_preflight.py")],
+                              input=json.dumps(story), text=True, capture_output=True,
+                              env={**os.environ, "PYTHONPATH": sources}, timeout=30)
+    if result.returncode == 2:
+        raise ValueError("native renderer preflight: " + result.stdout.strip()[:900])
+    if result.returncode:
+        raise RuntimeError("native renderer validator failed: " + result.stderr[-800:])
+    return story
+
+
 @contextmanager
 def writer(args, model, log):
     with args.lease.open("a") as lock:
@@ -316,7 +331,7 @@ def write(args):
     if (out / "writer.json").exists() and read(out / "writer.json") != meta:
         raise ValueError("cannot resume with a changed brief or writer configuration")
     if (out / "story.json").exists():
-        return validate(read(out / "story.json"))
+        return validate_native(validate(read(out / "story.json")))
     if (out / "writer-refusal.json").exists():
         raise ValueError("writer previously withheld this brief; original diagnostics saved")
     with model.open("rb") as asset:
@@ -389,7 +404,7 @@ def write(args):
                 story = json.loads(result["response"]["choices"][0]["message"]["content"])
                 story["voice_profile"] = args.voice
                 story["visual"]["visual_signature"] = SIGNATURES[brief["signature"]]
-                validate(compile_story(story))
+                validate_native(validate(compile_story(story)))
             except (ValueError, KeyError, TypeError) as exc:
                 errors.append(str(exc))
             except ValidationError as exc:
@@ -449,7 +464,7 @@ def main():
     with (args.out / ".run.lock").open("a") as lock:
         fcntl.flock(lock, fcntl.LOCK_EX | fcntl.LOCK_NB)
         if args.command == "render":
-            story = validate(read(args.input))
+            story = validate_native(validate(read(args.input)))
         else:
             story = write(args)
         if args.command != "write":
