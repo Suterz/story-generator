@@ -6,7 +6,7 @@ from tempfile import TemporaryDirectory
 
 from PIL import Image
 from pydantic import ValidationError
-from storyboard_renderer.compose import compose
+from storyboard_renderer.compose import approved_text, compose, font_for
 from storyboard_renderer.frame_api import Panel, Session
 from storyboard_renderer.grounding import NeedsReview
 from video_renderer.api import Video
@@ -19,7 +19,13 @@ def check_label_spacing(panel, session, temp):
     Image.new("RGB", size, "white").save(base)
     found = []
     for label in panel.overlays:
-        if label.type not in ("text", "label") or not isinstance(label.at, list):
+        if label.type not in ("text", "label"):
+            continue
+        text = approved_text(label.text or "", session.values)
+        # Anchored labels need generated geometry before overlap can be
+        # checked, but glyph coverage does not depend on that geometry.
+        font_for(text, max(1, round(size[0] * .05)))
+        if not isinstance(label.at, list):
             continue
         alpha = temp / "label-alpha.png"
         compose(base, [label], "", session.values, {}, size, temp / "label.png",
