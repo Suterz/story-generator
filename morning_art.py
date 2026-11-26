@@ -254,16 +254,17 @@ def seed():
         ("Bring one labeled packet to the welcome table. One is enough to get started.","One labeled packet.")])
 
 
-def mitten(x,y,zig=True):
-    return [poly((x-9,y+9),(x-10,y-2),(x-15,y-4),(x-12,y-8),(x-7,y-6),(x-7,y-11),
-                 (x+6,y-11),(x+9,y-6),(x+8,y+9),ink="accent")]+(
+def mitten(x,y,zig=True,mirror=False):
+    offsets = [(-9,9),(-10,-2),(-15,-4),(-12,-8),(-7,-6),(-7,-11),(6,-11),(9,-6),(8,9)]
+    direction = -1 if mirror else 1
+    return [poly(*[(x+direction*dx,y+dy) for dx,dy in offsets],ink="accent")]+(
         [stroke(x-5,y,x-1,y-3),stroke(x-1,y-3,x+2,y),stroke(x+2,y,x+6,y-3)] if zig else [ellipse(x,y-2,6,3.4,"ink")])
 
 
 def lost():
     bench=[box(44,43,88,47),box(48,47,54,66),box(80,47,86,66)]
-    return three("17",bench+mitten(22,50)+mitten(73,31,False),bench+mitten(22,50)+mitten(73,31,False)+mitten(66,59)+[arrow(48,73,61,61)],[
-        ("One mitten. Where's the other? Not the one with the dot.","Which one matches?",1000),
+    return three("17",bench+mitten(22,50)+mitten(73,31,False),bench+mitten(22,50)+mitten(73,31,False)+mitten(66,59,mirror=True)+[arrow(48,73,61,61)],[
+        ("I've got one mitten. Where did the other go? Not the one with the dot.","Which one matches?",900),
         ("There. Same zigzag.","There. Same zigzag.")])
 
 
