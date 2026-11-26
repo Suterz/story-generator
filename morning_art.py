@@ -268,13 +268,17 @@ def lost():
 
 
 def chair():
-    fixed=[stroke(8,70,91,70), box(51,54,73,58),box(51,37,55,54),box(52,58,55,68),box(70,58,73,68)]
-    seated=person(26,68); guest=person(85,69)
+    fixed=[stroke(8,70,91,70), box(51,54,73,58),box(51,37,55,54),box(52,58,55,68),box(70,58,73,68),
+           box(14,54,36,58),box(14,37,18,54),box(15,58,18,68),box(33,58,36,68)]
+    seated=[ellipse(25,40,10,5.6,"accent"),box(20,43,30,54),
+            stroke(27,54,36,54),stroke(36,54,38,67)]
+    guest=person(85,69)
     bag=lambda x,y:[box(x-8,y-10,x+8,y,"accent"),stroke(x-4,y-10,x,y-13),stroke(x,y-13,x+4,y-10)]
     guest_seated = [ellipse(61,41,10,5.6,"accent"), box(56,44,65,55),
                     stroke(63,55,71,55),stroke(71,55,73,66)]
-    return three("18",fixed+seated+guest+bag(63,54),fixed+seated+guest+bag(36,69),
-                 fixed+seated+guest_seated+bag(36,69),[
+    return three("18",fixed+seated+guest+bag(63,54),
+                 fixed+seated+guest+bag(43,69)+[stroke(29,45,42,54),stroke(42,54,44,58)],
+                 fixed+seated+guest_seated+bag(43,69),[
          ("There was one chair left. A bag sat on it.","One chair left, with a bag on it.",1000),
          ("Without a word.","Without a word.",950),
          ("Someone else sat down.","Someone else sat down.",1300)])
