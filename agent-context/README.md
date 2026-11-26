@@ -1,5 +1,12 @@
 # Communication iteration
 
+## 2026-11-26 — Matched intent and clean-art transfer
+
+- `2c66b48`: the compiled empathy storyboard previously asked grounding for a blank plate its clean-art instruction never requested. The compiler now carries the declared unobstructed surface into clean art without printing the mark. Matched captured-PCM replay changes just that art instruction; C01/C02/C03 also run from the original briefs.
+- `37c41fa` catches a preserved reveal with no graphic on either side of an overlay-only beat. Existing mark removal is allowed; the authored crescent control still passes. `2d929ad` adds optional skill v7 for spoken viewpoint and no invented empathy claims. Frozen v6/v7 runs use the same executable, model, voice, renderers and briefs.
+- The third blind narration batch adds six script passes, six revisions and one arithmetic error. Total 15 meet, 15 revise, 3 factual errors across mixed text-only drafts. No verified generated video or model recommendation follows from these counts.
+- On the separate timing branch, the fully replayed original PCM passed alignment and was then withheld by the prose visual-check answer. A contrasting-block authored transfer visibly stacks the same block at frame 46. Gallery: `v4/v4.7 - Communication storyteller/REVIEW.md`.
+
 ## 2026-11-26 — Visual authoring invariants
 
 - `video-renderer` branch `iteration/contraction-timing` (`1d0664d`) handles narrowly scoped forced-alignment spellings such as `youll`. The saved empathy WAV failed at that token on the original video commit; the patched replay binds its 456,960-sample spoken cue and corroborates it with original ASR. A separate end-to-end upload and stacking control are pending. Keep this timing experiment separate from writer comparisons.
