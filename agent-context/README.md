@@ -1,5 +1,11 @@
 # Communication iteration
 
+## 2026-11-27 — Broad development status
+
+- R1 completed 80/80 with no exports: 50 operational failures, 23 `needs_input`, and seven writer refusals. The diagnostic runner failures limit model comparisons.
+- R2 completed 80/80 with no exports: 77 writer refusals and three renderer withholdings. At the review checkpoint R3 had 12 Mistral Small writer refusals and eight pending cases; the other models and R4 had no case receipts yet. These are development outcomes; no finalist or validation decision follows.
+- The finished Morning Review package and its repair experiments are documented separately on `showcase/morning-review`.
+
 ## 2026-11-27 — Four-model surface transfer
 
 - The frozen v8 surface-grammar transfer on C01/C02/C03 had ten writer refusals and two Nemo returns below 30 seconds. Sol independently rejected both exports: C01 never shows the sign and implies a peaceful journey; C02 reveals a thin crescent at 12.40 s that straddles the door trim. Decoded phone frames and transcript/timing evidence are archived in the XPS communication gallery, with hash-bound verdicts in the run store. Neither export establishes a default or passing intent pair.
