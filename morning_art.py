@@ -98,15 +98,22 @@ def pottery():
 
 
 def bookmark():
-    t=poly((17,57),(83,57),(50,24),ink="pale")
-    pocket= poly((34,41),(66,41),(50,57),ink="accent")
-    return three("05",[t,stroke(17,57,83,57),arrow(50,30,50,45),label("LONG EDGE DOWN",50,68)],
-                 [t,pocket,arrow(23,54,42,33),arrow(77,54,58,33),label("LIFT BOTH CORNERS",50,69)],
-                 [poly((32,47),(50,29),(68,47),(50,65),ink="pale"),poly((32,47),(68,47),(50,29),ink="accent"),
-                  stroke(32,47,68,47),arrow(43,35,43,47),arrow(57,35,57,47),label("TUCK INTO THE POCKET",50,73)],
+    t=poly((18,53),(82,53),(50,35),ink="pale")
+    pocket=poly((34,44),(66,44),(50,53),ink="accent")
+    s=three("05",[t,stroke(18,53,82,53),arrow(50,35,50,50),label("LONG EDGE DOWN",50,68)],
+                 [t,pocket,arrow(21,52,43,39),arrow(79,52,57,39),label("LIFT BOTH CORNERS",50,69)],
+                 [poly((34,44),(50,35),(66,44),(50,53),ink="pale"),poly((34,44),(66,44),(50,35),ink="accent"),
+                  stroke(34,44,66,44),arrow(43,36.5,43,43.5),arrow(57,36.5,57,43.5),label("TUCK INTO THE POCKET",50,73)],
                  [("Start with a folded triangle. Long edge down. Fold the front point down to make a pocket.","Fold the front layer down."),
                   ("Lift both bottom corners to the top point.","Lift both bottom corners."),
-                  ("Tuck the two flaps into the pocket. Slide the bookmark onto a page corner.","Tuck the flaps into the pocket.")])
+                  ("Tuck the two flaps into the pocket.","Tuck the flaps into the pocket.")])
+    s["script"].append({"id":"s3","text":"Slide the bookmark onto a page corner.","caption":"Slip it onto the page corner."})
+    final = {**s["beats"][-1]["panel"], "overlays":[box(24,26,76,65,"pale"), *outline(24,26,76,65),
+            poly((24,26),(56,26),(24,44),ink="accent"),stroke(42,50,66,50),
+            stroke(42,55,66,55),label("PAGE CORNER",50,72,"value")]}
+    s["beats"].append({"id":"b3","parent":"b2","cue":{"utterance_id":"s3","phrase":"Slide the bookmark"},
+                       "panel":final})
+    return s
 
 
 def crop():
