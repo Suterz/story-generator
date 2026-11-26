@@ -496,7 +496,10 @@ def write(args):
             if generic:
                 editorial = (
                     "Return a JSON communication plan: in notes name the intended viewer effect, a natural opening, "
-                    "the decisive visual evidence and what stays visible, and a distinct worthwhile ending. "
+                    "the decisive visual evidence and what stays visible. End at the payoff; an extra closing line "
+                    "or shot is not required. Describe a real gesture or observable need for an emotional objective. "
+                    "Keep platform and door wayfinding narrowly about identification; a setting's name does not "
+                    "guarantee an experience. "
                     "Use only approved facts, preserve exact wording, and don't force a prediction. Set prediction "
                     "true only if showing clues, then waiting silently for a learner to guess a result is the best "
                     "way to communicate this objective. For wayfinding, a rhetorical question is not a prediction. "
