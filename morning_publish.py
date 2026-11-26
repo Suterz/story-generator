@@ -33,8 +33,12 @@ def first_outcome(path):
         file = path / f"{name}.json"
         if file.exists():
             data = get(file)
-            return data.get("state") or data.get("status") or ("writer_refusal" if name == "writer-refusal" else "operational_failure")
-    return "pending"
+            status = data.get("state") or data.get("status") or ("writer_refusal" if name == "writer-refusal" else "operational_failure")
+            reason = data.get("reason") or data.get("error")
+            if not reason and data.get("diagnostics"):
+                reason = data["diagnostics"][-1]
+            return status, reason
+    return "pending", None
 
 
 def main():
@@ -73,13 +77,15 @@ def main():
     for slot, row in briefs.items():
         brief = row["brief"]
         first = evidence / "Runs" / "first" / slot
-        original = first_outcome(first)
+        original, issue = first_outcome(first)
         key.extend(("", f"## {slot} — {brief['topic']}", "",
                     f"**Objective:** {brief['objective']}",
                     f"**Audience / tone:** {brief['audience']} · {brief['tone']}.",
                     f"**Takeaway:** {brief['takeaway']}",
                     "**Authorized facts:** " + " ".join(n["text"] for n in brief["source_notes"]),
                     f"**Success check:** {row['success']}", f"**First outcome:** `{original}`."))
+        if issue:
+            key.append(f"**Initial diagnostic:** {issue.replace(chr(10), ' ')[:350]}")
         entry = verdicts.get(slot)
         if not entry:
             key.append("**Final:** Pending review or delivery.")
@@ -118,6 +124,10 @@ def main():
     summary = f"**Playable and verified on the XPS: {sum(counts.values())}/20.** " + ", ".join(
         f"{count} {name}" for name, count in counts.items()) + "."
     key.insert(2, summary + "\n")
+    key.extend(("", "## Suggested comparisons", "",
+                "- **01 and 02:** Same door and fact. Compare the immediate practical clue with the acknowledgment of a long day before it.",
+                "- **12:** Listen to the silence before *slowly* in the two readings; the held image takes attention away from visual cuts.",
+                "- **17 and 18:** A visible matching patch resolves a mystery; moving a bag carries the meaning of kindness without a spoken moral."))
     synctext(watch / "Playlist.m3u", "\n".join(playlist) + "\n")
     synctext(root / "Review key.md", "\n".join(key) + "\n")
     synctext(published, json.dumps(index, indent=2) + "\n")

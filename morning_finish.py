@@ -129,11 +129,19 @@ def main():
     p.add_argument("--frames-url", required=True)
     p.add_argument("--slot", action="append")
     p.add_argument("--prepare", action="store_true")
+    p.add_argument("--decode-first", action="store_true")
     a = p.parse_args()
     job, first = a.root / "assisted", a.root / "first"
     ffmpeg = a.toolroot / "media/bin/ffmpeg"
     job.mkdir(exist_ok=True)
     for slot in a.slot or [f"{i:02}" for i in range(1, 21)]:
+        initial = first / slot
+        if a.decode_first:
+            if ((initial / "outcome.json").is_file() and read(initial / "outcome.json")["state"] == "succeeded"
+                    and not (initial / "phone.png").exists()):
+                frames = capture_frames(initial / "video.mp4", read(initial / "manifest.json"), initial / "phone.png", ffmpeg)
+                save(initial / "gallery.json", {"sample_frames": frames, "sha256": sha(initial / "video.mp4")})
+            continue
         folder = job / slot
         folder.mkdir(exist_ok=True)
         control = {"01": "contract-control/heart", "02": "empathy-authored-control"}.get(slot)
@@ -143,11 +151,11 @@ def main():
                 save(request, DESIGNS[slot]())
         if a.prepare:
             continue
-        initial = first / slot
-        if not any((initial / name).exists() for name in ("share-assist.json", "outcome.json", "result.json", "writer-refusal.json", "cli.json")):
+        if not any((initial / name).exists() for name in ("outcome.json", "result.json", "writer-refusal.json", "cli.json")):
             continue
         if (initial / "outcome.json").exists() and read(initial / "outcome.json")["state"] == "succeeded":
-            continue  # only use an alternative after reviewing the delivered first clip
+            if not (initial / "incorrect-accepted.json").exists():
+                continue  # only use an alternative after reviewing the delivered first clip
         if (folder / "phone.png").exists():
             continue
         if control:
