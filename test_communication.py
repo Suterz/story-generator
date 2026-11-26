@@ -121,8 +121,14 @@ class CommunicationTests(unittest.TestCase):
         opening["panel"].pop("op")
         draft["opening"] = opening
         draft["script"][1].pop("caption_not_before_beat")
+        overlay = draft["beats"][0]["panel"]["overlays"][0]
+        overlay.pop("at")
+        overlay["surface"] = "The plate on the train door"
         d = Draft202012Validator(schema)
         self.assertTrue(d.is_valid(draft), list(d.iter_errors(draft)))
+        del overlay["surface"]
+        overlay["at"] = "invented-door-id"
+        self.assertFalse(d.is_valid(draft))
         panel = draft["beats"][0]["panel"]
         panel["overlays"] = []
         self.assertFalse(d.is_valid(draft))

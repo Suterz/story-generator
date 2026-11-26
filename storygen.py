@@ -112,6 +112,13 @@ def generation_schema(*, communication=False, prediction=True):
         props["type"] = {"const": kind}
         if communication and kind in {"text", "label"}:
             props["text"] = {"type": "string", "minLength": 1}
+            # A text mark inside generated art should use the semantic
+            # surface form below rather than inventing an anchor ID.
+            props["at"] = {"anyOf": [
+                {"type": "array", "minItems": 2, "maxItems": 2,
+                 "items": {"type": "number", "minimum": 0, "maximum": 1}},
+                {"enum": ["safe.top", "safe.bottom"]},
+            ]}
         if shape:
             props["shape"] = {"const": shape}
         return {"type": "object", "properties": props,
@@ -129,7 +136,7 @@ def generation_schema(*, communication=False, prediction=True):
         graphic("shape", ["vertices"], ["ink"], "polygon"),
     ]
     if communication:
-        graphics.append({
+        graphics.insert(0, {
             "type": "object",
             "properties": {"type": {"const": "text"}, "text": {"type": "string", "minLength": 1},
                            "surface": {"type": "string", "minLength": 1}, "fact": {"type": "string"}},
