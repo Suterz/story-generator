@@ -1,5 +1,6 @@
 """Publish review-approved, hash-matched MP4s and a neutral local playlist."""
 import argparse
+from collections import Counter
 import hashlib
 import json
 from pathlib import Path
@@ -62,6 +63,7 @@ def main():
                     "--include=submission.json", "--include=gallery.json", "--include=receipt.json",
                     "--include=cli.json", "--include=phone.png", "--include=pause-proof.json",
                     "--include=mux-speech.json", "--include=writer-attempt-*.json",
+                    "--include=mux-pause-proof.json", "--include=mux-bell-proof.json",
                     "--include=incorrect-accepted.json", "--include=operational.json",
                     "--exclude=*", f"{a.host}:{a.remote}/", str(evidence / "Runs")], check=True, timeout=100)
     briefs = get(evidence / "Frozen briefs.json")
@@ -71,6 +73,7 @@ def main():
     published = evidence / "Published clips.json"
     index = get(published) if published.exists() else {}
     counts = dict.fromkeys(("autonomous first pass", "automatic repair", "agent-assisted"), 0)
+    initial_counts = Counter()
     playlist = ["#EXTM3U"]
     key = [
         "# Morning Review — key", "",
@@ -88,6 +91,7 @@ def main():
         brief = row["brief"]
         first = evidence / "Runs" / "first" / slot
         original, issue = first_outcome(first)
+        initial_counts[original] += 1
         key.extend(("", f"## {slot} — {brief['topic']}", "",
                     f"**Objective:** {brief['objective']}",
                     f"**Audience / tone:** {brief['audience']} · {brief['tone']}.",
@@ -134,6 +138,8 @@ def main():
     summary = f"**Playable and verified on the XPS: {sum(counts.values())}/20.** " + ", ".join(
         f"{count} {name}" for name, count in counts.items()) + "."
     key.insert(2, summary + "\n")
+    key.insert(3, "**Initial outcomes (all 20 slots):** " + ", ".join(
+        f"{count} {status.replace('_', ' ')}" for status, count in initial_counts.items()) + ".\n")
     key.extend(("", "## Suggested comparisons", "",
                 "- **01 and 02:** Same door and fact. Compare the immediate practical clue with the acknowledgment of a long day before it.",
                 "- **12:** Listen to the silence before *slowly* in the two readings; the held image takes attention away from visual cuts.",
