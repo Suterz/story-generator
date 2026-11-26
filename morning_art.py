@@ -209,11 +209,12 @@ def pause():
 
 
 def shadow():
-    art=[ellipse(16,46,14,8,"accent"),stroke(16,51,16,61), box(84,28,90,67,"pale"),label("LAMP",17,67),label("WALL",86,72)]
-    return three("13",art+[stroke(22,43,84,32,"accent"),stroke(22,46,84,47,"accent"),stroke(22,49,84,61,"accent")],
-                 art+[stroke(22,43,84,32,"accent"),stroke(22,49,84,61,"accent"),
-                  stroke(22,46,48,46,"accent"),box(48,39,53,55),box(84,42,90,54),
-                  label("CARD",50,61),label("SHADOW",78,36,"value")],[
+    art=[ellipse(16,46,14,8,"accent"),stroke(16,51,16,61), box(84,22,90,70,"pale"),
+         label("LAMP",17,67),label("WALL",86,74)]
+    outside=[stroke(22,44,84,24,"accent"),stroke(22,48,84,68,"accent")]
+    return three("13",art+outside+[stroke(22,46,84,46,"accent")],
+                 art+outside+[stroke(22,46,48,46,"accent"),box(48,39,53,53),box(84,31,90,61),
+                  label("CARD",50,61),label("SHADOW",78,17,"value")],[
         ("Light from the lamp reaches the wall. Now put a card in its path.","Light reaches the wall."),
         ("Behind the card, some light cannot reach the wall. That's where the shadow comes from.","The card blocks part of the light.")])
 
