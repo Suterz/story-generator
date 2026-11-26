@@ -168,10 +168,12 @@ def hopping():
 
 
 def poster():
-    def card(a,b):
-        return [box(20,24,80,68,"pale")]+outline(20,24,80,68)+[
-            label("OPEN STUDIO",50,37,a), label("SATURDAY",50,57,b)]
-    return three("09",card("question","support"),card("support","question"),[
+    def card(large, small):
+        # Same type treatment for both phrases. Near the safe margin, the
+        # compositor fits the secondary phrase into a narrower local width.
+        return [box(6,24,94,68,"pale")]+outline(6,24,94,68)+[
+            label(large,50,37,"question"), label(small,20,57,"question")]
+    return three("09",card("OPEN STUDIO","SATURDAY"),card("SATURDAY","OPEN STUDIO"),[
         ("Read this poster at a glance. What do you notice first?","What reads first?",900),
         ("The words haven't changed. Making Saturday larger shifts your eye from the event to the day.","Same words. Different emphasis.")])
 
