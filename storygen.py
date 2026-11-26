@@ -29,14 +29,15 @@ OUTPUT_GRAMMAR = {
         "visual": {"type": "object", "additionalProperties": True},
         "script": {"type": "array", "items": {
             "type": "object", "properties": {
-                "id": {"type": "string"}, "text": {"type": "string"},
+                "id": {"type": "string", "pattern": "^[A-Za-z][A-Za-z0-9_.-]{0,79}$"}, "text": {"type": "string"},
                 "caption": {"type": "string"}, "pause_after_ms": {"type": "integer"},
                 "critical_spoken": {"type": "array", "items": {"type": "array", "items": {"type": "string"}}},
             }, "required": ["id", "text"], "additionalProperties": False,
         }},
         "beats": {"type": "array", "items": {
             "type": "object", "properties": {
-                "id": {"type": "string"}, "parent": {"type": "string"},
+                "id": {"type": "string", "pattern": "^[A-Za-z][A-Za-z0-9_.-]{0,79}$"},
+                "parent": {"type": "string", "pattern": "^[A-Za-z][A-Za-z0-9_.-]{0,79}$"},
                 "cue": {"type": "object", "additionalProperties": True},
                 "panel": {"type": "object", "additionalProperties": True},
             }, "required": ["id", "cue", "panel"], "additionalProperties": False,
@@ -70,7 +71,8 @@ def generation_schema():
         # b6500 cannot translate every regex supported by JSON Schema.
         # Full schema validation still runs after generation.
         if isinstance(node, dict):
-            return {key: grammar_subset(value) for key, value in node.items() if key != "pattern"}
+            return {key: grammar_subset(value) for key, value in node.items()
+                    if key != "pattern" or (value.startswith("^") and value.endswith("$") and "\\w" not in value)}
         if isinstance(node, list):
             return [grammar_subset(value) for value in node]
         return node
@@ -188,6 +190,11 @@ def validate(story):
         answer = seen[rule["answer_beat"]]
         if order.index(answer["cue"]["utterance_id"]) <= order.index(question["id"]):
             raise ValueError("answer beat is not after the question")
+        active = next(b for b in reversed(story["beats"])
+                      if "ms" in b["cue"] or order.index(b["cue"]["utterance_id"]) <= order.index(question["id"]))
+        marks = {item.get("fact") for item in active["panel"].get("overlays", [])}
+        if not set(rule["required_facts"]) <= marks:
+            raise ValueError("question panel does not draw each instructional required_facts overlay")
     return story
 
 
@@ -232,6 +239,7 @@ def write(args):
     brief = read(args.input)
     brief_rule(brief)
     skill = (ROOT / "skills/lesson-writer/v2/SKILL.md").read_text()
+    example = (ROOT / "skills/lesson-writer/v2/annotated-example.json").read_text()
     config = read(ROOT / "models.json")[args.model]
     model = args.models / config["file"]
     with model.open("rb") as asset:
@@ -240,6 +248,7 @@ def write(args):
         raise ValueError("writer checkpoint hash mismatch")
     meta = {"brief": brief, "model": config, "skill_sha256": hashlib.sha256(skill.encode()).hexdigest(),
             "runner_sha256": hashlib.sha256(Path(__file__).read_bytes()).hexdigest(),
+            "example_sha256": hashlib.sha256(example.encode()).hexdigest(),
             "seed": 437, "temperature": .6, "top_p": .95, "max_tokens": 3300, "voice": args.voice}
     if (out / "writer.json").exists() and read(out / "writer.json") != meta:
         raise ValueError("cannot resume with a changed brief or writer configuration")
@@ -251,7 +260,8 @@ def write(args):
             if artifact.exists():
                 result = read(artifact)
             else:
-                prompt = skill + "\nReturn one JSON object with title, visual, script, beats, and instructional.\n"
+                prompt = skill + "\nRead this unrelated format example. Do not copy its values or topic:\n" + example
+                prompt += "\nReturn one JSON object with title, visual, script, beats, and instructional.\n"
                 prompt += "Brief:\n" + json.dumps(brief, ensure_ascii=False)
                 prompt += "\nUse this exact visual signature: " + SIGNATURES[brief["signature"]]
                 if errors:
