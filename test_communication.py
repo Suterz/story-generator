@@ -6,6 +6,7 @@ import unittest
 from unittest.mock import patch
 
 from communication import NeedsInput, UnsupportedBrief, check_supplied_authority, extract, intent_hash, normalize
+from communication_sweep import corpus, digest
 from storygen import SIGNATURES, generation_schema, load_brief
 
 ROOT = Path(__file__).parent
@@ -62,3 +63,18 @@ class CommunicationTests(unittest.TestCase):
         actual, origins = extract(rough, lambda _prompt: {"brief": brief, "provenance": provenance}, SIGNATURES)
         self.assertEqual(actual, normalize(structured, SIGNATURES)[0])
         self.assertEqual(origins["/source_notes/1"]["excerpt"], "Do not state carriage rules.")
+
+    def test_public_partitions_are_frozen_with_an_objective_only_pair(self):
+        benchmark = ROOT / "benchmark/communication"
+        freeze = json.loads((benchmark / "freeze.json").read_text())
+        dev = corpus(benchmark / "development.tsv", legacy=True)
+        validation = corpus(benchmark / "validation.tsv")
+        self.assertEqual(len(dev), 60)
+        self.assertEqual(len(validation), 20)
+        self.assertEqual(len([key for key in dev if not key.startswith("D")]), 20)
+        self.assertTrue({x[-1] for x in dev.values()}.isdisjoint(x[-1] for x in validation.values()))
+        for name in ("development", "validation"):
+            self.assertEqual(freeze["sha256"][name], digest(benchmark / f"{name}.tsv"))
+        a, b = (json.loads((EXAMPLES / f"{case}.json").read_text()) for case in ("wayfinding", "empathy"))
+        self.assertNotEqual(a.pop("objective"), b.pop("objective"))
+        self.assertEqual(a, b)
