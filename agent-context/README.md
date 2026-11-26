@@ -1,5 +1,12 @@
 # Communication iteration
 
+## 2026-11-26 — Authoring and first blind judgments
+
+- `d72c587` preserves the first narration for blind review even when preflight rejects its storyboard. Sol reviewed nine first scripts without model names or briefs, then revealed the independent expectations: four script passes, four revisions, and the incorrect pennant rotation. Text only; no voice delivery judgment or video passes. Gallery: `v4/v4.7 - Communication storyteller/REVIEW.md`.
+- `34b62c5` separates the fixed opening scene from authored spoken cuts after repeated invalid opening times and parent IDs. It leaves the renderer contracts unchanged. Initial generation reached the render queue; no quality transfer claim.
+- `bd75333` removes a concrete sign example after v3 and v4 copied “library entrance door” into train clips; one frame grounding attempt explicitly refused the absent library door. Test v5 against the same wayfinding and empathy facts plus a different entrance announcement. Do not count the separate authored controls as model results.
+- One withheld model opening already had the crescent baked into its clean art; its intended exact reveal then lacked a declared anchor. Keep this phone image as a control for independent judging of the cue, not an exported video.
+
 ## 2026-11-26 — Generic brief contract and comparison baseline
 
 - `d29eb9d`: the first model-authored nonprediction announcement reached frames, but used an undeclared sign anchor and ended with “Enjoy your peaceful ride.” The anchor preflight now catches that missing binding, and the editorial prompt drops the requirement for a separate ending. No renderer change was credited.

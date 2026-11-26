@@ -2,6 +2,7 @@ from pathlib import Path
 from tempfile import TemporaryDirectory
 import unittest
 
+from communication_score import score
 from review_packets import collect
 from storygen import read, save
 
@@ -24,3 +25,6 @@ class ReviewPacketTests(unittest.TestCase):
             self.assertFalse((packet / "script.json").exists())
             self.assertFalse((packet / "video.mp4").exists())
             self.assertNotIn("model-a", packet.name)
+            save(row / "first-script-judgment.json", {"verdict": "meets_brief", "first_attempt_sha256": "stale"})
+            with self.assertRaisesRegex(ValueError, "does not bind"):
+                score(run)

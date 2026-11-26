@@ -9,6 +9,15 @@ from storygen import read
 from review_packets import first_script
 
 
+def verdict_for(record_path, artifact, field):
+    record = read(record_path)
+    with artifact.open("rb") as f:
+        digest = hashlib.file_digest(f, "sha256").hexdigest()
+    if record[field] != digest:
+        raise ValueError(f"{record_path}: judgment does not bind to the reviewed artifact")
+    return record["verdict"]
+
+
 def score(run):
     scripts, drafts, videos = Counter(), Counter(), Counter()
     cases = {}
@@ -17,10 +26,12 @@ def score(run):
         folder = run / case
         editorial = folder / "script-judgment.json"
         first_editorial = folder / "first-script-judgment.json"
-        draft_state = (read(first_editorial)["verdict"] if first_editorial.exists() else
-                       "unjudged" if first_script(folder / "writer-attempt-0.json") is not None else "no_script")
+        first_attempt = folder / "writer-attempt-0.json"
+        draft_state = (verdict_for(first_editorial, first_attempt, "first_attempt_sha256")
+                       if first_editorial.exists() else
+                       "unjudged" if first_script(first_attempt) is not None else "no_script")
         drafts[draft_state] += 1
-        script_state = read(editorial)["verdict"] if editorial.exists() else (
+        script_state = verdict_for(editorial, folder / "story.json", "story_file_sha256") if editorial.exists() else (
             "unjudged" if (folder / "story.json").exists() else "no_script")
         scripts[script_state] += 1
         outcome = folder / "outcome.json"
