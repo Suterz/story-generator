@@ -55,14 +55,16 @@ def generation_schema():
     panel = read(ROOT / "schemas/Panel.json")
     panel["properties"].pop("key")
     panel["properties"].pop("parent_panel_id")
-    panel["required"] = ["op", "scene_id", "objective", "instruction", "overlays"]
+    panel["required"] = ["op", "objective", "instruction", "overlays"]
     session["required"] = ["story_context", "visual_signature", "graphic_theme"]
     schema = json.loads(json.dumps(OUTPUT_GRAMMAR))
     schema["$defs"] = {**video["$defs"], **session.pop("$defs", {}), **panel.pop("$defs", {})}
     schema["properties"]["visual"] = session
     schema["properties"]["instructional"] = {"$ref": "#/$defs/Instructional"}
     beat = schema["properties"]["beats"]["items"]["properties"]
-    beat["cue"] = {"anyOf": [{"$ref": "#/$defs/Milliseconds"}, {"$ref": "#/$defs/Phrase"}]}
+    starts = {"type": "object", "properties": {"at_utterance_start": {"type": "string"}},
+              "required": ["at_utterance_start"], "additionalProperties": False}
+    beat["cue"] = {"anyOf": [{"$ref": "#/$defs/Milliseconds"}, starts, {"$ref": "#/$defs/Phrase"}]}
     beat["panel"] = panel
     return schema
 
@@ -108,6 +110,29 @@ def brief_rule(brief):
 
 def words(text):
     return re.findall(r"[a-z0-9]+(?:'[a-z]+)?", text.replace("’", "'").lower())
+
+
+def compile_story(story):
+    """Resolve authored ancestry and utterance starts into API identifiers."""
+    texts = {u["id"]: u["text"] for u in story["script"]}
+    scenes = {}
+    for beat in story["beats"]:
+        panel = beat["panel"]
+        scene = scenes[beat["parent"]] if beat.get("parent") else beat["id"]
+        if panel.get("scene_id", scene) != scene and beat.get("parent"):
+            raise ValueError("an existing scene must preserve its parent's scene_id")
+        scenes[beat["id"]] = panel.setdefault("scene_id", scene)
+        cue = beat["cue"]
+        if "at_utterance_start" not in cue:
+            continue
+        if set(cue) != {"at_utterance_start"}:
+            raise ValueError("utterance-start cue cannot have other fields")
+        key = cue["at_utterance_start"]
+        tokens = words(texts[key])
+        if not tokens:
+            raise ValueError("utterance-start cue has no spoken words")
+        beat["cue"] = {"utterance_id": key, "phrase": " ".join(tokens[:min(4, len(tokens))]), "occurrence": 1}
+    return story
 
 
 def validate(story):
@@ -195,7 +220,7 @@ def write(args):
         return validate(read(out / "story.json"))
     brief = read(args.input)
     brief_rule(brief)
-    skill = (ROOT / "skills/lesson-writer/v1/SKILL.md").read_text()
+    skill = (ROOT / "skills/lesson-writer/v2/SKILL.md").read_text()
     config = read(ROOT / "models.json")[args.model]
     model = args.models / config["file"]
     with model.open("rb") as asset:
@@ -232,7 +257,7 @@ def write(args):
                 story = json.loads(result["response"]["choices"][0]["message"]["content"])
                 story["voice_profile"] = args.voice
                 story["visual"]["visual_signature"] = SIGNATURES[brief["signature"]]
-                validate(story)
+                validate(compile_story(story))
             except (ValueError, KeyError, TypeError) as exc:
                 errors.append(str(exc))
             except ValidationError as exc:
