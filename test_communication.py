@@ -7,7 +7,7 @@ from unittest.mock import patch
 
 from communication import NeedsInput, UnsupportedBrief, check_supplied_authority, extract, intent_hash, normalize
 from communication_sweep import corpus, digest
-from storygen import SIGNATURES, check_communication_anchors, compile_story, compile_surfaces, generation_schema, load_brief, validate
+from storygen import SIGNATURES, bind_opening, check_communication_anchors, compile_story, compile_surfaces, generation_schema, load_brief, validate
 
 ROOT = Path(__file__).parent
 EXAMPLES = ROOT / "examples/carriage"
@@ -106,3 +106,18 @@ class CommunicationTests(unittest.TestCase):
         self.assertTrue(target.endswith(".face"))
         self.assertEqual(parent["anchors"][target], "Whole blank sign plate on the train door")
         self.assertNotIn("surface", child["overlays"][0])
+
+    def test_opening_is_compiled_without_inventing_a_spoken_cue(self):
+        draft = json.loads((EXAMPLES / "contract-story.json").read_text())
+        opening = draft["beats"].pop(0)
+        original_cue = draft["beats"][0]["cue"].copy()
+        opening.pop("cue")
+        opening["panel"].pop("op")
+        draft["opening"] = opening
+        result = validate(compile_story(bind_opening(draft)))
+        self.assertEqual(result["beats"][0]["cue"], {"ms": 0})
+        self.assertEqual(result["beats"][0]["panel"]["op"], "new_scene")
+        self.assertEqual(result["beats"][1]["cue"], original_cue)
+        schema = generation_schema(communication=True)
+        self.assertIn("opening", schema["required"])
+        self.assertNotIn("cue", schema["properties"]["opening"]["properties"])

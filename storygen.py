@@ -1,6 +1,7 @@
 """Local brief-to-story CLI, with durable one-submit rendering."""
 import argparse
 from contextlib import contextmanager
+from copy import deepcopy
 import fcntl
 import hashlib
 import json
@@ -24,7 +25,7 @@ from spoken_money import normalize_story_money
 
 ROOT = Path(__file__).resolve().parent
 SKILL = ROOT / "skills/lesson-writer/v4/SKILL.md"
-COMMUNICATION_SKILL = ROOT / "skills/communication-writer/v3/SKILL.md"
+COMMUNICATION_SKILL = ROOT / "skills/communication-writer/v4/SKILL.md"
 HOME = Path.home()
 SIGNATURES = {
     "market": "Original editorial cartoon, strong plum outlines, warm ivory paper, bright ochre fruit, teal leaves, rounded simple silhouettes.",
@@ -137,6 +138,19 @@ def generation_schema(*, communication=False, prediction=True):
               "required": ["at_utterance_start"], "additionalProperties": False}
     beat["cue"] = {"anyOf": [{"$ref": "#/$defs/Milliseconds"}, starts, {"$ref": "#/$defs/Phrase"}]}
     beat["panel"] = panel
+    if communication:
+        # The first visual is a renderer invariant, not a timing decision
+        # the language model must rediscover. Subsequent cuts remain authored.
+        opening_panel = deepcopy(panel)
+        del opening_panel["properties"]["op"]
+        opening_panel["required"].remove("op")
+        schema["properties"]["opening"] = {
+            "type": "object",
+            "properties": {"id": beat["id"], "panel": opening_panel},
+            "required": ["id", "panel"], "additionalProperties": False,
+        }
+        schema["required"].append("opening")
+        beat["cue"] = {"anyOf": [starts, {"$ref": "#/$defs/Phrase"}]}
     def grammar_subset(node):
         # b6500 cannot translate every regex supported by JSON Schema.
         # Full schema validation still runs after generation.
@@ -467,6 +481,17 @@ def load_brief(args, model, config):
     return brief, True
 
 
+def bind_opening(story):
+    """Compile the authored opening scene to the renderer's fixed first beat."""
+    if set(story["opening"]) != {"id", "panel"} or "op" in story["opening"]["panel"]:
+        raise ValueError("opening contains only an id and a panel; no parent, cue or op")
+    opening = story.pop("opening")
+    opening["cue"] = {"ms": 0}
+    opening["panel"]["op"] = "new_scene"
+    story["beats"].insert(0, opening)
+    return story
+
+
 def compile_surfaces(story):
     """Bind a writer-authored text placement to its nearest clean reference."""
     clean_panels = {}
@@ -595,12 +620,13 @@ def write(args):
                 if receipt.exists():
                     raise RuntimeError(f"writer attempt {attempt} was interrupted; no duplicate generation")
                 if generic:
-                    prompt = skill + "\nReturn JSON with title, visual, script and beats.\n"
+                    prompt = skill + "\nReturn JSON with title, visual, script, opening and beats.\n"
                     if not prediction:
                         prompt += "The editorial plan chose no prediction. Omit instructional. "
-                    prompt += ('Timing example: first beat cue {"ms":0}; any later beat cue '
-                               '{"at_utterance_start":"id-of-spoken-utterance"}. '
-                               "Do not invent millisecond estimates for later beats.\n")
+                    prompt += ('Put the first scene in opening: {"id":"opening","panel":{...}}. '
+                               "Opening has no cue, parent or panel op: it always starts at zero. "
+                               'In beats list only later changes, each with a cue like {"at_utterance_start":'
+                               '"id-of-spoken-utterance"}. If there are no later changes, beats is [].\n')
                 else:
                     prompt = skill + "\nRead this unrelated format example. Do not copy its values or topic:\n" + example
                     prompt += "\nReturn one JSON object with title, visual, script, beats, and instructional.\n"
@@ -648,6 +674,7 @@ def write(args):
                     # the authored panels are normalized, not pixel sizes.
                     story["visual"].pop("canvas", None)
                     story["max_ms"] = brief["max_duration_ms"]
+                    bind_opening(story)
                     compile_surfaces(story)
                 choose_artwork(story, brief)
                 if generic and any(n["kind"] == "verbatim" for n in brief["source_notes"]):
