@@ -515,16 +515,25 @@ def bind_opening(story):
 def compile_surfaces(story):
     """Bind a writer-authored text placement to its nearest clean reference."""
     clean_panels = {}
+    paper_panels = {}
     previous = None
     for beat in story["beats"]:
         panel = beat["panel"]
+        parent = beat.get("parent") or previous
         if panel["op"] == "overlay_only":
-            source = clean_panels.get(beat.get("parent") or previous)
+            source = clean_panels.get(parent)
         elif panel["op"] in {"new_scene", "edit_scene"} and not panel.get("paper_scene") and not panel.get("layout"):
             source = panel
         else:
             source = None
         clean_panels[beat["id"]] = source
+        paper = panel.get("paper_scene", False) or (
+            panel["op"] == "overlay_only" and paper_panels.get(parent, False)
+        )
+        paper_panels[beat["id"]] = paper
+        if panel.get("counter_rows") and not paper:
+            raise ValueError(f"{beat['id']}: counter_rows draw counted circles on plain paper; they cannot "
+                             "represent a sign or sit over generated art. Use the actual mark on its surface.")
         previous = beat["id"]
         for overlay in panel.get("overlays", []):
             if "surface" not in overlay:

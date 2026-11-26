@@ -115,6 +115,14 @@ class CommunicationTests(unittest.TestCase):
         self.assertEqual(parent["anchors"][target], "Whole blank sign plate on the train door")
         self.assertNotIn("surface", child["overlays"][0])
 
+    def test_compiled_count_circles_cannot_stand_in_for_a_generated_door_mark(self):
+        story = json.loads((EXAMPLES / "contract-story.json").read_text())
+        story["beats"][1]["panel"]["counter_rows"] = [{"id": "mark", "count": 1, "y": 0.5, "label": "crescent"}]
+        with self.assertRaisesRegex(ValueError, "cannot represent a sign"):
+            compile_surfaces(story)
+        story["beats"][0]["panel"]["paper_scene"] = True
+        compile_surfaces(story)
+
     def test_opening_is_compiled_without_inventing_a_spoken_cue(self):
         draft = json.loads((EXAMPLES / "contract-story.json").read_text())
         opening = draft["beats"].pop(0)
