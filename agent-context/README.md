@@ -2,6 +2,8 @@
 
 ## 2026-11-26 — Visual authoring invariants
 
+- `video-renderer` branch `iteration/contraction-timing` (`1d0664d`) handles narrowly scoped forced-alignment spellings such as `youll`. The saved empathy WAV failed at that token on the original video commit; the patched replay binds its 456,960-sample spoken cue and corroborates it with original ASR. A separate end-to-end upload and stacking control are pending. Keep this timing experiment separate from writer comparisons.
+
 - `81968f5`: a v6 draft drew `counter_rows` where it needed the crescent. Reject that use over generated art; preserve paper counts. Retest both carriage objectives, library entrance, and grouping.
 - `225d170`, `ac5a6e7`: preflight now catches prose expected answers for binary review and unsupported anchored glyphs. Existing native review said `yes` twice against expected “Yes, the commuter is visible on the platform.” The approved crescent fixture supports `☾`; the v5 submission's `🌙` and `👆` do not have installed glyph coverage.
 - `e8e723c` skill v6 asks for blank clean art when introducing a mark, an exact check answer, and a necessary visual change per beat. No verified model-authored export from the targeted pair at the time of writing. Comparison jobs are detached; preserve first attempts and keep validation/sealed unopened until choices are justified.
