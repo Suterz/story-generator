@@ -6,15 +6,20 @@ import json
 from pathlib import Path
 
 from storygen import read
+from review_packets import first_script
 
 
 def score(run):
-    scripts, videos = Counter(), Counter()
+    scripts, drafts, videos = Counter(), Counter(), Counter()
     cases = {}
     total = read(run / "freeze.json")["case_ids"]
     for case in total:
         folder = run / case
         editorial = folder / "script-judgment.json"
+        first_editorial = folder / "first-script-judgment.json"
+        draft_state = (read(first_editorial)["verdict"] if first_editorial.exists() else
+                       "unjudged" if first_script(folder / "writer-attempt-0.json") is not None else "no_script")
+        drafts[draft_state] += 1
         script_state = read(editorial)["verdict"] if editorial.exists() else (
             "unjudged" if (folder / "story.json").exists() else "no_script")
         scripts[script_state] += 1
@@ -58,8 +63,9 @@ def score(run):
         else:
             video_state = "pending"
         videos[video_state] += 1
-        cases[case] = {"script": script_state, "video": video_state}
-    return {"planned": len(total), "script": dict(scripts), "video": dict(videos), "cases": cases}
+        cases[case] = {"first_script": draft_state, "script": script_state, "video": video_state}
+    return {"planned": len(total), "first_script": dict(drafts), "script": dict(scripts),
+            "video": dict(videos), "cases": cases}
 
 
 if __name__ == "__main__":
