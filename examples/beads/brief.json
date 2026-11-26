@@ -1,0 +1,12 @@
+{
+  "topic": "Add a bead to a row",
+  "takeaway": "Adding one bead increases the count by one.",
+  "required_facts": [
+    "Start with three separate beads.",
+    "Add a fourth bead to the right of the same three without moving them.",
+    "Let the viewer count before revealing the total of four.",
+    "Use a plain paper diagram with filled circles for beads; draw the counts, not a picture of printed text."
+  ],
+  "audience": "A beginner",
+  "signature": "paper"
+}
