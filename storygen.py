@@ -60,6 +60,31 @@ def generation_schema():
     session["required"] = ["story_context", "visual_signature", "graphic_theme"]
     schema = json.loads(json.dumps(OUTPUT_GRAMMAR))
     schema["$defs"] = {**video["$defs"], **session.pop("$defs", {}), **panel.pop("$defs", {})}
+    graphic_props = schema["$defs"]["Overlay"]["properties"]
+
+    def graphic(kind, required, optional=(), shape=None):
+        props = {k: graphic_props[k] for k in (*required, *optional, "fact")}
+        for key in required:
+            if "anyOf" in props[key]:
+                props[key] = {"anyOf": [option for option in props[key]["anyOf"]
+                                       if option.get("type") != "null"]}
+        props["type"] = {"const": kind}
+        if shape:
+            props["shape"] = {"const": shape}
+        return {"type": "object", "properties": props,
+                "required": ["type", *required, *(["shape"] if shape else [])],
+                "additionalProperties": False}
+
+    text = ("at", "text")
+    schema["$defs"]["Overlay"] = {"anyOf": [
+        graphic("text", text, ["role"]),
+        graphic("label", text, ["role"]),
+        graphic("arrow", ["from", "to"], ["part_target", "part_relation", "target_region", "target_rgb"]),
+        graphic("segment", ["from", "to"], ["divisions", "ink"]),
+        graphic("shape", ["at", "extent"], ["ink"], "rect"),
+        graphic("shape", ["at", "extent"], ["ink"], "disc"),
+        graphic("shape", ["vertices"], ["ink"], "polygon"),
+    ]}
     schema["properties"]["visual"] = session
     schema["properties"]["instructional"] = {"$ref": "#/$defs/Instructional"}
     beat = schema["properties"]["beats"]["items"]["properties"]
@@ -175,6 +200,11 @@ def validate(story):
         if (spec["op"] == "new_scene") == bool(parent):
             raise ValueError(f"{key}: only a new scene has no parent")
         panel.validate({**spec, "key": key, "parent_panel_id": "a" * 32 if parent else None})
+        for graphic in spec.get("overlays", []):
+            if graphic["type"] in ("text", "label") and not (graphic.get("text") or "").strip():
+                raise ValueError(f"{key}: text overlays must contain visible text")
+            if graphic["type"] != "arrow" and any(graphic.get(x) is not None for x in ("target_region", "target_rgb", "part_target")):
+                raise ValueError(f"{key}: part targeting fields apply only to arrows")
         cue = b["cue"]
         if pos:
             parts = words(cue["phrase"])
@@ -191,7 +221,7 @@ def validate(story):
     rule = story.get("instructional")
     if rule:
         question = script[rule["question_utterance"]]
-        if question.get("pause_after_ms", 0) < rule["minimum_ms"]:
+        if question.get("pause_after_ms", 0) < rule.get("minimum_ms", 1200):
             raise ValueError("prediction pause shorter than authored minimum")
         answer = seen[rule["answer_beat"]]
         if order.index(answer["cue"]["utterance_id"]) <= order.index(question["id"]):
@@ -296,6 +326,8 @@ def write(args):
                 prompt += "\nReturn one JSON object with title, visual, script, beats, and instructional.\n"
                 prompt += "Brief:\n" + json.dumps(brief, ensure_ascii=False)
                 prompt += "\nCheck the plan against the brief, then write the complete teachable answer and actual overlays:\n" + (checks or "")
+                prompt += ("\nUse required_facts to name only clues drawn in the opening, not facts introduced by the reveal. "
+                           "Include literal visible text in every text overlay. Put exact answers in the reveal, attached to the right objects.")
                 prompt += "\nUse this exact visual signature: " + SIGNATURES[brief["signature"]]
                 if errors:
                     prompt += "\nCorrect this validation failure without changing any required fact: " + errors[-1]
