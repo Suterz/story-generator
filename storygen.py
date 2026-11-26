@@ -249,7 +249,8 @@ def write(args):
                 data = {"messages": [{"role": "user", "content": prompt}],
                         "seed": meta["seed"], "temperature": meta["temperature"], "top_p": meta["top_p"],
                         "max_tokens": meta["max_tokens"],
-                        "response_format": {"type": "json_schema", "schema": generation_schema()}}
+                        "response_format": {"type": "json_schema", "json_schema": {
+                            "name": "lesson_story", "schema": generation_schema()}}}
                 result = json.loads(request(endpoint + "/v1/chat/completions", data, timeout=240))
                 save(artifact, {"seconds": time.monotonic() - t, "response": result})
                 result = read(artifact)
