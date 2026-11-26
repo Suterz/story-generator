@@ -7,7 +7,7 @@ from unittest.mock import patch
 
 from communication import NeedsInput, UnsupportedBrief, check_supplied_authority, extract, intent_hash, normalize
 from communication_sweep import corpus, digest
-from storygen import SIGNATURES, bind_opening, check_communication_anchors, check_meaningful_overlays, check_visual_answers, communication_skill, compile_story, compile_surfaces, generation_schema, load_brief, validate
+from storygen import SIGNATURES, bind_opening, bind_overlay_removals, check_communication_anchors, check_meaningful_overlays, check_visual_answers, communication_skill, compile_story, compile_surfaces, generation_schema, load_brief, validate
 
 ROOT = Path(__file__).parent
 EXAMPLES = ROOT / "examples/carriage"
@@ -101,10 +101,34 @@ class CommunicationTests(unittest.TestCase):
         check_meaningful_overlays(story)
         a, b = [beat["panel"] for beat in story["beats"]]
         mark = b.pop("overlays")
-        with self.assertRaisesRegex(ValueError, "draws nothing"):
+        with self.assertRaisesRegex(ValueError, "actual overlay data"):
             check_meaningful_overlays(story)
         a["overlays"] = mark
+        b["op"] = "clear_overlays"
         check_meaningful_overlays(story)
+        bind_overlay_removals(story)
+        self.assertEqual(b["op"], "overlay_only")
+
+    def test_grammar_requires_graphics_or_explicit_removal_for_overlay_only(self):
+        from jsonschema import Draft202012Validator
+        schema = generation_schema(communication=True, prediction=False)
+        draft = json.loads((EXAMPLES / "contract-story.json").read_text())
+        for key in ("voice_profile", "max_ms"):
+            draft.pop(key)
+        draft["visual"].pop("visual_signature")
+        opening = draft["beats"].pop(0)
+        opening.pop("cue")
+        opening["panel"].pop("op")
+        draft["opening"] = opening
+        draft["script"][1].pop("caption_not_before_beat")
+        d = Draft202012Validator(schema)
+        self.assertTrue(d.is_valid(draft), list(d.iter_errors(draft)))
+        panel = draft["beats"][0]["panel"]
+        panel["overlays"] = []
+        self.assertFalse(d.is_valid(draft))
+        panel.pop("overlays")
+        panel["op"] = "clear_overlays"
+        self.assertTrue(d.is_valid(draft), list(d.iter_errors(draft)))
 
     def test_explicit_skill_version_preserves_its_own_identity(self):
         self.assertEqual(communication_skill("v6").parent.name, "v6")

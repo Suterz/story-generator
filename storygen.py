@@ -158,6 +158,23 @@ def generation_schema(*, communication=False, prediction=True):
         }
         schema["required"].append("opening")
         beat["cue"] = {"anyOf": [starts, {"$ref": "#/$defs/Phrase"}]}
+        overlay_panel = deepcopy(panel)
+        overlay_panel["properties"]["op"] = {"const": "overlay_only"}
+        overlay_panel["properties"]["overlays"]["minItems"] = 1
+        overlay_panel["required"].append("overlays")
+        count_panel = deepcopy(panel)
+        count_panel["properties"]["op"] = {"const": "overlay_only"}
+        count_panel["properties"]["counter_rows"]["minItems"] = 1
+        count_panel["required"].append("counter_rows")
+        # Handle a true removal explicitly, distinct from adding an
+        # unspecified overlay. The renderer still receives its usual panel.
+        clear_panel = deepcopy(panel)
+        clear_panel["properties"].pop("overlays")
+        clear_panel["properties"].pop("counter_rows")
+        clear_panel["properties"]["op"] = {"const": "clear_overlays"}
+        other_panel = deepcopy(panel)
+        other_panel["properties"]["op"]["enum"].remove("overlay_only")
+        beat["panel"] = {"anyOf": [overlay_panel, count_panel, clear_panel, other_panel]}
     def grammar_subset(node):
         # b6500 cannot translate every regex supported by JSON Schema.
         # Full schema validation still runs after generation.
@@ -517,13 +534,28 @@ def check_meaningful_overlays(story):
     for beat in story["beats"]:
         panel = beat["panel"]
         parent = panels.get(beat.get("parent"))
-        # Overlay-only rendering copies the same clean art. Empty on both
-        # sides cannot add what the beat claims. Real removals still work.
-        if (panel["op"] == "overlay_only" and parent is not None and
-                not (parent.get("overlays") or panel.get("overlays"))):
-            raise ValueError(f"{beat['id']}: this overlay-only beat draws nothing. Add the actual visible "
-                             "change or keep playing the previous beat during these words.")
+        if panel["op"] == "overlay_only" and not (panel.get("overlays") or panel.get("counter_rows")):
+            if parent is not None and (parent.get("overlays") or parent.get("counter_rows")):
+                raise ValueError(f"{beat['id']}: use clear_overlays to intentionally remove the parent's graphics")
+            raise ValueError(f"{beat['id']}: add actual overlay data, or keep playing the previous beat")
         panels[beat["id"]] = panel
+
+
+def bind_overlay_removals(story):
+    """Map intentional overlay removal to the existing renderer operation."""
+    panels = {}
+    previous = None
+    for beat in story["beats"]:
+        panel = beat["panel"]
+        if panel["op"] == "clear_overlays":
+            parent = panels.get(beat.get("parent") or previous)
+            if (panel.get("overlays") or panel.get("counter_rows") or not parent or
+                    not (parent.get("overlays") or parent.get("counter_rows"))):
+                raise ValueError(f"{beat['id']}: clear_overlays needs an earlier panel with actual graphics")
+            panel["op"] = "overlay_only"
+        panels[beat["id"]] = panel
+        previous = beat["id"]
+    return story
 
 
 def bind_opening(story):
@@ -689,7 +721,9 @@ def write(args):
                     prompt += ('Put the first scene in opening: {"id":"opening","panel":{...}}. '
                                "Opening has no cue, parent or panel op: it always starts at zero. "
                                'In beats list only later changes, each with a cue like {"at_utterance_start":'
-                               '"id-of-spoken-utterance"}. If there are no later changes, beats is [].\n')
+                               '"id-of-spoken-utterance"}. If there are no later changes, beats is []. '
+                               'For overlay_only include actual entries in overlays, not just an instruction. '
+                               'Use clear_overlays only to remove previously visible graphics.\n')
                 else:
                     prompt = skill + "\nRead this unrelated format example. Do not copy its values or topic:\n" + example
                     prompt += "\nReturn one JSON object with title, visual, script, beats, and instructional.\n"
@@ -738,6 +772,10 @@ def write(args):
                     story["visual"].pop("canvas", None)
                     story["max_ms"] = brief["max_duration_ms"]
                     bind_opening(story)
+                    # Check while the draft still distinguishes an intentional
+                    # removal, before collapsing it to a native overlay.
+                    check_meaningful_overlays(story)
+                    bind_overlay_removals(story)
                     compile_surfaces(story)
                 choose_artwork(story, brief)
                 if generic and any(n["kind"] == "verbatim" for n in brief["source_notes"]):
@@ -749,7 +787,6 @@ def write(args):
                 if generic:
                     check_communication_anchors(story)
                     check_visual_answers(story)
-                    check_meaningful_overlays(story)
                     text = " ".join(u["text"] for u in story["script"])
                     if any(n["kind"] == "verbatim" and n["text"] not in text for n in brief["source_notes"]):
                         raise ValueError("approved verbatim wording is missing from the spoken script")
