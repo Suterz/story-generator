@@ -7,7 +7,7 @@ from unittest.mock import patch
 
 from communication import NeedsInput, UnsupportedBrief, check_supplied_authority, extract, intent_hash, normalize
 from communication_sweep import corpus, digest
-from storygen import SIGNATURES, bind_opening, check_communication_anchors, compile_story, compile_surfaces, generation_schema, load_brief, validate
+from storygen import SIGNATURES, bind_opening, check_communication_anchors, check_visual_answers, compile_story, compile_surfaces, generation_schema, load_brief, validate
 
 ROOT = Path(__file__).parent
 EXAMPLES = ROOT / "examples/carriage"
@@ -87,6 +87,14 @@ class CommunicationTests(unittest.TestCase):
         story["beats"][1]["panel"]["overlays"][0]["at"] = "made-up.face"
         with self.assertRaisesRegex(ValueError, "is not grounded"):
             check_communication_anchors(story)
+
+    def test_binary_check_leaves_the_predicate_in_the_question(self):
+        story = json.loads((EXAMPLES / "contract-story.json").read_text())
+        check_visual_answers(story)
+        check = story["beats"][0]["panel"]["clean_checks"][1]
+        check["expected"] = "Yes, the sign is visible and free of obstructions."
+        with self.assertRaisesRegex(ValueError, "all required visual details in the question"):
+            check_visual_answers(story)
 
     def test_cue_correction_identifies_the_actual_spoken_ids(self):
         story = json.loads((EXAMPLES / "contract-story.json").read_text())

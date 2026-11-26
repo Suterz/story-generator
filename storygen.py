@@ -488,6 +488,19 @@ def load_brief(args, model, config):
     return brief, True
 
 
+def check_visual_answers(story):
+    """A binary check's full requirement belongs in the question, not its answer."""
+    for beat in story["beats"]:
+        for kind in ("clean_checks", "composed_checks"):
+            for check in beat["panel"].get(kind, []):
+                answer = check["expected"].casefold().strip()
+                question = check["question"].casefold().strip()
+                if (re.match(r"^(?:is|are|can|does|do|did|has|have|could|would|will)\b", question) and
+                        re.match(r"^(?:yes|no)[,.:; ]+\S", answer)):
+                    raise ValueError(f"{beat['id']}: {kind} expects a fixed answer; put all required visual "
+                                     "details in the question and use 'yes' or 'no' alone as expected")
+
+
 def bind_opening(story):
     """Compile the authored opening scene to the renderer's fixed first beat."""
     if set(story["opening"]) != {"id", "panel"} or "op" in story["opening"]["panel"]:
@@ -692,6 +705,7 @@ def write(args):
                     validate_native(validate(compile_story(normalize_story_money(story))))
                 if generic:
                     check_communication_anchors(story)
+                    check_visual_answers(story)
                     text = " ".join(u["text"] for u in story["script"])
                     if any(n["kind"] == "verbatim" and n["text"] not in text for n in brief["source_notes"]):
                         raise ValueError("approved verbatim wording is missing from the spoken script")
