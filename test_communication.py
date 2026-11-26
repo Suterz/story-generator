@@ -40,6 +40,7 @@ class CommunicationTests(unittest.TestCase):
     def test_only_generic_generation_makes_prediction_optional(self):
         self.assertIn("instructional", generation_schema()["required"])
         self.assertNotIn("instructional", generation_schema(communication=True)["required"])
+        self.assertNotIn("style_ref_ids", generation_schema(communication=True)["properties"]["visual"]["properties"])
 
     def test_request_overrides_are_checked(self):
         brief = json.loads((EXAMPLES / "wayfinding.json").read_text())

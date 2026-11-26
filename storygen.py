@@ -24,7 +24,7 @@ from spoken_money import normalize_story_money
 
 ROOT = Path(__file__).resolve().parent
 SKILL = ROOT / "skills/lesson-writer/v4/SKILL.md"
-COMMUNICATION_SKILL = ROOT / "skills/communication-writer/v1/SKILL.md"
+COMMUNICATION_SKILL = ROOT / "skills/communication-writer/v2/SKILL.md"
 HOME = Path.home()
 SIGNATURES = {
     "market": "Original editorial cartoon, strong plum outlines, warm ivory paper, bright ochre fruit, teal leaves, rounded simple silhouettes.",
@@ -82,6 +82,9 @@ def generation_schema(*, communication=False):
     panel["properties"]["counter_rows"] = {"type": "array", "maxItems": 3, "items": COUNTER_ROW}
     panel["required"] = ["op", "objective", "instruction", "overlays"]
     session["required"] = ["story_context", "visual_signature", "graphic_theme"]
+    if communication:
+        for name in ("style_ref_ids", "legacy_input", "legacy_premise", "legacy_context"):
+            session["properties"].pop(name, None)
     schema = json.loads(json.dumps(OUTPUT_GRAMMAR))
     if communication:
         schema["required"].remove("instructional")
@@ -538,9 +541,16 @@ def write(args):
                 story["voice_profile"] = args.voice
                 story["visual"]["visual_signature"] = SIGNATURES[brief["visual_signature" if generic else "signature"]]
                 if generic:
+                    if any(k in story["visual"] for k in ("style_ref_ids", "legacy_input", "legacy_premise", "legacy_context")):
+                        raise ValueError("use the supplied signature; this brief did not supply uploaded style references or a legacy story")
                     story["max_ms"] = brief["max_duration_ms"]
                 choose_artwork(story, brief)
-                validate_native(validate(compile_story(normalize_story_money(story))))
+                if generic and any(n["kind"] == "verbatim" for n in brief["source_notes"]):
+                    # Exact supplied wording takes precedence over spoken
+                    # currency rewriting; an unalignable quote is withheld.
+                    validate_native(validate(compile_story(story)))
+                else:
+                    validate_native(validate(compile_story(normalize_story_money(story))))
                 if generic:
                     text = " ".join(u["text"] for u in story["script"])
                     if any(n["kind"] == "verbatim" and n["text"] not in text for n in brief["source_notes"]):
