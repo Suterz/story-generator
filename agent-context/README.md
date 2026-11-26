@@ -2,6 +2,9 @@
 
 ## 2026-11-26 — Generic brief contract and comparison baseline
 
+- `d29eb9d`: the first model-authored nonprediction announcement reached frames, but used an undeclared sign anchor and ended with “Enjoy your peaceful ride.” The anchor preflight now catches that missing binding, and the editorial prompt drops the requirement for a separate ending. No renderer change was credited.
+- An authored empathy control kept the wayfinding clip’s art hashes and factual sign. Its first line recognizes a long day before offering the direction, shifting the cue from frame 101 to 120. Use this control to illustrate the intended distinction, never as a writer pass.
+
 - `102bf6f`: observed later beats with invented millisecond cues and an answer embargo grafted onto a rhetorical hook. The generic planner can choose a prediction interval; if it does not, the generation schema excludes that block. Legacy lesson grammar stays intact. Rerun the objective-only pair to find out whether this is enough.
 - The second narration of the authored contract reused both accepted hashes and moved the sign cut from frame 101 to frame 158. Gallery: `v4/v4.7 - Communication storyteller/REVIEW.md`. This is renderer integration evidence, not a model-authored pass.
 - `f36f064` authored contract control exported in 7.83 s. The clean door is recognizable; the crescent appears on the same door at frame 101, without the caption hiding it. Both panels accepted on candidate zero. Unprompted ASR of the delivered MP4 matches the source transcript; no human listening claim.

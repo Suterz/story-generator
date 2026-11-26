@@ -45,16 +45,45 @@ def commit(path):
 
 def run(args):
     manifest = read(ROOT / "benchmark/communication/freeze.json")
-    if digest(args.dataset) != manifest["sha256"][args.partition]:
-        raise ValueError("dataset does not match frozen partition")
-    if digest(ROOT / "benchmark/communication/RUBRIC.md") != manifest["rubric_sha256"]:
+    rubric_sha = digest(ROOT / "benchmark/communication/RUBRIC.md")
+    if rubric_sha != manifest["rubric_sha256"]:
         raise ValueError("evaluation rubric does not match frozen partition")
     if digest(ROOT / "benchmark/first20.tsv") != manifest["legacy_sha256"]:
         raise ValueError("legacy inputs do not match frozen development partition")
-    if args.partition == "sealed" and not args.selection:
-        raise ValueError("sealed run requires the frozen selection record")
+    provenance = {
+        "model": args.model, "model_pin": read(ROOT / "models.json")[args.model],
+        "voice": "heart", "writer": commit(ROOT), "frames": commit(args.frames), "video": commit(args.video),
+        "endpoint": args.video_url, "skill_sha256": digest(COMMUNICATION_SKILL),
+        "rubric_sha256": rubric_sha, "evaluator": "openai/gpt-6.2-sol",
+    }
+    if args.partition == "sealed":
+        if not args.selection:
+            raise ValueError("sealed run requires the frozen selection record")
+        selection = read(args.selection)
+        for key, value in provenance.items():
+            if selection.get(key) != value:
+                raise ValueError(f"sealed selection differs on {key}")
+        from communication_score import score
+        validation_run = Path(selection["validation_run"])
+        validated = read(validation_run / "freeze.json")
+        if validated["partition"] != "validation" or any(validated.get(k) != v for k, v in provenance.items()):
+            raise ValueError("sealed selection must reference validation of the same frozen combination")
+        summary = score(validation_run)
+        if summary["planned"] != 20 or any(summary["video"].get(k) for k in ("pending", "unjudged")):
+            raise ValueError("validate and adjudicate all 20 validation cases before opening sealed inputs")
+        # Place the receipt beside the private partition so a different
+        # result directory or model cannot accidentally reopen the set.
+        receipt = args.dataset.with_suffix(".opening.json")
+        opening = {"out": str(args.out.resolve()), "selection_sha256": digest(args.selection)}
+        try:
+            with receipt.open("x") as f:
+                json.dump(opening, f)
+        except FileExistsError:
+            if read(receipt) != opening:
+                raise ValueError("sealed set was already opened for a different run")
+    if digest(args.dataset) != manifest["sha256"][args.partition]:
+        raise ValueError("dataset does not match frozen partition")
     all_items = corpus(args.dataset, args.partition == "development")
-    selection = read(args.selection) if args.selection else None
     choices = list(all_items)
     if args.partition == "development":
         if args.ids:
@@ -65,18 +94,8 @@ def run(args):
             choices = [k for k in choices if not k.startswith("D")]
     if len(set(choices)) != len(choices) or any(k not in all_items for k in choices):
         raise ValueError("unknown or duplicate case")
-    config = {
-        "case_ids": choices, "partition": args.partition, "model": args.model, "voice": "heart",
-        "model_pin": read(ROOT / "models.json")[args.model], "dataset_sha256": digest(args.dataset),
-        "writer": commit(ROOT), "frames": commit(args.frames), "video": commit(args.video),
-        "endpoint": args.video_url, "skill_sha256": digest(COMMUNICATION_SKILL),
-        "rubric_sha256": digest(ROOT / "benchmark/communication/RUBRIC.md"),
-        "evaluator": "openai/gpt-6.2-sol",
-    }
-    if args.partition == "sealed":
-        for key in ("model", "writer", "frames", "video", "skill_sha256", "rubric_sha256", "evaluator"):
-            if selection.get(key) != config[key]:
-                raise ValueError(f"sealed selection differs on {key}")
+    config = {**provenance, "case_ids": choices, "partition": args.partition,
+              "dataset_sha256": manifest["sha256"][args.partition]}
     frozen = args.out / "freeze.json"
     if frozen.exists() and read(frozen) != config:
         raise ValueError("resume must use the exact original run configuration")
