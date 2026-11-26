@@ -502,7 +502,9 @@ def main():
     if any(native):
         if not all(native):
             p.error("--validator-python, --frames-repo and --video-repo must be supplied together")
-        os.environ["STORYGEN_VALIDATOR_PYTHON"] = str(args.validator_python.resolve())
+        # Resolve the directory relative to the caller, not a venv Python
+        # symlink: the interpreter needs the neighboring pyvenv.cfg.
+        os.environ["STORYGEN_VALIDATOR_PYTHON"] = str(args.validator_python.absolute())
         os.environ["STORYGEN_RENDERER_SOURCES"] = os.pathsep.join(
             str(root.resolve() / "src") for root in (args.frames_repo, args.video_repo))
     if not os.environ.get("STORYGEN_VALIDATOR_PYTHON") and not os.environ.get("STORYGEN_RENDERER_SOURCES"):

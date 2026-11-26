@@ -9,7 +9,7 @@ from unittest.mock import patch
 from arithmetic import calculate
 from graphics import expand_counter_rows
 from spoken_money import spoken_money
-from storygen import SKILL, compile_story, read, render, validate, validate_native
+from storygen import SKILL, compile_story, main, read, render, validate, validate_native
 
 
 def draft():
@@ -56,6 +56,20 @@ class WriterTests(unittest.TestCase):
         with patch.dict("os.environ", {"STORYGEN_VALIDATOR_PYTHON": "/some/python"}, clear=True):
             with self.assertRaisesRegex(ValueError, "both"):
                 validate_native({})
+
+    def test_native_cli_preserves_venv_interpreter_symlink(self):
+        with TemporaryDirectory() as folder:
+            root = Path(folder)
+            python = root / "python"
+            python.symlink_to("/usr/bin/python3")
+            argv = ["storygen", "write", "brief.json", "--out", str(root / "out"),
+                    "--validator-python", str(python), "--frames-repo", folder, "--video-repo", folder]
+            def check(_):
+                import os
+                self.assertEqual(os.environ["STORYGEN_VALIDATOR_PYTHON"], str(python))
+
+            with patch.dict("os.environ", clear=True), patch("sys.argv", argv), patch("storygen.write", check):
+                main()
 
     def test_lost_acknowledgement_resumes_with_get_only(self):
         with TemporaryDirectory() as folder:
