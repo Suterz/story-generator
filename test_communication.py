@@ -5,8 +5,8 @@ from types import SimpleNamespace
 import unittest
 from unittest.mock import patch
 
-from communication import NeedsInput, UnsupportedBrief, intent_hash, normalize
-from storygen import SIGNATURES, check_sufficiency, generation_schema, load_brief
+from communication import NeedsInput, UnsupportedBrief, check_supplied_authority, intent_hash, normalize
+from storygen import SIGNATURES, generation_schema, load_brief
 
 ROOT = Path(__file__).parent
 EXAMPLES = ROOT / "examples/carriage"
@@ -27,17 +27,15 @@ class CommunicationTests(unittest.TestCase):
 
     def test_missing_input_is_typed_and_reusable(self):
         brief, _ = normalize(json.loads((EXAMPLES / "missing-rules.json").read_text()), SIGNATURES)
-        response = {"choices": [{"message": {"content":
-                    '{"decision":"blocked","question":"What rule governs phone calls?"}'}}]}
-        with TemporaryDirectory() as directory, patch("storygen.request", return_value=json.dumps(response)) as request:
-            out = Path(directory)
-            for _ in range(2):
-                with self.assertRaises(NeedsInput) as raised:
-                    check_sufficiency("http://local", brief, out)
-                self.assertFalse(raised.exception.result["render_submitted"])
-                self.assertIn("phone calls", raised.exception.result["missing"][0]["question"])
-                self.assertFalse((out / "submission.json").exists())
-            self.assertEqual(request.call_count, 1)
+        with self.assertRaises(NeedsInput) as raised:
+            check_supplied_authority(brief)
+        self.assertFalse(raised.exception.result["render_submitted"])
+        self.assertIn("phone calls", raised.exception.result["missing"][0]["question"])
+        brief["source_notes"].append({"kind": "fact", "text": "Passengers must make phone calls outside this carriage."})
+        check_supplied_authority(brief)
+        for case in ("wayfinding", "empathy"):
+            valid, _ = normalize(json.loads((EXAMPLES / f"{case}.json").read_text()), SIGNATURES)
+            check_supplied_authority(valid)
 
     def test_only_generic_generation_makes_prediction_optional(self):
         self.assertIn("instructional", generation_schema()["required"])

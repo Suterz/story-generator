@@ -3,6 +3,7 @@ from copy import deepcopy
 import hashlib
 import json
 from pathlib import Path
+import re
 
 from jsonschema import Draft202012Validator
 
@@ -75,6 +76,30 @@ def schema_reply(schema, name):
     return {"type": "json_schema", "json_schema": {"name": name, "schema": schema}}
 
 
+def policy_input(brief):
+    """Require actual instructions when the objective explicitly asks for rules."""
+    objective = brief["objective"].casefold()
+    if not re.search(r"\b(?:rules?|polic(?:y|ies)|requirements?|regulations?)\b", objective):
+        return
+    if re.search(r"\b(?:do not|don't|without)\b.{0,45}\b(?:rules?|polic(?:y|ies)|regulations?)\b", objective):
+        return
+    evidence = [n["text"].casefold() for n in brief["source_notes"] if n["kind"] in {"fact", "verbatim"}]
+    norm = r"\b(?:must|may|should|required|allow(?:ed)?|cannot|can(?:'t)?|forbid(?:den)?|prohibited|only|no|do not)\b"
+    subject = ("making or taking phone calls" if re.search(r"\bphone calls?\b", objective) else None)
+    if any(re.search(norm, text) and (not subject or re.search(r"\b(?:calls?|phones?)\b", text)) for text in evidence):
+        return
+    target = f" about {subject}" if subject else " for the policy or requirement named in the objective"
+    raise NeedsInput([{"path": "/source_notes", "code": "missing_policy_fact",
+                       "question": f"What is the approved rule{target}?"}])
+
+
+def check_supplied_authority(brief):
+    policy_input(brief)
+    # A brief can itself supply a logistics fact (e.g. "Tell them to meet at
+    # two"); the writer may not invent extra details. Empty notes alone do
+    # not justify blocking a fictional or expressive brief.
+
+
 def extract(raw, ask, signatures):
     """Extract only grounded values and require exact source excerpts."""
     if not raw.strip() or len(raw) > 16000:
@@ -95,7 +120,8 @@ def extract(raw, ask, signatures):
     if not isinstance(brief, dict):
         raise ValueError("text extraction did not return a brief object")
     brief["schema_version"] = "1.0"
-    provenance = {key.removeprefix("/brief"): entry for key, entry in result["provenance"].items()}
+    provenance = {key.removeprefix("/brief"): entry for key, entry in result["provenance"].items()
+                  if key not in ("/schema_version", "/brief/schema_version")}
     for entry in provenance.values():
         excerpt = entry["excerpt"]
         if entry["origin"] not in {"supplied", "inferred"} or not excerpt or excerpt not in raw:
