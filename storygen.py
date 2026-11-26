@@ -300,6 +300,15 @@ def validate_native(story):
     return story
 
 
+def check_editorial_conclusion(story, comparisons):
+    if not {"<", ">"} <= {entry["relation"] for entry in comparisons}:
+        return
+    conclusion = re.split(r"[.!?]\s+", story["script"][-1]["text"].rstrip(".! "))[-1]
+    criterion = r"\b(?:per [a-z]+|at checkout|by [a-z]+|in terms of [a-z]+|on [a-z]+ alone)\b"
+    if re.search(r"\bbetter\s+than\b", conclusion, re.I) and not re.search(criterion, conclusion, re.I):
+        raise ValueError("the last sentence names an overall winner across opposing criteria; name the criterion")
+
+
 @contextmanager
 def writer(args, model, log):
     with args.lease.open("a") as lock:
@@ -403,7 +412,10 @@ def write(args):
                 prompt += "\nCheck the plan against the brief, then write the complete teachable answer and actual overlays:\n" + (checks or "")
                 prompt += ("\nGive an overlay fact ID only to a clue actually drawn before the question; "
                            "the compiler records those IDs. Include literal visible text in every text overlay. "
-                           "Put exact answers in the reveal, attached to the right objects.")
+                           "Put exact answers in the reveal, attached to the right objects. "
+                           "If comparisons use different criteria, name the criterion in each conclusion. "
+                           "Never end a two-criterion tradeoff with an unspecified overall winner. "
+                           "Spell out numbers and currency in narration; use numerals in graphics.")
                 prompt += "\nUse this exact visual signature: " + SIGNATURES[brief["signature"]]
                 if errors:
                     prompt += "\nCorrect this validation failure without changing any required fact: " + errors[-1]
@@ -423,6 +435,7 @@ def write(args):
                 story["voice_profile"] = args.voice
                 story["visual"]["visual_signature"] = SIGNATURES[brief["signature"]]
                 validate_native(validate(compile_story(story)))
+                check_editorial_conclusion(story, comparisons)
             except (ValueError, KeyError, TypeError) as exc:
                 errors.append(str(exc))
             except ValidationError as exc:
