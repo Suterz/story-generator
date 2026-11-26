@@ -1,0 +1,40 @@
+{
+  "title": "Find the quiet carriage",
+  "voice_profile": "heart",
+  "max_ms": 29999,
+  "visual": {
+    "story_context": "A commuter on the platform looking for the quiet carriage.",
+    "visual_signature": "Standalone explanatory cartoon with warm cut-paper silhouettes, dark outlines, and minimal decoration.",
+    "graphic_theme": "paper"
+  },
+  "script": [
+    {"id": "platform", "text": "Looking for the quiet carriage? Check the carriage door."},
+    {"id": "sign", "text": "Look for the crescent. That is the door to the quiet carriage.",
+     "caption": "Look for the crescent.", "caption_not_before_beat": "show_sign"}
+  ],
+  "beats": [
+    {"id": "door", "cue": {"ms": 0}, "panel": {
+      "op": "new_scene", "scene_id": "platform",
+      "objective": "Recognize the carriage door before introducing its sign.",
+      "instruction": "Platform close-up of one train carriage door. Include one large, plain, blank sign plate inside the door outline; no text or symbols.",
+      "anchors": {"plate.face": "The large blank sign plate on the carriage door; bound the whole plate."},
+      "clean_checks": [
+        {"question": "What does the blank plate sit on: carriage door, window, platform, or unknown? Reply with one option.", "expected": "carriage door"},
+        {"question": "Is the whole blank sign plate visible and unobstructed? Answer yes or no.", "expected": "yes"}
+      ],
+      "retry_budget": 1
+    }},
+    {"id": "show_sign", "parent": "door", "cue": {"utterance_id": "sign", "phrase": "Look for the crescent"}, "panel": {
+      "op": "overlay_only", "scene_id": "platform",
+      "objective": "Associate the readable crescent with the same carriage door.",
+      "instruction": "Put the crescent on the blank sign plate.",
+      "keep": "Keep the door, window, sign plate and viewpoint fixed.",
+      "overlays": [{"type": "text", "text": "☾", "at": "plate.face", "fact": "door-crescent"}],
+      "composed_checks": [
+        {"question": "Which symbol is clearly visible on the carriage door: crescent, star, circle, or unknown? Reply with one option.", "expected": "crescent"},
+        {"question": "What carries the symbol: carriage door, window, platform, or unknown? Reply with one option.", "expected": "carriage door"}
+      ],
+      "retry_budget": 1
+    }}
+  ]
+}

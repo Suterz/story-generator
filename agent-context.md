@@ -7,6 +7,9 @@
 - Integration handoff: frames `050f93235e3ca0db4930304cdd20ffa5584aa1b7`; video `19673754d668446e14a8f21cc3d2d16ce0fc9d1b`. See the corresponding renderer `agent-context.md` files and gallery `v4/v4.6 - Trunk integration/` for the tested triple and scope.
 - Next: branch from `main`; test B16 and a different rotation lesson, and inspect the actual picture. Keep production independently pinned to V2. No reliable unattended writer or 20/20 claim.
 
+Current branch work on the generic storyteller is recorded in
+[Communication iteration](agent-context/README.md).
+
 ## Decisions, newest first
 
 - **Integration:** honor opt-in paper diagrams rather than duplicate the same evidence with generated art and overlays. The three-to-four bead reveal on bare paper retains the same first three objects. CLI supports native preflight; tests cover exact values, visible facts, and GET-only recovery. Compare upgrades with `main`, and bring genuine quality tradeoffs to the owner.
