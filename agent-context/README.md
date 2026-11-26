@@ -2,7 +2,7 @@
 
 ## 2026-11-26 — Matched intent and clean-art transfer
 
-- `2c66b48`: the compiled empathy storyboard previously asked grounding for a blank plate its clean-art instruction never requested. The compiler now carries the declared unobstructed surface into clean art without printing the mark. Matched captured-PCM replay changes just that art instruction; C01/C02/C03 also run from the original briefs.
+- `2c66b48`: the empathy storyboard asked grounding for a plate never put in its clean-art instructions. With just that instruction corrected, the identical-PCM replay grounded the plate once, but the phone frame did not clearly read as a train platform; the opening was still withheld. Retain that image and test C01/C02/C03 from the original briefs.
 - `37c41fa` catches a preserved reveal with no graphic on either side of an overlay-only beat. Existing mark removal is allowed; the authored crescent control still passes. `2d929ad` adds optional skill v7 for spoken viewpoint and no invented empathy claims. Frozen v6/v7 runs use the same executable, model, voice, renderers and briefs.
 - The third blind narration batch adds six script passes, six revisions and one arithmetic error. Total 15 meet, 15 revise, 3 factual errors across mixed text-only drafts. No verified generated video or model recommendation follows from these counts.
 - On the separate timing branch, the fully replayed original PCM passed alignment and was then withheld by the prose visual-check answer. A contrasting-block authored transfer visibly stacks the same block at frame 46. Gallery: `v4/v4.7 - Communication storyteller/REVIEW.md`.
