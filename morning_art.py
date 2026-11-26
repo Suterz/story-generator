@@ -240,7 +240,7 @@ def tote():
          stroke(33,36,39,26),stroke(39,26,61,26),stroke(61,26,67,36)]
     return three("15",bag+[stroke(47,49,53,52),stroke(53,52,46,56),label("A SMALL TEAR",50,72)],
                  bag+[box(41,46,58,59,"accent"),stroke(42,47,57,47,"ink",4),stroke(42,58,57,58,"ink",4),label("PATCH OVER THE TEAR",50,72,"value")],[
-        ("Still reaching for that favorite tote? Don't give up on it for one small tear.","One small tear"),
+        ("Still reaching for that favorite tote? Don't give up on it for one small rip.","One small rip"),
         ("Cover the torn spot with a cloth patch. Fix the part that needs it, keep the bag you like.","Keep the bag you like.")])
 
 
