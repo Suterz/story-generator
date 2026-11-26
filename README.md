@@ -2,6 +2,8 @@
 
 Local English lesson briefs to renderer requests. A brief is a JSON file with
 `topic`, `takeaway`, `required_facts`, `audience`, and a named `signature`.
+Optionally set `"artwork": "paper"` for diagrams that must draw all visual
+evidence with controlled shapes and labels. This does not change other briefs.
 See `examples/market/brief.json`. The writer and renderer expose separate
 failure evidence; a valid story or playable video has not passed adjudication.
 Start with [agent context](agent-context.md) for the tested renderer combination

@@ -9,7 +9,7 @@ from unittest.mock import patch
 from arithmetic import calculate
 from graphics import expand_counter_rows
 from spoken_money import spoken_money
-from storygen import SKILL, compile_story, main, read, render, validate, validate_native
+from storygen import SKILL, choose_artwork, compile_story, main, read, render, validate, validate_native
 
 
 def draft():
@@ -19,6 +19,16 @@ def draft():
 
 
 class WriterTests(unittest.TestCase):
+    def test_explicit_paper_is_opt_in_and_cannot_drop_generated_assets(self):
+        story = draft()
+        panel = story["beats"][0]["panel"]
+        panel.pop("paper_scene", None)
+        self.assertNotIn("paper_scene", choose_artwork(story, {})["beats"][0]["panel"])
+        self.assertTrue(choose_artwork(story, {"artwork": "paper"})["beats"][0]["panel"]["paper_scene"])
+        panel["layout"] = {"asset": "fruit", "count": 3}
+        with self.assertRaisesRegex(ValueError, "without generated anchors or layouts"):
+            choose_artwork(story, {"artwork": "paper"})
+
     def test_compiles_visible_prediction_and_parented_spoken_cue(self):
         story = draft()
         story["beats"][1].pop("parent")

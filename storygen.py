@@ -158,8 +158,10 @@ def request(url, data=None, headers=None, timeout=30):
 
 def brief_rule(brief):
     names = {"topic", "takeaway", "audience", "signature", "required_facts"}
-    if not isinstance(brief, dict) or set(brief) != names:
+    if not isinstance(brief, dict) or not names <= set(brief) <= names | {"artwork"}:
         raise ValueError("brief requires topic, takeaway, audience, signature and required_facts")
+    if brief.get("artwork", "auto") not in ("auto", "paper"):
+        raise ValueError("artwork must be auto or paper")
     if not all(isinstance(brief[k], str) and brief[k].strip() for k in names - {"required_facts"}):
         raise ValueError("brief text fields must not be blank")
     facts = brief["required_facts"]
@@ -167,6 +169,22 @@ def brief_rule(brief):
         raise ValueError("required_facts must be a nonempty list of text")
     if brief["signature"] not in SIGNATURES:
         raise ValueError(f"unknown signature: {brief['signature']}")
+
+
+def choose_artwork(story, brief):
+    """An explicit paper brief uses only the author's controlled graphics."""
+    if brief.get("artwork") != "paper":
+        return story
+    for beat in story["beats"]:
+        panel = beat["panel"]
+        if (panel["op"] not in ("new_scene", "overlay_only") or
+                any(panel.get(field) for field in ("layout", "fallback_layout", "anchors"))):
+            raise ValueError("paper artwork needs new_scene or overlay_only with authored graphics, without generated anchors or layouts")
+        if panel["op"] == "new_scene":
+            panel["paper_scene"] = True
+        if not (panel.get("overlays") or panel.get("counter_rows")):
+            raise ValueError("paper artwork needs visible authored graphics")
+    return story
 
 
 def words(text):
@@ -421,6 +439,10 @@ def write(args):
                            "Never end a two-criterion tradeoff with an unspecified overall winner. "
                            "Spell out numbers and currency in narration; use numerals in graphics.")
                 prompt += "\nUse this exact visual signature: " + SIGNATURES[brief["signature"]]
+                if brief.get("artwork") == "paper":
+                    prompt += ("\nThis brief explicitly selects paper artwork. Draw all evidence with shapes, "
+                               "segments, labels or counter_rows. Use new_scene or overlay_only; no generated "
+                               "anchors or cutout layouts.")
                 if errors:
                     prompt += "\nCorrect this validation failure without changing any required fact: " + errors[-1]
                 t = time.monotonic()
@@ -438,6 +460,7 @@ def write(args):
                 story = json.loads(result["response"]["choices"][0]["message"]["content"])
                 story["voice_profile"] = args.voice
                 story["visual"]["visual_signature"] = SIGNATURES[brief["signature"]]
+                choose_artwork(story, brief)
                 validate_native(validate(compile_story(normalize_story_money(story))))
                 check_editorial_conclusion(story, comparisons)
             except (ValueError, KeyError, TypeError) as exc:
