@@ -44,6 +44,7 @@ class CommunicationTests(unittest.TestCase):
         self.assertNotIn("instructional", generation_schema(communication=True, prediction=False)["properties"])
         self.assertNotIn("style_ref_ids", generation_schema(communication=True)["properties"]["visual"]["properties"])
         self.assertNotIn("checks", generation_schema(communication=True)["properties"]["visual"]["properties"])
+        self.assertNotIn("canvas", generation_schema(communication=True)["properties"]["visual"]["properties"])
 
     def test_request_overrides_are_checked(self):
         brief = json.loads((EXAMPLES / "wayfinding.json").read_text())

@@ -86,7 +86,7 @@ def generation_schema(*, communication=False, prediction=True):
         # Communication plans keep their evaluated comparisons separately.
         # The renderer's session checks only support the specific legacy
         # equal-groups operand contract, not general editorial arithmetic.
-        for name in ("style_ref_ids", "legacy_input", "legacy_premise", "legacy_context", "checks"):
+        for name in ("style_ref_ids", "legacy_input", "legacy_premise", "legacy_context", "checks", "canvas"):
             session["properties"].pop(name, None)
     schema = json.loads(json.dumps(OUTPUT_GRAMMAR))
     if communication:
@@ -607,6 +607,10 @@ def write(args):
                         raise ValueError("use the supplied signature; this brief did not supply uploaded style references or a legacy story")
                     if story["visual"].get("checks"):
                         raise ValueError("keep editorial calculations out of the frame session checks")
+                    # The communication output profile is portrait; the
+                    # renderer supplies its default canvas. Coordinates in
+                    # the authored panels are normalized, not pixel sizes.
+                    story["visual"].pop("canvas", None)
                     story["max_ms"] = brief["max_duration_ms"]
                 choose_artwork(story, brief)
                 if generic and any(n["kind"] == "verbatim" for n in brief["source_notes"]):
