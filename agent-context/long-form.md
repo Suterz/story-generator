@@ -1,5 +1,11 @@
 # Long-form development
 
+## 2026-11-27 — Correct event order and contraction timing
+
+- Candidate 07's clock shows a correct physical path at 1:46.60, but its delivered narration at 0:54.40 says the upper mirror has already shifted at emission, and suggests vertical ship motion. Candidate 06's clock had the same defect. On the bank film, the policy-rate-to-demand view now works at 2:51.83; the spoken conclusion still incorrectly treats loan retention as a general rule. These are hash-bound negative judgments, not render refusals.
+- Candidate 07's citation episode was withheld when forced alignment reported `herewell` for “here—we’ll.” On the archived group PCM, independent ASR identified both intended words. The timing change accepts that independently corroborated fusion but does not provide a cut point inside it. The regression test still refuses “well.” Diagnostic timing replay is separate from qualification.
+- Candidate 08 runs story `9c5f814`, video `d5c7696` on 8940, and frames `050f932`. It preserves the mirror event order and limits the policy explanation to funding costs, prices and borrower demand. The existing XPS preview hashes are unchanged. The v2 skill baseline clock rendered through panel work but was withheld for a caption exceeding the phone-safe region; this is not evidence for or against retained skill instructions.
+
 ## 2026-11-27 — Blind full-episode review and next freeze
 
 - Full clocks in candidates 04 and 05 kept the exact mirror endpoints and corrected the GPS signs. Both still said the ship clock ticks like Earth-frame time near 2:29.87, and the turnaround omitted the switch from outbound to inbound frame. Both were rejected; the clock brief now separates local normality from the comparison rate and keeps the early setup to two views.
