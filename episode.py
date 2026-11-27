@@ -141,6 +141,13 @@ def _has_phrase(tokens, phrase):
     return bool(phrase) and any(tokens[j:j + len(phrase)] == phrase for j in range(len(tokens)))
 
 
+def plain_narration(value):
+    # The engine never speaks typographic emphasis. Curve punctuation is kept
+    # for phrase identity and the explicit long-form alignment policy.
+    return re.sub(r"\*\*([^\n*]+)\*\*|`([^\n`]+)`",
+                  lambda m: m[1] if m[1] is not None else m[2], value).strip()
+
+
 def write_chapter(args, brief, folder, endpoint, *, short=True, prefix="chapter"):
     from storygen import read, request, save
 
@@ -238,7 +245,7 @@ def author_state(args, context, work, endpoint, prior, prior_opening, index, sta
         try:
             raw = read(candidate)["choices"][0]["message"]["content"]
             value = json.loads(raw)
-            narration = value["text"].strip()
+            narration = plain_narration(value["text"])
             cue = value["cue"].strip()
             count = len(words(narration))
             if not low - 14 <= count <= high + 42:
@@ -256,6 +263,12 @@ def author_state(args, context, work, endpoint, prior, prior_opening, index, sta
                     raise ValueError("four and five are distances; the Earth ray has a sideways component")
                 if stage_id == "one-year" and re.search(r"\bsame time\b", narration, re.I):
                     raise ValueError("same leg, different elapsed times; do not say same time")
+            if context["obligation"] == "worked-example" and not context.get("visual_fixture"):
+                if stage_id == "origination" and re.search(
+                        r"\bboth zero\b|\bhasn['’]t been (?:created|made)\b", narration, re.I):
+                    raise ValueError("the loan and matching borrower deposit are already posted in this picture")
+                if re.search(r"\bloan is (?:their|the bank['’]s|bank a['’]s) liability\b", narration, re.I):
+                    raise ValueError("the loan is a bank asset and a borrower liability")
             focus = value.get("focus", "")
             if focus and focus not in labels:
                 raise ValueError("focus must name an actual support label")
