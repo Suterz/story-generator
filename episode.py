@@ -6,15 +6,16 @@ from pathlib import Path
 from jsonschema import Draft202012Validator
 
 from episode_graphics import CITATION_PACKET, RENDER
+from transfer_graphics import TRANSFER_RENDERERS
 
 
 def chapter_schema(ids, compact=False, *, sentences=False):
     if sentences:
         per_stage = 2 if len(ids) >= 3 else 3
         text = {"type": "array", "minItems": per_stage, "maxItems": per_stage,
-                "items": {"type": "string", "minLength": 45, "maxLength": 153}}
+                "items": {"type": "string", "minLength": 1}}
     else:
-        text = {"type": "string", "minLength": 1, **({"maxLength": 183} if compact else {})}
+        text = {"type": "string", "minLength": 1}
     return {
         "type": "object", "additionalProperties": False, "required": ["sections"],
         "properties": {"sections": {"type": "array", "minItems": len(ids), "maxItems": len(ids),
@@ -90,6 +91,8 @@ def compile_chapter(brief, draft, prefix, *, short=True):
         caption = section["caption"].strip()
         if not spoken or not spoken.rstrip("\"”’").endswith((".", "?", "!")):
             raise ValueError(f"{stage}: finish the full spoken sentence with punctuation")
+        if spoken.startswith("START "):
+            raise ValueError(f"{stage}: START is a cue and must not appear in spoken text")
         if short and (not caption or len(caption) > 84):
             raise ValueError(f"{stage}: give narration and a faithful caption of at most 84 characters")
         cue = {"ms": 0}
@@ -103,7 +106,9 @@ def compile_chapter(brief, draft, prefix, *, short=True):
             if not candidate or len(matches) != 1 or matches[0] > 6:
                 raise ValueError(f"{stage}: cue must bind once near the beginning of its own narration")
             cue = {"utterance_id": ident, "phrase": section["cue"]}
-        overlays = RENDER[brief["obligation"]](stage)
+        renderer = (TRANSFER_RENDERERS[brief["visual_fixture"]] if "visual_fixture" in brief
+                    else RENDER[brief["obligation"]])
+        overlays = renderer(stage)
         panel = {"op": "new_scene" if not i else "overlay_only", "scene_id": prefix,
                  "objective": brief["stages"][i][1], "instruction": "Compose the controlled evidence on paper.",
                  "overlays": overlays, "retry_budget": 0}
@@ -215,13 +220,27 @@ def run(args):
     from storygen import ROOT, SIGNATURES, read, render, save, validate, validate_native, writer
 
     brief = read(args.input)
-    if brief.get("schema_version") != "episode/1":
-        raise ValueError("expected episode/1")
+    errors = list(Draft202012Validator(read(ROOT / "schemas/EpisodeBrief.v1.json")).iter_errors(brief))
+    if errors:
+        problem = errors[0]
+        save(args.out / "result.json", {"status": "needs_input", "reason": problem.message,
+                                       "field": "/".join(map(str, problem.absolute_path)), "render_submitted": False})
+        return
+    renderer = (TRANSFER_RENDERERS[brief["visual_fixture"]] if "visual_fixture" in brief
+                else RENDER[brief["obligation"]])
+    try:
+        for chapter in brief.get("chapters", [brief]):
+            for stage, _ in chapter["stages"]:
+                renderer(stage)
+    except KeyError as error:
+        save(args.out / "result.json", {"status": "needs_input", "reason": f"Unknown visual state: {error}",
+                                       "render_submitted": False})
+        return
     model = read(ROOT / "models.json")[args.model]
     config = {"brief": brief, "model": model, "skill": args.episode_skill, "voice": args.voice,
               "runner": hashlib.sha256(Path(__file__).read_bytes()).hexdigest(),
               "graphics": hashlib.sha256(Path(__file__).with_name("episode_graphics.py").read_bytes()).hexdigest()}
-    if brief["obligation"] == "source-verification":
+    if brief["obligation"] == "source-verification" and "visual_fixture" not in brief:
         from source_pack import evidence_for
 
         config["source_packet"] = hashlib.sha256(CITATION_PACKET.read_bytes()).hexdigest()

@@ -1,0 +1,95 @@
+{
+  "schema_version": "episode/1",
+  "id": "05",
+  "topic": "Why can a queue suddenly grow?",
+  "audience": "Adult familiar with checkout lines",
+  "prior": "May count the person being served as waiting.",
+  "tone": "Observant and practical",
+  "objective": "Predict waiting count with a fixed service schedule.",
+  "takeaway": "Arrivals can bunch even when service never slows.",
+  "sources": {
+    "Q1": "Fictional FIFO fixture; compute every event from the supplied clock."
+  },
+  "visual_fixture": "queue",
+  "obligation": "worked-example",
+  "editorial_direction": "Open on a quiet counter that suddenly looks busy.",
+  "misconceptions": [
+    "Service must have slowed",
+    "A person already served still counts in the line"
+  ],
+  "min_ms": 120000,
+  "chapters": [
+    {
+      "question": "How fast can the counter serve?",
+      "chapter_claims": [
+        "One FIFO counter; A arrives at zero; fixed two-minute service."
+      ],
+      "stages": [
+        [
+          "rules",
+          "Read the clock and start the first service."
+        ],
+        [
+          "arrivals",
+          "Show B and C arrive at minute one."
+        ]
+      ],
+      "words": "115–140 (around 40 per visual state)"
+    },
+    {
+      "question": "What happens at the same minute as a departure?",
+      "chapter_claims": [
+        "At a tie, complete service, start the next waiting person, then add new arrivals. D arrives at minute two."
+      ],
+      "stages": [
+        [
+          "prediction",
+          "Hold minute one while posing the next event."
+        ],
+        [
+          "second",
+          "Reveal B serving and C, D waiting."
+        ]
+      ],
+      "words": "115–140 (around 40 per visual state)"
+    },
+    {
+      "question": "Did service speed change when the line grew?",
+      "chapter_claims": [
+        "Service is fixed at two minutes. At minute four A and B have departed, C serves, D waits. All depart by eight."
+      ],
+      "stages": [
+        [
+          "next",
+          "Same service rate, later clock."
+        ],
+        [
+          "drain",
+          "Show the last person departed at minute eight."
+        ]
+      ],
+      "words": "115–140 (around 40 per visual state)"
+    },
+    {
+      "question": "What if D comes a minute later?",
+      "chapter_claims": [
+        "Change only D's arrival to minute three. At minute two B serves and C alone waits."
+      ],
+      "stages": [
+        [
+          "second",
+          "Recall the original minute two."
+        ],
+        [
+          "delay",
+          "Contrast the counterfactual and conclude."
+        ]
+      ],
+      "words": "115–140 (around 40 per visual state)"
+    }
+  ],
+  "transfer": {
+    "question": "If D arrives at minute three instead, who is waiting just after minute two?",
+    "answer": "Only C. B is being served; D hasn’t arrived."
+  }
+}

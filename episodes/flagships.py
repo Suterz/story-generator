@@ -5,7 +5,7 @@ from storygen import read
 
 
 def chapter(question, claims, *stages):
-    return {"question": question, "chapter_claims": claims, "stages": list(stages),
+    return {"question": question, "chapter_claims": claims, "stages": [list(stage) for stage in stages],
             "words": "115–140 (around 40 per visual state)"}
 
 

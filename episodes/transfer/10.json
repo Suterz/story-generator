@@ -1,0 +1,94 @@
+{
+  "schema_version": "episode/1",
+  "id": "10",
+  "topic": "How can average pay rise when nobody gets a raise?",
+  "audience": "Adult who reads aggregate pay figures",
+  "prior": "May interpret a group mean as what happened to a typical continuing worker.",
+  "tone": "Conversational and slightly surprising",
+  "objective": "Recompute the mean under changed membership and explain the difference.",
+  "takeaway": "The average can change because the group changes.",
+  "sources": {
+    "W1": "Fictional annual salaries; explicit integer totals and means."
+  },
+  "visual_fixture": "salary",
+  "obligation": "worked-example",
+  "editorial_direction": "Open on a rising average and a roster where no continuing salary changes.",
+  "misconceptions": [
+    "A rising average guarantees an individual raise"
+  ],
+  "min_ms": 120000,
+  "chapters": [
+    {
+      "question": "What is the first average made of?",
+      "chapter_claims": [
+        "Three workers A $40k, B $60k, C $80k; total $180k; average $60k."
+      ],
+      "stages": [
+        [
+          "roster",
+          "Show each worker and salary."
+        ],
+        [
+          "before",
+          "Show total over count."
+        ]
+      ],
+      "words": "115–140 (around 40 per visual state)"
+    },
+    {
+      "question": "What changed in the second snapshot?",
+      "chapter_claims": [
+        "A leaves. B remains at $60k and C at $80k; no raises."
+      ],
+      "stages": [
+        [
+          "before",
+          "Maintain worker identity."
+        ],
+        [
+          "leave",
+          "Remove only A; show the remaining total and count."
+        ]
+      ],
+      "words": "115–140 (around 40 per visual state)"
+    },
+    {
+      "question": "How does the mean go up while total pay goes down?",
+      "chapter_claims": [
+        "Total falls from $180k to $140k; count falls from three to two. Mean rises to $70k."
+      ],
+      "stages": [
+        [
+          "before",
+          "Compare original total and divisor."
+        ],
+        [
+          "after",
+          "Show both changes in the second snapshot."
+        ]
+      ],
+      "words": "115–140 (around 40 per visual state)"
+    },
+    {
+      "question": "What would an average headline tell us on its own?",
+      "chapter_claims": [
+        "Composition can shift a mean. Infer individual raises only from matched individual data, not the aggregate alone."
+      ],
+      "stages": [
+        [
+          "after",
+          "Retain the two unchanged individual wages."
+        ],
+        [
+          "transfer",
+          "Return to what the headline could and could not show."
+        ]
+      ],
+      "words": "115–140 (around 40 per visual state)"
+    }
+  ],
+  "transfer": {
+    "question": "Who got a raise in this case and what would the aggregate alone reveal?",
+    "answer": "No one; the aggregate alone reveals no individual pay change."
+  }
+}

@@ -1,0 +1,94 @@
+{
+  "schema_version": "episode/1",
+  "id": "06",
+  "topic": "Why doesn’t 20% down followed by 20% up cancel out?",
+  "audience": "Adult shopper",
+  "prior": "May add the percentage labels without checking their bases.",
+  "tone": "Direct and playful",
+  "objective": "Explain changing bases and compute reversal.",
+  "takeaway": "After the drop, the same percentage is applied to fewer dollars.",
+  "sources": {
+    "P1": "Fictional price and arithmetic: 100×0.8×1.2=96; 20/80=0.25."
+  },
+  "visual_fixture": "percent",
+  "obligation": "worked-example",
+  "editorial_direction": "Start on a price tag that went down and back up but didn’t return.",
+  "misconceptions": [
+    "Equal plus and minus percentages have equal dollar amounts"
+  ],
+  "min_ms": 120000,
+  "chapters": [
+    {
+      "question": "What does the first 20 percent mean?",
+      "chapter_claims": [
+        "Base is $100; difference $20; ending price $80."
+      ],
+      "stages": [
+        [
+          "base",
+          "Start on the original base."
+        ],
+        [
+          "down",
+          "Reveal the change and new base."
+        ]
+      ],
+      "words": "115–140 (around 40 per visual state)"
+    },
+    {
+      "question": "What is the second 20 percent taken from?",
+      "chapter_claims": [
+        "New base $80; increase $16; ending price $96."
+      ],
+      "stages": [
+        [
+          "down",
+          "Hold the new base."
+        ],
+        [
+          "up",
+          "Reveal the second amount without erasing the first."
+        ]
+      ],
+      "words": "115–140 (around 40 per visual state)"
+    },
+    {
+      "question": "Why don’t the labels cancel?",
+      "chapter_claims": [
+        "Dollar changes differ because multiplying by 0.8 then 1.2 gives 0.96."
+      ],
+      "stages": [
+        [
+          "both",
+          "Compare both visible dollar changes."
+        ],
+        [
+          "down",
+          "Return to the starting point of the recovery."
+        ]
+      ],
+      "words": "115–140 (around 40 per visual state)"
+    },
+    {
+      "question": "What would actually restore the original price?",
+      "chapter_claims": [
+        "Need $20 on base $80; twenty divided by eighty is one quarter, or 25 percent."
+      ],
+      "stages": [
+        [
+          "down",
+          "Ask for a prediction using the visible base."
+        ],
+        [
+          "restore",
+          "Show and explain the restoration ratio."
+        ]
+      ],
+      "words": "115–140 (around 40 per visual state)"
+    }
+  ],
+  "transfer": {
+    "question": "What gain reverses the fall from $100 to $80?",
+    "answer": "25 percent of eighty dollars adds twenty dollars."
+  }
+}

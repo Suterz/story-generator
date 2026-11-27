@@ -1,0 +1,95 @@
+{
+  "schema_version": "episode/1",
+  "id": "04",
+  "topic": "Why do seasons change?",
+  "audience": "Adult who knows Earth's orbit and seasons",
+  "prior": "Likely assumes winter means farther from the Sun.",
+  "tone": "Curious and grounded",
+  "objective": "Explain both changes caused by tilt.",
+  "takeaway": "Tilt changes daylight duration and the angle of the noon sun.",
+  "sources": {
+    "S1": "https://assets.science.nasa.gov/content/dam/science/esd/eo/eokids/wp-content/uploads/sites/6/2019/04/16_SunSeasons-508.pdf"
+  },
+  "visual_fixture": "seasons",
+  "obligation": "spatial",
+  "editorial_direction": "Open on two very different days in Minneapolis.",
+  "misconceptions": [
+    "Distance is the primary cause",
+    "The axis turns around between the two solstices"
+  ],
+  "min_ms": 120000,
+  "chapters": [
+    {
+      "question": "What stays the same on opposite sides of this orbit?",
+      "chapter_claims": [
+        "Same planet and direction of tilted axis. Use Minneapolis near 45° north."
+      ],
+      "stages": [
+        [
+          "orbit",
+          "Show June and December positions around one Sun."
+        ],
+        [
+          "axis",
+          "Compare parallel rotation axes."
+        ]
+      ],
+      "words": "115–140 (around 40 per visual state)"
+    },
+    {
+      "question": "Does the city spend the same time in sunlight?",
+      "chapter_claims": [
+        "June daylight lasts longer at this northern latitude; December shorter. Bars are illustrative, not timed observations."
+      ],
+      "stages": [
+        [
+          "axis",
+          "Show tilt before using a one-rotation timeline."
+        ],
+        [
+          "day",
+          "Compare each lit share of a full rotation."
+        ]
+      ],
+      "words": "115–140 (around 40 per visual state)"
+    },
+    {
+      "question": "Does the same Sun strike the ground in the same way?",
+      "chapter_claims": [
+        "Noon angles at idealized 45° north: 68.5° June, 21.5° December. More oblique rays spread light over a larger patch."
+      ],
+      "stages": [
+        [
+          "day",
+          "Link daylight hours to the separate angle effect."
+        ],
+        [
+          "angle",
+          "Compare both noon angles on the same ground."
+        ]
+      ],
+      "words": "115–140 (around 40 per visual state)"
+    },
+    {
+      "question": "What happens across the equator?",
+      "chapter_claims": [
+        "Seasonal pattern reverses at 45° south; both hemispheres share Earth's distance from the Sun at a given moment."
+      ],
+      "stages": [
+        [
+          "angle",
+          "Return to the northern example."
+        ],
+        [
+          "south",
+          "Contrast corresponding southern conditions."
+        ]
+      ],
+      "words": "115–140 (around 40 per visual state)"
+    }
+  ],
+  "transfer": {
+    "question": "At the same June solstice, what changes at 45 degrees south?",
+    "answer": "Days are shorter and the noon sun lower there; December reverses the pattern."
+  }
+}

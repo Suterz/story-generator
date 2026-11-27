@@ -1,0 +1,95 @@
+{
+  "schema_version": "episode/1",
+  "id": "08",
+  "topic": "Why can a relevant search result fail to answer your question?",
+  "audience": "Adult checking an online source",
+  "prior": "Recognizes a review and a research paper but may confuse methods and results.",
+  "tone": "Investigative",
+  "objective": "Select the passage that supports an exact measurement definition.",
+  "takeaway": "Vocabulary overlap is not evidence for a particular detail.",
+  "sources": {
+    "D1": "https://doi.org/10.1145/2556325.2566239",
+    "D2": "https://doi.org/10.1187/cbe.16-03-0125"
+  },
+  "visual_fixture": "study",
+  "obligation": "source-verification",
+  "editorial_direction": "Show two real results with overlapping vocabulary.",
+  "misconceptions": [
+    "The more relevant-looking title automatically answers the precise question"
+  ],
+  "min_ms": 120000,
+  "chapters": [
+    {
+      "question": "What exactly are we checking?",
+      "chapter_claims": [
+        "The question is the study's window for an assessment attempt, not watch time or learning."
+      ],
+      "stages": [
+        [
+          "question",
+          "Keep one precise query visible."
+        ],
+        [
+          "review",
+          "Open a real review discussing related results."
+        ]
+      ],
+      "words": "115–140 (around 40 per visual state)"
+    },
+    {
+      "question": "What does the review actually say here?",
+      "chapter_claims": [
+        "Brame's Student Engagement section describes viewing time by video length. This passage does not state the attempted-problem window."
+      ],
+      "stages": [
+        [
+          "review",
+          "Point to the viewing-time topic."
+        ],
+        [
+          "mismatch",
+          "Mark exactly what is missing."
+        ]
+      ],
+      "words": "115–140 (around 40 per visual state)"
+    },
+    {
+      "question": "Where would the definition be recorded?",
+      "chapter_claims": [
+        "Guo et al., Measuring Engagement: attempt counted within 30 minutes after watching."
+      ],
+      "stages": [
+        [
+          "question",
+          "Return to the exact query."
+        ],
+        [
+          "method",
+          "Show the primary methods excerpt."
+        ]
+      ],
+      "words": "115–140 (around 40 per visual state)"
+    },
+    {
+      "question": "Which citation earns the statement?",
+      "chapter_claims": [
+        "Use primary methods excerpt for the window. A related paragraph can support a different statement; neither viewing nor an attempt proves learning."
+      ],
+      "stages": [
+        [
+          "mismatch",
+          "Recheck the tempting weak passage."
+        ],
+        [
+          "answer",
+          "Show the supporting passage and reason."
+        ]
+      ],
+      "words": "115–140 (around 40 per visual state)"
+    }
+  ],
+  "transfer": {
+    "question": "Which passage supplies the time window for counting a problem attempt?",
+    "answer": "Guo et al.'s Measuring Engagement passage: within 30 minutes after watching."
+  }
+}

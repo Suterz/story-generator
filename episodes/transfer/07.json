@@ -1,0 +1,95 @@
+{
+  "schema_version": "episode/1",
+  "id": "07",
+  "topic": "How does shutter duration create motion blur?",
+  "audience": "Phone photographer",
+  "prior": "May think blur always means missed focus or that a camera stores one instant.",
+  "tone": "Visual and hands-on",
+  "objective": "Predict motion streak from speed and exposure.",
+  "takeaway": "A longer exposure records more positions of a moving subject.",
+  "sources": {
+    "M1": "Controlled fixture: for constant image-plane speed, trail displacement = speed × exposure duration."
+  },
+  "visual_fixture": "shutter",
+  "obligation": "spatial",
+  "editorial_direction": "Start with two pictures of the same moving object with different streak lengths.",
+  "misconceptions": [
+    "Both pictures had different speed or scale",
+    "A shutter speed is a change in object speed"
+  ],
+  "min_ms": 120000,
+  "chapters": [
+    {
+      "question": "Why can one moving object leave different streaks?",
+      "chapter_claims": [
+        "Camera and motion direction fixed. Define exposure as how long light is collected."
+      ],
+      "stages": [
+        [
+          "comparison",
+          "Show both exposures and streaks."
+        ],
+        [
+          "short",
+          "Isolate the short one."
+        ]
+      ],
+      "words": "115–140 (around 40 per visual state)"
+    },
+    {
+      "question": "How far can it move in the short window?",
+      "chapter_claims": [
+        "1,000 image pixels per second, 1/100 second gives 10 pixels."
+      ],
+      "stages": [
+        [
+          "short",
+          "Follow start and stop on one path."
+        ],
+        [
+          "comparison",
+          "Keep pixel scale for the next case."
+        ]
+      ],
+      "words": "115–140 (around 40 per visual state)"
+    },
+    {
+      "question": "What does the longer window change?",
+      "chapter_claims": [
+        "1/25 second gives 40 pixels at the same speed. Longer exposure integrates more positions, not a larger object."
+      ],
+      "stages": [
+        [
+          "short",
+          "Keep the first result legible."
+        ],
+        [
+          "comparison",
+          "Compare motion paths and streaks."
+        ]
+      ],
+      "words": "115–140 (around 40 per visual state)"
+    },
+    {
+      "question": "Can the viewer predict a new streak?",
+      "chapter_claims": [
+        "At the same image speed twice the exposure doubles the motion contribution. Defocus is a separate cause."
+      ],
+      "stages": [
+        [
+          "comparison",
+          "Use the same paths for the explanation."
+        ],
+        [
+          "short",
+          "Return to the original short exposure."
+        ]
+      ],
+      "words": "115–140 (around 40 per visual state)"
+    }
+  ],
+  "transfer": {
+    "question": "At the same speed, what happens when the opening time doubles?",
+    "answer": "The motion displacement doubles."
+  }
+}

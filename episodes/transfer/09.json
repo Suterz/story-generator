@@ -1,0 +1,96 @@
+{
+  "schema_version": "episode/1",
+  "id": "09",
+  "topic": "Why does Greenland look so large on some maps?",
+  "audience": "Adult used to flat world maps",
+  "prior": "May assume every map has one fixed scale and area can be compared by eye.",
+  "tone": "Curious and precise",
+  "objective": "Distinguish a real area difference from Mercator scale distortion.",
+  "takeaway": "Mercator enlarges area increasingly toward the poles.",
+  "sources": {
+    "G1": "https://www.usgs.gov/faqs/how-are-different-map-projections-used",
+    "G2": "Natural Earth public-domain outline snapshot, episodes/coastlines.json"
+  },
+  "visual_fixture": "map",
+  "obligation": "spatial",
+  "editorial_direction": "Open on Greenland and South America in the same Mercator view.",
+  "misconceptions": [
+    "A projection changes the land",
+    "All flat maps stretch area in the same way"
+  ],
+  "min_ms": 120000,
+  "chapters": [
+    {
+      "question": "Which shape looks bigger on that map?",
+      "chapter_claims": [
+        "Name spherical Mercator. Compare the same Greenland and mainland South America outlines."
+      ],
+      "stages": [
+        [
+          "mercator",
+          "Show both on named Mercator."
+        ],
+        [
+          "globe",
+          "Trace the same geographic vertices on a globe."
+        ]
+      ],
+      "words": "115–140 (around 40 per visual state)"
+    },
+    {
+      "question": "What does flattening do at high latitude?",
+      "chapter_claims": [
+        "Mercator longitude lines are parallel. Scale increases with absolute latitude."
+      ],
+      "stages": [
+        [
+          "globe",
+          "Keep identities across a view change."
+        ],
+        [
+          "mercator",
+          "Show high-latitude expansion."
+        ]
+      ],
+      "words": "115–140 (around 40 per visual state)"
+    },
+    {
+      "question": "Can we isolate the scale change?",
+      "chapter_claims": [
+        "Two patches have equal area on the sphere; the patch at 60 degrees is larger in Mercator than that at the equator."
+      ],
+      "stages": [
+        [
+          "mercator",
+          "Return to the two outlines."
+        ],
+        [
+          "patches",
+          "Show both equal-on-Earth patches in Mercator."
+        ]
+      ],
+      "words": "115–140 (around 40 per visual state)"
+    },
+    {
+      "question": "What if the comparison is specifically about area?",
+      "chapter_claims": [
+        "A cylindrical equal-area check preserves area ratios, not shape; no numerical area ratio is given."
+      ],
+      "stages": [
+        [
+          "mercator",
+          "Recall the first impression."
+        ],
+        [
+          "equal-area",
+          "Answer with an equal-area comparison."
+        ]
+      ],
+      "words": "115–140 (around 40 per visual state)"
+    }
+  ],
+  "transfer": {
+    "question": "How can we check a real size difference?",
+    "answer": "Use an equal-area projection or geodesic areas."
+  }
+}
