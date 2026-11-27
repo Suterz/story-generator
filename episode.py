@@ -174,9 +174,14 @@ def check_transfer_explanation(fixture, stage, narration):
             r"\bD (?:arrived|showed up|joined).{0,20}\b(?:after|when|as) B (?:left|departed|finished)\b|"
             r"\bD (?:arrived|showed up|joined).{0,55}\bnot when B started\b", narration, re.I):
         raise ValueError("D arrives at minute two; A leaves at minute two and B leaves at minute four")
-    if (fixture, stage) == ("queue", "delay") and not re.search(
-            r"\bD.{0,55}\b(?:later|minute (?:three|3)|not (?:here|there|yet))\b", narration, re.I):
-        raise ValueError("say why only C waits: D's arrival moved from minute two to minute three")
+    if (fixture, stage) == ("queue", "delay"):
+        if re.search(r"\bwithout (?:that|the) delay.{0,24}\bonly C\b|\b(?:line|queue) (?:looks|is) longer\b",
+                     narration, re.I) or not re.search(
+                         r"\bD.{0,55}\b(?:later|minute (?:three|3)|not (?:here|there|yet))\b", narration, re.I):
+            raise ValueError("in the delayed run only C waits; without the delay C and D both wait")
+    if (fixture, stage) == ("queue", "second") and re.search(
+            r"\b(?:two people joined|two arrivals)\b", narration, re.I):
+        raise ValueError("at minute two only D arrives; A leaves and B moves from waiting into service")
     if fixture == "map" and stage != "patches" and re.search(
             r"\b(?:they(?:['’]re| are)|regions are|continents are)\s+(?:actually )?(?:the )?same size\b|"
             r"\b(?:both|they(?:['’]re| are))\s+(?:both\s+)?near the equator\b|"
@@ -200,6 +205,11 @@ def check_transfer_explanation(fixture, stage, narration):
         raise ValueError("twenty percent of eighty dollars is sixteen dollars; reserve twenty-five percent for the recovery")
     if (fixture, stage) == ("percent", "base") and re.search(r"\b(?:new|lower) (?:amount|price|base)\b", narration, re.I):
         raise ValueError("the first discount is taken from the original price of one hundred dollars")
+    if (fixture, stage) == ("percent", "base") and re.search(r"\b(?:eighty(?: dollars)?|\$?80)\b", narration, re.I):
+        raise ValueError("ask for the discounted price without speaking eighty before the reveal")
+    if (fixture, stage) == ("percent", "up") and re.search(r"\b(?:percentage|percent(?:age)? increase) takes less\b",
+                                                          narration, re.I):
+        raise ValueError("this change is an increase: add sixteen dollars to eighty")
     if (fixture, stage) == ("study", "question") and re.search(r"\b(?:look|point) at the (?:title|document)\b", narration, re.I):
         raise ValueError("the current card shows only the question; save discussion of the documents for later")
     if fixture == "salary" and re.search(

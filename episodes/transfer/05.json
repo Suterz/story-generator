@@ -65,7 +65,7 @@
           "At minute one A is served and B and C are waiting. Ask the viewer to apply the tie rule next: finish service, then serve the oldest waiter, then append a new arrival."
         ],
         "second": [
-          "At minute two, A finishes and B starts service at once. D arrives at that same minute and joins behind C. Now C and D wait."
+          "At minute two, A finishes and B starts service at once. Only one new person arrives at this minute: D, who joins behind C. Now C and D wait."
         ]
       }
     },
@@ -115,7 +115,7 @@
           "In the original case, at minute two B is in service and C and D are waiting."
         ],
         "delay": [
-          "In the alternate run D arrives at minute three instead of minute two. At the minute-two snapshot D hasn't arrived; B is in service and only C waits. Name the delayed arrival as the reason for the difference."
+          "The alternative is shorter at minute two because D is scheduled for minute three and has not arrived yet. B is in service and only C waits. In the original run both C and D wait."
         ]
       }
     }

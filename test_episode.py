@@ -17,6 +17,8 @@ class EvidenceTests(unittest.TestCase):
             ("queue", "next", "D showed up right after B left."),
             ("queue", "second", "D arrived just as A left, not when B started."),
             ("queue", "delay", "Only C is waiting."),
+            ("queue", "delay", "D arrived later. Without the delay, only C would be waiting."),
+            ("queue", "second", "The queue grew because two people joined."),
             ("shutter", "short", "The short exposure shows forty pixels."),
             ("study", "mismatch", "Guo and colleagues wrote about viewing time."),
             ("seasons", "angle", "The sunlight scatters at this angle."),
@@ -33,7 +35,9 @@ class EvidenceTests(unittest.TestCase):
             check_transfer_explanation("seasons", "angle", "The distance to the Sun hasn’t changed.")
         check_transfer_explanation("percent", "restore", "Twenty-five percent restores the price.")
         for stage, line in (("down", "Twenty percent of eighty is twenty-five."),
-                            ("base", "The first discount comes from the new lower amount.")):
+                            ("base", "The first discount comes from the new lower amount."),
+                            ("base", "The first drop leaves eighty dollars."),
+                            ("up", "The same percentage takes less.")):
             with self.subTest(stage=stage), self.assertRaises(ValueError):
                 check_transfer_explanation("percent", stage, line)
         check_transfer_explanation("salary", "after", "B earns sixty thousand and C earns eighty thousand.")

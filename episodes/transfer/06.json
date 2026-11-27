@@ -64,7 +64,7 @@
           "On the current card the $80 price is the base for the increase. Do not give a numeric increase until the next reveal."
         ],
         "up": [
-          "Twenty percent of $80 is $16, making the new price $96. Contrast the $20 removed with the $16 added."
+          "The second operation is an increase. Add sixteen dollars to the eighty-dollar base, giving ninety-six dollars. Contrast the increase with the first discount."
         ]
       }
     },
