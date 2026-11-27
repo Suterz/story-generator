@@ -131,6 +131,29 @@ def duplicated(chapters):
     return problems
 
 
+def overlapping_passages(intervals):
+    """Diagnostic only: lexical similarity is a review lead, not a withhold."""
+    from storygen import words
+
+    reports = []
+    observed = []
+    for row in intervals:
+        text = re.sub(r"\b(?:kilowatt[ -]hours?|kwh)\b", "kwh", row["delivered"], flags=re.I)
+        terms = words(text)
+        grams = set(zip(terms, terms[1:], terms[2:]))
+        if len(grams) < 12:
+            continue
+        for earlier, seen in observed:
+            if earlier["chapter"] == row["chapter"]:
+                continue
+            overlap = len(grams & seen) / min(len(grams), len(seen))
+            if overlap >= .5:
+                reports.append({"earlier": earlier["id"], "later": row["id"], "starts": [earlier["start"], row["start"]],
+                                "shared_trigram_fraction_of_shorter": round(overlap, 4)})
+        observed.append((row, grams))
+    return reports
+
+
 def audit(attempt):
     story = json.loads((attempt / "story.json").read_text())
     media = json.loads((attempt / "manifest.json").read_text())
@@ -156,7 +179,7 @@ def audit(attempt):
     frames = media["verification"]["expected_video_frames"]
     return {"duration": decode["duration"], "duplicate_authored_passages": duplicated(chapters),
             "identical_panel_seconds": dict(durations), "caption_frame_fraction": caption_frames/frames,
-            "intervals": intervals}
+            "intervals": intervals, "overlapping_delivered_passages": overlapping_passages(intervals)}
 
 
 if __name__ == "__main__":
