@@ -17,11 +17,11 @@ STATE_CLAIMS = {
         (["At minute zero A arrives and begins two minutes of service, with no one waiting."],
          ["At minute one A is still served; B then C arrive and both wait, in that order."]),
         (["At minute one A is served and B and C are waiting. Ask the viewer to apply the tie rule next: finish service, then serve the oldest waiter, then append a new arrival."],
-         ["Minute two: A finishes, B begins service, and D joins behind C. C and D wait. D arrives when A leaves, not when B leaves."]),
+         ["At minute two, A finishes and B starts service at once. D arrives at that same minute and joins behind C. Now C and D wait."]),
         (["Minute four: A and B have departed, C begins service, and D waits. D arrived at minute two and has not arrived again."],
          ["C completes service at minute six and D starts immediately. D leaves at minute eight and nobody remains. Every service interval lasted two minutes."]),
         (["In the original case, at minute two B is in service and C and D are waiting."],
-         ["Only D's arrival changes to minute three. At minute two B is served and only C waits."]),
+         ["In the alternate run D arrives at minute three instead of minute two. At the minute-two snapshot D hasn't arrived; B is in service and only C waits. Name the delayed arrival as the reason for the difference."]),
     ],
     "shutter": [
         (["The same subject moves horizontally at the same speed with a fixed camera. One exposure records ten pixels of travel and the other forty."],

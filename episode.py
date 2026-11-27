@@ -170,8 +170,13 @@ def check_transfer_explanation(fixture, stage, narration):
     }.get((fixture, stage))
     if forbidden and re.search(forbidden[0], narration, re.I):
         raise ValueError(forbidden[1])
-    if fixture == "queue" and re.search(r"\bD arrived.{0,20}\b(?:after|when) B (?:left|departed)\b", narration, re.I):
+    if fixture == "queue" and re.search(
+            r"\bD (?:arrived|showed up|joined).{0,20}\b(?:after|when|as) B (?:left|departed|finished)\b|"
+            r"\bD (?:arrived|showed up|joined).{0,55}\bnot when B started\b", narration, re.I):
         raise ValueError("D arrives at minute two; A leaves at minute two and B leaves at minute four")
+    if (fixture, stage) == ("queue", "delay") and not re.search(
+            r"\bD.{0,55}\b(?:later|minute (?:three|3)|not (?:here|there|yet))\b", narration, re.I):
+        raise ValueError("say why only C waits: D's arrival moved from minute two to minute three")
     if fixture == "map" and stage != "patches" and re.search(
             r"\b(?:they(?:['’]re| are)|regions are|continents are)\s+(?:actually )?(?:the )?same size\b|"
             r"\b(?:both|they(?:['’]re| are))\s+(?:both\s+)?near the equator\b|"
@@ -183,7 +188,7 @@ def check_transfer_explanation(fixture, stage, narration):
             r"\b(?:will finish|will start|will arrive|joins.{0,25}leaves)\b", narration, re.I):
         raise ValueError("ask what happens at minute two without predicting the answer aloud on the minute-one panel")
     if fixture == "seasons" and re.search(
-            r"\b(?:both months share the same|distance to the sun hasn['’]t changed|sun['’]s just as far away|"
+            r"\b(?:both months share the same|distance to the sun hasn['’]t changed(?! (?:much|significantly|by much)\b)|sun['’]s just as far away|"
             r"minneapolis tilts|slices of earth['’]s yearly path)\b",
             narration, re.I):
         raise ValueError("Earth's axis tilts; each bar is one rotation. Compare equal distance across hemispheres on the same day")

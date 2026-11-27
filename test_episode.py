@@ -14,6 +14,9 @@ class EvidenceTests(unittest.TestCase):
     def test_transfer_state_rejects_inconsistent_narration(self):
         for fixture, stage, sentence in (
             ("queue", "next", "D arrived right after B left."),
+            ("queue", "next", "D showed up right after B left."),
+            ("queue", "second", "D arrived just as A left, not when B started."),
+            ("queue", "delay", "Only C is waiting."),
             ("shutter", "short", "The short exposure shows forty pixels."),
             ("study", "mismatch", "Guo and colleagues wrote about viewing time."),
             ("seasons", "angle", "The sunlight scatters at this angle."),
@@ -24,6 +27,10 @@ class EvidenceTests(unittest.TestCase):
                 check_transfer_explanation(fixture, stage, sentence)
         check_transfer_explanation("shutter", "comparison", "The second streak is forty pixels.")
         check_transfer_explanation("map", "patches", "On Earth, they’re the same size.")
+        check_transfer_explanation("seasons", "angle", "The distance to the Sun hasn’t changed much.")
+        check_transfer_explanation("queue", "delay", "D arrives at minute three, so only C waits at minute two.")
+        with self.assertRaisesRegex(ValueError, "same day"):
+            check_transfer_explanation("seasons", "angle", "The distance to the Sun hasn’t changed.")
         check_transfer_explanation("percent", "restore", "Twenty-five percent restores the price.")
         check_transfer_explanation("salary", "after", "B earns sixty thousand and C earns eighty thousand.")
         with self.assertRaisesRegex(ValueError, "twenty-five percent"):
