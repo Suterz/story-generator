@@ -58,7 +58,7 @@ STATE_CLAIMS = {
          ["The original total is $180,000 for three employees, so the mean is $60,000."]),
         (["This is still the before roster: A, B and C are all present. The mean is $60,000."],
          ["A leaves. B stays at $60,000 and C stays at $80,000. Neither continuing worker got a raise."]),
-        (["Original total and mean: $180,000 divided by three gives $60,000."],
+        (["Rewind for a comparison. On this before card all three employees are present, including the $40,000 employee. The original $180,000 payroll divided by three is $60,000. Discuss only this original roster until the next card."],
          ["New total and mean: $140,000 divided by two gives $70,000. Total payroll fell but the mean rose."]),
         (["B and C each earn exactly what they earned in the first group: $60,000 and $80,000."],
          ["The person who left earned less than the old mean. Removing a below-average salary raises the mean of the remaining group; a smaller group alone does not imply a higher mean.",

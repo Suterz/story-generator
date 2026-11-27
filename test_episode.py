@@ -44,6 +44,8 @@ class EvidenceTests(unittest.TestCase):
         check_transfer_explanation("salary", "after", "B earns sixty thousand and C earns eighty thousand.")
         check_transfer_explanation("salary", "transfer", "The lowest earner left. Neither remaining employee got a raise.")
         for stage, line in (("before", "One salary is gone now."), ("leave", "The total is still there."),
+                            ("before", "One worker is gone. The remaining salaries are forty and eighty thousand."),
+                            ("leave", "With one worker gone, the average has to change."),
                             ("transfer", "The average rose because the group shrank.")):
             with self.subTest(stage=stage), self.assertRaises(ValueError):
                 check_transfer_explanation("salary", stage, line)
