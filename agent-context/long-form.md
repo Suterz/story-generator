@@ -1,5 +1,10 @@
 # Long-form development
 
+## 2026-11-27 — Candidate 15 requalified
+
+- Fresh Candidate 15 flagship MP4s independently passed on story `7b8d05f`, video `2dca361` on 8943 and frames `050f932`. Durations: 226.77, 235.90, 209.10 s. Automatic writer revisions: 0, 0, 2. Decoded phone frames before and at the decisive cues agree with the delivered MP4 ASR; no listening.
+- Transfer slots 04–10 now run on the same freeze after the gate. Candidate 09 remains the only published set; its archive and the chapter previews are intact.
+
 ## 2026-11-27 — Seven passes on Candidate 14
 
 - Candidate 14's full review is complete. The trio and transfers 04 seasons, 07 shutter, 08 source check, and 09 maps passed (7/10 on the same freeze). The three remaining exports were incorrect: queue reversed the delayed arrival comparison and counted two new arrivals at minute two; percentage gave the result before its reveal and called the increase a subtraction; payroll described one salary as absent on the original roster and attributed the mean increase to group size alone.
