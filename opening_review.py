@@ -25,6 +25,17 @@ LITERAL_FIRST = (
     "speech correct. Treat seeing an earlier state before a rewind as normal. Do not count a number that only "
     "appears in the brief as spoken. Then apply the rubric. Use the actual clip timeline, including excerpt offsets."
 )
+OPENING_NOT_ANSWER = (
+    "A useful opening can deliberately leave the answer unresolved. If the question is clear and the first "
+    "state provides the right focus, keeping the missing inputs unknown is expected. An early_reveal requires "
+    "specific words or pixels that expose the correct answer or its embargoed evidence before the planned "
+    "reveal. Never diagnose early_reveal because the answer is not yet possible to derive."
+)
+REVIEWERS = {
+    "observable-opening-v2": RUBRIC,
+    "literal-evidence-v3": LITERAL_FIRST + " " + RUBRIC,
+    "unanswered-is-valid-v4": OPENING_NOT_ANSWER + " " + LITERAL_FIRST + " " + RUBRIC,
+}
 VERDICT = obj({"status": {"enum": ["accepted", "failed", "uncertain"]},
                "code": {"enum": ["ok", "unclear_focus", "wrong_value", "wrong_object", "early_reveal",
                                   "wrong_route", "illegible", "unsupported", "timing", "unobservable"]},
@@ -144,7 +155,7 @@ def review(args, brief, evidence, identity):
     persist(out / "opening-review-packet.json", {**lock, **packet})
     model = read(ROOT / "models.json")["mistral-small"]
     with writer(args, args.models / model["file"], out / "opening-reviewer.log") as endpoint:
-        instructions = (LITERAL_FIRST + " " + RUBRIC if identity["reviewer"] == "literal-evidence-v3" else RUBRIC)
+        instructions = REVIEWERS[identity["reviewer"]]
         result = ask(endpoint, instructions, packet, VERDICT, 620, out / "opening-review-response.json")
     if (result["status"] == "accepted") != (result["code"] == "ok"):
         raise ValueError("reviewer status and defect disagree")

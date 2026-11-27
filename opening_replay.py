@@ -6,7 +6,7 @@ from pathlib import Path
 
 from daily import ask
 from daily_evidence import digest, persist
-from opening_review import LITERAL_FIRST, RUBRIC, VERDICT
+from opening_review import REVIEWERS, VERDICT
 from review_daily import editorial
 from storygen import ROOT, read, writer
 
@@ -28,13 +28,12 @@ def run(args):
         for case, clip, packet in inputs:
             target = args.output / case
             target.mkdir()
-            for version in ("chapter-editorial-v1", "observable-opening-v2", "literal-evidence-v3"):
+            for version in ("chapter-editorial-v1", *REVIEWERS):
                 try:
                     if version == "chapter-editorial-v1":
                         result = editorial(endpoint, packet)
                     else:
-                        instructions = RUBRIC if version == "observable-opening-v2" else LITERAL_FIRST + " " + RUBRIC
-                        result = ask(endpoint, instructions, packet, VERDICT, 620, target / f"{version}-response.json")
+                        result = ask(endpoint, REVIEWERS[version], packet, VERDICT, 620, target / f"{version}-response.json")
                 except ValueError as error:
                     result = {"status": "uncertain", "code": "unobservable", "detail": str(error), "start_seconds": 0}
                 persist(target / f"{version}.json", {**result, "mp4_sha256": clip,

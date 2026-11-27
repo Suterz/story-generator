@@ -24,6 +24,9 @@ PROMPT = ("Decide separately whether new factual evidence is needed and how to o
 CLOSED_PACK = ("Treat the caller's explicit facts and hypothetical assumptions as sufficient for a claim they "
                "already settle. Do not research the visual method, object or technique just to draw it. "
                "Mark research only when a missing factual premise could change the answer.")
+VISUAL_COUNTERFACTUAL = ("Ask whether an attractive but numerically or spatially incorrect picture would teach "
+                         "the wrong lesson. If yes, the route is exact; a change of viewpoint does not make a "
+                         "projection decorative. Illustration is only for a visual whose accuracy is not the claim.")
 SCHEMA = obj({"kind": {"enum": ["exact", "authentic", "illustration"]},
               "needs_fact_research": {"type": "boolean"}, "reason": {**TEXT, "maxLength": 220}})
 
@@ -36,7 +39,7 @@ def main():
     parser.add_argument("--models", type=Path, default=writer_root / "models")
     parser.add_argument("--runtime", type=Path, default=writer_root / "runtime/build/bin/llama-server")
     parser.add_argument("--lease", type=Path, default=home / "ai/storyboard-build/v2/gpu.lock")
-    parser.add_argument("--version", choices=("route-v1", "route-v2"), default="route-v1")
+    parser.add_argument("--version", choices=("route-v1", "route-v2", "route-v3"), default="route-v1")
     args = parser.parse_args()
     args.output.mkdir(parents=True, exist_ok=False)
     model = read(ROOT / "models.json")["mistral-small"]
@@ -44,6 +47,8 @@ def main():
         results = []
         for case, objective, evidence, route, needs_research in CASES:
             instructions = PROMPT if args.version == "route-v1" else PROMPT + " " + CLOSED_PACK
+            if args.version == "route-v3":
+                instructions += " " + VISUAL_COUNTERFACTUAL
             observed = ask(endpoint, instructions, {"objective": objective, "evidence": evidence}, SCHEMA,
                            450, args.output / f"{case}.json")
             results.append({"id": case, "expected_route": route, "expected_research": needs_research,
