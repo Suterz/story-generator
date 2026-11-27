@@ -16,6 +16,7 @@ def main():
     parser.add_argument("--models", type=Path, default=base / "models")
     parser.add_argument("--runtime", type=Path, default=base / "runtime/build/bin/llama-server")
     parser.add_argument("--lease", type=Path, default=Path.home() / "ai/storyboard-build/v2/gpu.lock")
+    parser.add_argument("--rate-comparison", action="store_true")
     args = parser.parse_args()
     args.output.mkdir(parents=True, exist_ok=False)
     pin = read(ROOT / "models.json")["mistral-small"]
@@ -25,17 +26,23 @@ def main():
             inputs = read(brief)
             # This isolates the authoring step with identical evidence in both arms.
             approved = {"supplied": {"passages": inputs["facts"]}}
-            for version, neutral, menu in (("source-bound-v10", False, False), ("neutral-question-v11", True, False),
-                                           ("bound-options-v12", True, True)):
+            versions = (("rate-question-v14", True, True, True, False),
+                        ("numerator-first-v15", True, True, True, True)) if args.rate_comparison else (
+                        ("source-bound-v10", False, False, False, False),
+                        ("neutral-question-v11", True, False, False, False),
+                        ("bound-options-v12", True, True, False, False))
+            for version, neutral, menu, rate, numerator in versions:
                 case = args.output / brief.stem / version
                 case.mkdir(parents=True)
                 try:
-                    plan = bound_opening(endpoint, inputs, approved, case, neutral_question=neutral, menu=menu)
+                    plan = bound_opening(endpoint, inputs, approved, case, neutral_question=neutral, menu=menu,
+                                         rate_question=rate, numerator_first=numerator)
                 except ValueError as error:
                     result = {"status": "withheld", "reason": str(error)}
                 else:
                     persist(case / "plan.json", plan)
-                    result = {"status": "authored", "promise": plan["promise"]}
+                    result = {"status": "authored", "promise": plan["promise"],
+                              "meters": plan["states"][0]["visual_data"]["meters"]}
                 results.append({"brief": brief.stem, "brief_sha256": hashlib.sha256(brief.read_bytes()).hexdigest(),
                                 "version": version, **result})
     persist(args.output / "results.json", {"model_sha256": pin["sha256"], "results": results})

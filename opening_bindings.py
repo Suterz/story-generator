@@ -18,6 +18,11 @@ KNOWN_RATE_QUESTIONS = {
     frozenset(("distance", "duration")): "Which covers more distance per minute?",
     frozenset(("cost", "yield")): "Which costs less per usable unit?",
 }
+RATE_NUMERATORS = {
+    frozenset(("input", "return")): "return",
+    frozenset(("distance", "duration")): "distance",
+    frozenset(("cost", "yield")): "cost",
+}
 UNITS = {"kWh": "kilowatt-hours", "kW": "kilowatts", "km": "kilometers",
          "min": "minutes", "s": "seconds", "kg": "kilograms", "g": "grams",
          "L": "liters", "m": "meters", "USD": "dollars", "units": "units"}
@@ -138,7 +143,8 @@ def paired_options(rows):
     return options
 
 
-def bound_opening(endpoint, packet, approved, out, *, neutral_question=False, menu=False, rate_question=False):
+def bound_opening(endpoint, packet, approved, out, *, neutral_question=False, menu=False, rate_question=False,
+                  numerator_first=False):
     sources = [passage for row in approved.values() for passage in row["passages"]]
     rows = literal_rows(sources)
     persist(out / "source-measurements.json", rows)
@@ -155,6 +161,14 @@ def bound_opening(endpoint, packet, approved, out, *, neutral_question=False, me
     content = {"objective": packet["objective"], "rows": rows, "repair": packet.get("repair")}
     if menu:
         options = paired_options(rows)
+        if numerator_first:
+            preferred = []
+            for option in options:
+                visible = rows[option["first"]]["property"]
+                properties = frozenset((visible, option["hidden_property"]))
+                if RATE_NUMERATORS.get(properties) == visible:
+                    preferred.append(option)
+            options = preferred or options
         if not options:
             raise ValueError("source has no two compatible measurements and a shared missing property")
         schema = obj({"option": {"enum": list(range(len(options)))},

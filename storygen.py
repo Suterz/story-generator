@@ -871,7 +871,7 @@ def main():
                                                  "short-question-v4", "locked-promise-v5", "literal-embargo-v6",
                                                  "visible-split-v7", "stable-comparison-v8", "same-property-v9",
                                                  "source-bound-v10", "neutral-question-v11", "bound-options-v12",
-                                                 "complete-pack-v13", "rate-question-v14"),
+                                                 "complete-pack-v13", "rate-question-v14", "numerator-first-v15"),
                    help="render and adjudicate a daily/2 opening without making a full film")
     p.add_argument("--opening-reviewer", choices=("observable-opening-v2", "literal-evidence-v3", "unanswered-is-valid-v4",
                                                   "focus-is-relation-v5"),

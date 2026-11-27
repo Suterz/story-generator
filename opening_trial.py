@@ -10,7 +10,7 @@ from daily import DAILY_OUTLINE, SECTION, adapt, array, ask, collect, extract_cl
 from daily_evidence import digest, persist
 
 BOUND_VERSIONS = ("source-bound-v10", "neutral-question-v11", "bound-options-v12", "complete-pack-v13",
-                  "rate-question-v14")
+                  "rate-question-v14", "numerator-first-v15")
 
 BASELINE = ("Plan three or four chapters for this portrait explanation. Teach in evidence order. "
             "Give a distinct one-sentence goal of at most twelve words per chapter. Use four chapters "
@@ -256,7 +256,8 @@ def run_opening(args):
                             "neutral-question-v11": "neutral-question-v11\n" + Path(__file__).with_name("opening_bindings.py").read_text(),
                             "bound-options-v12": "bound-options-v12\n" + Path(__file__).with_name("opening_bindings.py").read_text(),
                             "complete-pack-v13": "complete-pack-v13\n" + Path(__file__).with_name("opening_bindings.py").read_text(),
-                            "rate-question-v14": "rate-question-v14\n" + Path(__file__).with_name("opening_bindings.py").read_text()}
+                            "rate-question-v14": "rate-question-v14\n" + Path(__file__).with_name("opening_bindings.py").read_text(),
+                            "numerator-first-v15": "numerator-first-v15\n" + Path(__file__).with_name("opening_bindings.py").read_text()}
                            [args.opening_preview].encode()).hexdigest()}
     if args.voice.startswith("drama3-") and args.video_repo:
         registry = args.video_repo / "voices/drama3/narrators.json"
@@ -339,7 +340,8 @@ def run_opening(args):
                             plan = bound_opening(endpoint, packet, approved, out,
                                                  neutral_question=args.opening_preview != "source-bound-v10",
                                                  menu=args.opening_preview in BOUND_VERSIONS[2:],
-                                                 rate_question=args.opening_preview == "rate-question-v14")
+                                                 rate_question=args.opening_preview in BOUND_VERSIONS[4:],
+                                                 numerator_first=args.opening_preview == "numerator-first-v15")
                         except ValueError as error:
                             result = {"status": "withheld", "code": "plan_guard", "detail": str(error)}
                             if (out / "binding-selection.json").is_file():
