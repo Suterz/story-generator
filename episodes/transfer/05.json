@@ -65,7 +65,7 @@
           "At minute one A is served and B and C are waiting. Ask the viewer to apply the tie rule next: finish service, then serve the oldest waiter, then append a new arrival."
         ],
         "second": [
-          "At minute two, A finishes and B starts service at once. Only one new person arrives at this minute: D, who joins behind C. Now C and D wait."
+          "At minute two, A finishes and B starts service at once. D joins behind C. The waiting count stays at two from minute one to minute two; the people in line change."
         ]
       }
     },
@@ -87,7 +87,7 @@
       "words": "115–140 (around 40 per visual state)",
       "stage_claims": {
         "next": [
-          "Minute four: A and B have departed, C begins service, and D waits. D arrived at minute two and has not arrived again."
+          "Minute four: A and B have departed, C begins service, and D waits. Only one person is waiting at this snapshot."
         ],
         "drain": [
           "C completes service at minute six and D starts immediately. D leaves at minute eight and nobody remains. Every service interval lasted two minutes."

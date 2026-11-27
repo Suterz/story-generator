@@ -180,8 +180,9 @@ def check_transfer_explanation(fixture, stage, narration):
                          r"\bD.{0,55}\b(?:later|minute (?:three|3)|not (?:here|there|yet))\b", narration, re.I):
             raise ValueError("in the delayed run only C waits; without the delay C and D both wait")
     if (fixture, stage) == ("queue", "second") and re.search(
-            r"\b(?:two people joined|two arrivals)\b", narration, re.I):
-        raise ValueError("at minute two only D arrives; A leaves and B moves from waiting into service")
+            r"\b(?:two people joined|two arrivals|two people waiting instead of one|(?:line|queue) grows)\b",
+            narration, re.I):
+        raise ValueError("two were waiting at minute one and two at minute two; A leaves, B starts service, and only D arrives")
     if fixture == "map" and stage != "patches" and re.search(
             r"\b(?:they(?:['’]re| are)|regions are|continents are)\s+(?:actually )?(?:the )?same size\b|"
             r"\b(?:both|they(?:['’]re| are))\s+(?:both\s+)?near the equator\b|"
@@ -316,8 +317,13 @@ def author_state(args, context, work, endpoint, prior, prior_opening, index, sta
                    f"Editorial context: {json.dumps(editorial, ensure_ascii=False)}\n"
                    f"Previously spoken ending: {prior!r}. Vary phrasing; avoid reusing this preceding opening: "
                    f"{prior_opening!r}.")
-    if context.get("visual_fixture") == "queue" and stage_id == "drain":
-        instruction += " Stay with the final service and departure; do not recap when D arrived."
+    if context.get("visual_fixture") == "queue":
+        queue_instruction = {
+            "second": " Compare the two snapshots: two wait at minute one and two wait at minute two. The people change, not the count.",
+            "next": " Describe only the minute-four service and waiting roster. Do not restate the earlier arrival order.",
+            "drain": " Stay with the final service and departure; do not recap when D arrived.",
+        }.get(stage_id, "")
+        instruction += queue_instruction
     if context.get("visual_fixture") == "salary":
         instruction += (" Open every panel with a short plain clause of at least three words, without employee initials. "
                         "Do not reuse numbers from the previous narration. "

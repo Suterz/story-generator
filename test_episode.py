@@ -19,6 +19,7 @@ class EvidenceTests(unittest.TestCase):
             ("queue", "delay", "Only C is waiting."),
             ("queue", "delay", "D arrived later. Without the delay, only C would be waiting."),
             ("queue", "second", "The queue grew because two people joined."),
+            ("queue", "second", "Now there are two people waiting instead of one."),
             ("shutter", "short", "The short exposure shows forty pixels."),
             ("study", "mismatch", "Guo and colleagues wrote about viewing time."),
             ("seasons", "angle", "The sunlight scatters at this angle."),
