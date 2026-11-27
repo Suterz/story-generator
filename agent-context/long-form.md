@@ -4,6 +4,7 @@
 
 - All three fresh Candidate 13 flagship MP4s independently passed on `3e1a726` / `39eeed6` / `050f932` at 226.77, 235.90, and 209.10 seconds. Automatic writer revisions: 0, 0, and 2. Evidence is decoded phone-size before/on cue frames, timing manifests, and ASR of the delivered MP4s; no listening.
 - The transfer and media-audit jobs are now running slots 04–10 after the same-freeze gate. Candidate 09 remains the sole published set; its archive and existing chapter previews are unchanged.
+- Transfer 04 was withheld when the seasons guard treated “hasn’t changed much” as “hasn’t changed.” The original refusal remains. The 05 draft also says D arrived after B left in one state and omits why D is absent in the alternate run; hold any verdict for decoded media and delivered-audio ASR. `e7acfb0` addresses these cases with narrowly scoped checks. Wait for the other original transfer outcomes before freezing the next requalification.
 
 ## 2026-11-27 — Three transfer passes; remaining narration fixes
 
