@@ -170,6 +170,10 @@ def editorial(endpoint, packet):
                "counts, numbers, names, units, imagery and agreement of visible and spoken evidence. "
                "Expected facts and intended forced-alignment text are not observations. Compare the literal "
                "delivered ASR with visible evidence in the same interval. Prior states are allowed to differ. "
+               "When a chapter goal is given, judge that chapter's contribution; do not demand that a setup "
+               "chapter already deliver the episode's answer. Treat exact equivalents such as seventy-five "
+               "kilowatt-hours and 75 kWh as the same value and unit. Flag baked pseudo-text when it distracts "
+               "or appears to carry meaning. "
                "A contradiction or materially wrong explanation fails; unclear decisive evidence needs "
                "review. Accept only with affirmative support. Cite a timestamp, literal words when relevant, "
                "and what the viewer sees there. Do not assert an early reveal on the basis of answer text "
@@ -224,6 +228,8 @@ def review(args, brief, ledger, identity):
                                             "ASR_spans": [[round(row["start"], 2), row["word"]] for row in observed_words],
                                             "forced_alignment_to_intended_text": aligned_words})
             models = read(ROOT / "models.json")
+            outline_path = out / "outline.json"
+            goals = read(outline_path).get("chapters", []) if outline_path.is_file() else []
             for model_name in ("deepseek", "mistral-small"):
                 model = models[model_name]
                 judgments = []
@@ -236,6 +242,7 @@ def review(args, brief, ledger, identity):
                             result = editorial(endpoint,
                                 {"objective": brief["objective"], "transfer": brief["transfer"],
                                  "example": brief.get("example_data"), "chapter": number,
+                                 "chapter_goal": goals[number-1]["goal"] if number <= len(goals) else None,
                                  "delivered": beats, "evidence": evidence})
                             judgments.append({"chapter": number, **result})
                 except (ValueError, RuntimeError, OSError) as error:
