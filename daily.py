@@ -160,7 +160,8 @@ def collect(args, brief, model_path, today):
                     {"claim": item["text"], "scope": item["scope"], "document": source["text"][:14000]}, EXTRACT)
             if getattr(args, "body_instruction", "historical") in ("advancing-bound-v2", "advancing-ratio-v3",
                                                                  "advancing-repair-v4", "advancing-scope-v5",
-                                                                 "advancing-no-copy-v6", "advancing-grounded-v7"):
+                                                                 "advancing-no-copy-v6", "advancing-grounded-v7",
+                                                                 "advancing-verified-meters-v8"):
                 from body_progress import comparison_support
 
                 exact = comparison_support(item["text"], source["passage"],
@@ -230,6 +231,8 @@ def compile_story(brief, chapters, ids, *, voice="heart", ordinary=False, compou
                 raise ValueError(f"{key}: no usable spoken opening cue")
             script.append({"id": key, "text": spoken, "pause_after_ms": 0 if ordinary else 300})
             cue = {"utterance_id": key, "phrase": opening} if beats else {"ms": 0}
+            if beats and compound_safe:
+                cue["occurrence"] = 1
             beats.append({"id": key, "cue": cue, "panel": {"op": "new_scene", "scene_id": key,
                           "objective": "; ".join(row["why"] for row in selected),
                           "instruction": section["visible"],
@@ -339,7 +342,8 @@ def run_daily(args):
             packet = {k: v for k, v in brief.items() if k != "claims"}
             packet["approved"] = {k: {"claim": v["claim"], "passages": [s["passage"][:1000] for s in v["approved"]]}
                                   for k, v in collected.items() if v["approved"]}
-            grounded = getattr(args, "body_instruction", None) == "advancing-grounded-v7"
+            checked_meters = getattr(args, "body_instruction", None) == "advancing-verified-meters-v8"
+            grounded = checked_meters or getattr(args, "body_instruction", None) == "advancing-grounded-v7"
             if grounded:
                 from body_progress import rate_evidence
 
@@ -395,7 +399,7 @@ def run_daily(args):
                 for i, chapter in enumerate(outline["chapters"]):
                     checkpoint = out / f"chapter-{i}.json"
                     target_words = "155–175" if brief["min_ms"] == 180000 else "125–150"
-                    no_copy = getattr(args, "body_instruction", None) in ("advancing-no-copy-v6", "advancing-grounded-v7")
+                    no_copy = grounded or getattr(args, "body_instruction", None) == "advancing-no-copy-v6"
                     scoped = no_copy or getattr(args, "body_instruction", None) == "advancing-scope-v5"
                     chapter_input = {"brief": packet, "chapter": chapter, "previous": chapters[-1:],
                                      "opening": outline.get("hook") if i == 0 else None,
@@ -433,8 +437,8 @@ def run_daily(args):
                             chapter_input, CHAPTER,
                             out / f"chapter-{i}-response.json", 1900, revisions))
                     current = read(checkpoint)
-                    if getattr(args, "body_instruction", None) in ("advancing-repair-v4", "advancing-scope-v5",
-                                                                    "advancing-no-copy-v6", "advancing-grounded-v7"):
+                    if grounded or getattr(args, "body_instruction", None) in ("advancing-repair-v4", "advancing-scope-v5",
+                                                                               "advancing-no-copy-v6"):
                         duplicate = duplicated(chapters + [current])
                         if duplicate:
                             repaired = out / f"chapter-{i}-progress-repair.json"
@@ -461,6 +465,16 @@ def run_daily(args):
             if advancing:
                 for row in story["script"]:
                     row["caption"] = row["text"]
+            if checked_meters:
+                from body_progress import known_meter_conflicts
+
+                conflicts = known_meter_conflicts(story, [p for row in packet["approved"].values()
+                                                         for p in row["passages"]])
+                if conflicts:
+                    persist(out / "meter-source-conflicts.json", conflicts)
+                    issue = conflicts[0]
+                    raise ValueError(f'{issue["beat"]}: displayed {issue["property"]} for {issue["entity"]} '
+                                     f'({issue["display"]}) disagrees with the source')
             validate_native(story)
             persist(story_path, story)
     except ValueError as error:

@@ -1,6 +1,6 @@
 import unittest
 
-from body_progress import comparison_support, duplicated, rate_evidence
+from body_progress import comparison_support, duplicated, known_meter_conflicts, rate_evidence
 from discovery_review import locate
 from derive_assertions import derive, search
 from daily import compile_story
@@ -61,3 +61,11 @@ class WholeQualification(unittest.TestCase):
         result = compile_story(briefing, [{"sections": [section]}, {"sections": [section]}], set(),
                                ordinary=True, compound_safe=True)
         self.assertEqual(result["beats"][1]["cue"]["phrase"], "The river route")
+        self.assertEqual(result["beats"][1]["cue"]["occurrence"], 1)
+
+    def test_source_meter_still_rejects_a_return_attached_to_an_input(self):
+        story = {"beats": [{"id": "x", "panel": {"daily": {"data": {"meters": [
+            {"object": "Battery B", "readings": [{"label": "energy returned", "display": "60 kWh"}]}
+        ]}}}}]}
+        self.assertEqual(known_meter_conflicts(story, ["B takes in 60 kWh and returns 48 kWh."])[0]["expected"],
+                         (48, "kwh"))

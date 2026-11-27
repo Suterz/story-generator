@@ -86,6 +86,35 @@ def rate_evidence(passages):
                                                  "exact_rate": str(Fraction(n, d))})
     return results
 
+
+def known_meter_conflicts(story, passages):
+    """Withhold only a recognizable literal reading that contradicts a source."""
+    from opening_bindings import UNITS, literal_rows
+
+    rows = literal_rows(passages)
+    properties = {"input": "input", "energy put in": "input", "energy input": "input",
+                  "returned": "return", "energy returned": "return", "returned energy": "return",
+                  "distance": "distance", "time": "duration", "duration": "duration",
+                  "operating cost": "cost", "cost": "cost"}
+    findings = []
+    for beat in story["beats"]:
+        data = beat["panel"]["daily"]["data"]
+        for meter in data.get("meters", []):
+            entity = meter["object"].casefold().removeprefix("battery ").removeprefix("system ")
+            for reading in meter["readings"]:
+                prop = properties.get(reading["label"].casefold())
+                display = re.fullmatch(r"\s*(\d+)\s+([a-z-]+)\s*", reading["display"], re.I)
+                if prop is None or display is None:
+                    continue
+                expected = {(r["value"], r["unit"].casefold()) for r in rows
+                            if r["entity"].casefold() == entity and r["property"] == prop}
+                units = {name.casefold(): key.casefold() for key, name in UNITS.items()}
+                normalized = units.get(display[2].casefold(), display[2].casefold())
+                if len(expected) == 1 and (int(display[1]), normalized) not in expected:
+                    findings.append({"beat": beat["id"], "entity": meter["object"], "property": prop,
+                                     "display": reading["display"], "expected": list(expected)[0]})
+    return findings
+
 def duplicated(chapters):
     from storygen import words
 
