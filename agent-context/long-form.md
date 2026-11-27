@@ -1,5 +1,10 @@
 # Long-form development
 
+## 2026-11-27 — Eight passes on Candidate 15
+
+- Candidate 15 passed 01–04 and 06–09. Percentages now keeps $80 off the opening card and speaks the $16 increase and 25% recovery correctly. Queue still wrongly narrates an increase at minute two: two people wait at both minute one and minute two. Payroll correctly explains the final mean, but over the restored original roster says one worker has left and gives $40,000 and $80,000 as the remaining salaries.
+- All original transfer renders received hash-bound judgments using decoded cue frames and delivered audio ASR, without listening. The next freeze is Candidate 16 (`021d793` / `2dca361` / `050f932`, endpoint 8943); it distinguishes the queue count from the people waiting and keeps narration on the correct payroll roster. The three new flagship jobs and audits are running. Candidate 09 remains the only published set.
+
 ## 2026-11-27 — Candidate 15 requalified
 
 - Fresh Candidate 15 flagship MP4s independently passed on story `7b8d05f`, video `2dca361` on 8943 and frames `050f932`. Durations: 226.77, 235.90, 209.10 s. Automatic writer revisions: 0, 0, 2. Decoded phone frames before and at the decisive cues agree with the delivered MP4 ASR; no listening.
