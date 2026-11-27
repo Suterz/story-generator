@@ -72,8 +72,9 @@ def assemble():
     a["chapters"][4]["stage_claims"] = {
         "paths": ["Both worldlines start and end together. The traveler changes inertial frame at turnaround.",
                   "The elapsed proper time differs along the two paths. Do not infer elapsed time from drawn Euclidean line lengths."],
-        "gps": ["Motion AND weaker gravity affect GPS satellite clocks; the effects have opposite signs.",
-                "Do not say GPS orbiting clocks run slower overall. No drift numbers are required."],
+        "gps": ["Relative to the comparison clock on Earth, the effect of satellite motion is to slow its clock.",
+                "The weaker gravity at GPS orbital altitude makes the satellite clock run faster.",
+                "These effects do not exactly cancel. GPS accounts for both. No drift numbers are needed."],
         "reunion": ["Return to the clocks: elapsed time is what each clock accumulated along its own path.",
                     "Neither clock malfunctioned; the two different readings are compatible."],
     }

@@ -263,6 +263,11 @@ def author_state(args, context, work, endpoint, prior, prior_opening, index, sta
                     raise ValueError("four and five are distances; the Earth ray has a sideways component")
                 if stage_id == "one-year" and re.search(r"\bsame time\b", narration, re.I):
                     raise ValueError("same leg, different elapsed times; do not say same time")
+                if stage_id == "gps" and re.search(
+                        r"\bmotion (?:makes .{1,35} faster|speeds)|"
+                        r"\bweaker gravity (?:makes .{1,35} slower|slows)|"
+                        r"\b(?:effects|they) (?:balance out|cancel out)\b", narration, re.I):
+                    raise ValueError("motion slows the satellite clock; weaker gravity speeds it up; GPS accounts for both")
             if context["obligation"] == "worked-example" and not context.get("visual_fixture"):
                 if stage_id == "origination" and re.search(
                         r"\bboth zero\b|\bhasn['’]t been (?:created|made)\b", narration, re.I):
