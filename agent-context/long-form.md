@@ -2,6 +2,7 @@
 
 ## 2026-11-27 — One transfer passed; next requalification started
 
+- A later diagnostic split the original payroll audio into two windows at the measured visual-state boundary. ASR agreement rose from 0.477 for the full chapter to 0.813 and 0.876 for the two windows, using the same PCM and numeric normalization. This points to a possible ASR windowing issue; it does not certify the episode or change the frozen verifier.
 - Candidate 11's shutter episode (07) independently passed at 158.37 s with one automatic writing revision. The 40-pixel comparison arrives at 1:37.87. The other six transfers did not pass: 04 confuses the southern comparison heading and asserts equal Earth–Sun distance across months; 05 speaks the prediction answer early; 08 points to titles not on screen; 06 and 10 were withheld at speech checks; 09's guard rejected a legitimate equal-area patch sentence.
 - Candidate 12 freezes storyteller `cb1bbf7`, video `39eeed6` on 8942 and frames `050f932`. The revised map labels its patches, the southern comparison has its own heading, and transfer narration gets only the current state's claims. Exact-PCM replay corroborates the original $100 cue and rejects a substituted $1,000. The archived payroll chapter still scores below the ASR threshold after numeric normalization; do not count the diagnostic as a pass.
 - Candidate 09 remains published and archived. Candidate 12 must pass its flagship trio before transfer jobs can launch. Do not mix the passing Candidate 11 shutter episode into another freeze.
