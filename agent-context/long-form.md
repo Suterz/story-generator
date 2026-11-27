@@ -1,5 +1,10 @@
 # Long-form development
 
+## 2026-11-27 — Candidate 16 requalified
+
+- The three fresh MP4s independently passed on story `021d793`, video `2dca361` at 8943, and frames `050f932`. Durations were 226.77, 235.90, and 209.10 seconds; automatic writer revisions were 0, 0, and 2. Each verdict is tied to the new MP4 and freeze hashes and based on decoded phone-size cue frames, measured timing, and ASR of delivered audio without listening.
+- Candidate 16 transfer slots 04–10 and their media audits began after the flagship gate. Candidate 09 remains the published trio and is archived; chapter previews remain unchanged. Publish a successor only as a complete verified set from one freeze.
+
 ## 2026-11-27 — Eight passes on Candidate 15
 
 - Candidate 15 passed 01–04 and 06–09. Percentages now keeps $80 off the opening card and speaks the $16 increase and 25% recovery correctly. Queue still wrongly narrates an increase at minute two: two people wait at both minute one and minute two. Payroll correctly explains the final mean, but over the restored original roster says one worker has left and gives $40,000 and $80,000 as the remaining salaries.
