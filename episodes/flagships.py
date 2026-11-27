@@ -56,6 +56,18 @@ def assemble():
         "compare-years": ["Both clocks work normally. The traveler does not feel slowed.",
                           "The example is for one constant-speed leg, not the full trip."],
     }
+    a["chapters"][1]["stage_claims"] = {
+        "ship": ["One full tick is the pulse from the lower mirror to the upper mirror and back to the lower mirror.",
+                 "The highlighted four-unit upward path is only the first half-tick, from emission E to reflection R."],
+        "shift": ["In the Earth frame the ship moves only sideways between those same two events.",
+                  "The upper mirror is no longer over E when light arrives. Do not describe the length of the diagonal before showing it."],
+    }
+    a["chapters"][2]["stage_claims"] = {
+        "ship": ["The same pulse travels upward from emission E at the lower mirror to reflection R at the upper mirror in the ship frame. Four units."],
+        "shift": ["The whole ship shifts three units sideways in Earth's frame between emission and reflection. The pulse is not traveling horizontally."],
+        "path": ["The diagonal leaves E and arrives at R at the new upper mirror position; five units versus four in the ship.",
+                 "Both frames measure the same light speed. Earth therefore assigns more time to this same half-tick, emission to reflection."],
+    }
     a["chapters"][4]["stage_claims"] = {
         "paths": ["Both worldlines start and end together. The traveler changes inertial frame at turnaround.",
                   "The elapsed proper time differs along the two paths. Do not infer elapsed time from drawn Euclidean line lengths."],

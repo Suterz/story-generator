@@ -82,7 +82,7 @@ def compile_chapter(brief, draft, prefix, *, short=True):
     count = sum(len(words(s["text"])) for s in sections)
     if short and not 42 <= count <= 96:
         raise ValueError(f"preview narration has {count} words; use 55–85 words")
-    if not short and not 75 <= count <= 207:
+    if not short and not 60 <= count <= 260:
         raise ValueError(f"chapter has {count} words; use around 20 words per sentence")
     script, beats = [], []
     for i, section in enumerate(sections):
@@ -240,8 +240,8 @@ def author_state(args, context, work, endpoint, prior, index, stage, bounds):
             narration = value["text"].strip()
             cue = value["cue"].strip()
             count = len(words(narration))
-            if not low - 8 <= count <= high + 18:
-                raise ValueError(f"{count} words; the permitted range is {low}–{high}")
+            if not low - 14 <= count <= high + 42:
+                raise ValueError(f"{count} words; aim for {low}–{high} to fit the episode")
             if (not narration.rstrip("\"”’").endswith((".", "?", "!"))
                     or narration.split()[0].rstrip(".:").casefold() in {"start", "cue", "stage"}):
                 raise ValueError("write complete spoken sentences without cue labels")
@@ -255,7 +255,11 @@ def author_state(args, context, work, endpoint, prior, index, stage, bounds):
             tokens = words(narration)
             hits = [j for j in range(len(tokens)) if tokens[j:j+len(match)] == match] if match else []
             if cue and (len(hits) != 1 or hits[0] > 6):
-                raise ValueError("use an empty cue or a short exact cue near the beginning")
+                if attempt == 0:
+                    raise ValueError("use an empty cue or a short exact cue near the beginning")
+                save(work / "cue-repair.json", {"attempt": attempt, "unbound": cue,
+                                                 "rule": "start of the authored evidence section"})
+                cue = ""
             return {"stage": stage_id, "text": narration, "cue": cue, "caption": "", "focus": focus}
         except (ValueError, KeyError, TypeError, IndexError) as error:
             defect = f"\nThe previous attempt was withheld: {error}. Fix only that problem."

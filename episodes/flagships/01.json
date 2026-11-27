@@ -93,7 +93,17 @@
           "Treat the moving mirror as a question before drawing the pulse."
         ]
       ],
-      "words": "115–140 (around 40 per visual state)"
+      "words": "115–140 (around 40 per visual state)",
+      "stage_claims": {
+        "ship": [
+          "One full tick is the pulse from the lower mirror to the upper mirror and back to the lower mirror.",
+          "The highlighted four-unit upward path is only the first half-tick, from emission E to reflection R."
+        ],
+        "shift": [
+          "In the Earth frame the ship moves only sideways between those same two events.",
+          "The upper mirror is no longer over E when light arrives. Do not describe the length of the diagonal before showing it."
+        ]
+      }
     },
     {
       "question": "Where does the upper mirror actually meet that pulse?",
@@ -116,7 +126,19 @@
           "In Earth connect E to R at the new upper mirror and show 5 versus 4 units. Keep both frames visible."
         ]
       ],
-      "words": "115–140 (around 40 per visual state)"
+      "words": "115–140 (around 40 per visual state)",
+      "stage_claims": {
+        "ship": [
+          "The same pulse travels upward from emission E at the lower mirror to reflection R at the upper mirror in the ship frame. Four units."
+        ],
+        "shift": [
+          "The whole ship shifts three units sideways in Earth's frame between emission and reflection. The pulse is not traveling horizontally."
+        ],
+        "path": [
+          "The diagonal leaves E and arrives at R at the new upper mirror position; five units versus four in the ship.",
+          "Both frames measure the same light speed. Earth therefore assigns more time to this same half-tick, emission to reflection."
+        ]
+      }
     },
     {
       "question": "How large can that difference be?",
