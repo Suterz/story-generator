@@ -1,5 +1,11 @@
 # Long-form development
 
+## 2026-11-27 — Candidate 13 transfer review complete
+
+- The shutter, source-check and map films passed again, at 167.60 s, 168.70 s and 186.77 s. Shutter needed one automatic writer revision; the other two needed none. The queue export wrongly says D arrived after B departed; the percentage export now speaks the correct 25% recovery but also wrongly says 20% of $80 is 25. Both errors are verified in delivered MP4 ASR and bound to the original exports.
+- Seasons remains an authoring refusal. Payroll remains an alignment withholding; same-PCM replay with independent ASR now binds `havent` at 3.92 s in the chapter. The original payroll draft describes $40,000 and $80,000 as the two continuing salaries, so fixing the speech token alone could not make that episode pass.
+- Candidate 14 freezes `1c5e7aa` / `2dca361` / `050f932`, endpoint 8943. The next trio and audit are active. No transfers until three new hash-bound flagship passes; candidate 09 remains published.
+
 ## 2026-11-27 — Candidate 13 requalified
 
 - All three fresh Candidate 13 flagship MP4s independently passed on `3e1a726` / `39eeed6` / `050f932` at 226.77, 235.90, and 209.10 seconds. Automatic writer revisions: 0, 0, and 2. Evidence is decoded phone-size before/on cue frames, timing manifests, and ASR of the delivered MP4s; no listening.
