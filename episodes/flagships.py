@@ -103,7 +103,7 @@ def assemble():
                 ["Use separate, pre-existing $1,000 savings at Bank A. These savings were not the spent deposit.",
                  "Pay down principal only: savings fall by $1,000 and Bank A loan falls from $100,000 to $99,000; B's seller deposit and reserves unchanged.",
                  "Interest is a distinct charge/income flow, not principal reduction. End by returning to the original two entries."],
-                ("outstanding","Before repayment, locate the original loan."),
+                ("savings","Before repayment, locate the original loan and separate savings."),
                 ("repayment","Show the $99,000 result and savings source.")),
     ]
     b["chapters"][0]["stage_claims"] = {
@@ -130,7 +130,7 @@ def assemble():
         "outstanding": ["Bank A still owns the loan and bears its credit risk. Creditworthy borrowers must want loans; policy rates influence funding costs, rates and demand without a fixed result."],
     }
     b["chapters"][4]["stage_claims"] = {
-        "outstanding": ["The borrower owes Bank A the original $100,000. Separately, the borrower has $1,000 of pre-existing savings at Bank A. That's where the repayment funds are held."],
+        "savings": ["The borrower owes Bank A the original $100,000. Separately, the borrower has $1,000 of pre-existing savings at Bank A. That's where the repayment funds are held."],
         "repayment": ["A reduces the borrower's savings deposit by $1,000 and the loan by $1,000 to $99,000. Both at A; no reserves move and B's deposit does not change.",
                       "This is principal only. Interest is a separate bank income flow, not principal. Return to creation at origination."],
     }

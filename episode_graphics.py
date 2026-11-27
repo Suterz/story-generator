@@ -126,11 +126,12 @@ def money(cents):
 
 def bank(stage):
     count = {"before": 0, "origination": 1, "wealth": 1, "settlement": 2,
-             "outstanding": 2, "limits": 2, "repayment": 3}[stage]
+             "outstanding": 2, "limits": 2, "savings": 2, "repayment": 3}[stage]
     accounts = ledger_at(count)
     marks = [text({"origination": "THE LOAN IS MADE", "settlement": "THE SELLER IS PAID",
                    "outstanding": "THE LOAN STAYS PUT", "before": "BEFORE THE LOAN",
                    "wealth": "DEPOSIT AND DEBT", "limits": "BANK A STILL HAS TO SETTLE",
+                   "savings": "WHERE REPAYMENT COMES FROM",
                    "repayment": "PRINCIPAL REPAID"}[stage], .12, role="value")]
     marks += [rect(.28, .44, .44, .48), rect(.72, .44, .43, .48), line([.5, .20], [.5, .68])]
     for bank_id, x, customer in (("A", .285, "Borrower"), ("B", .716, "Seller")):
@@ -146,6 +147,8 @@ def bank(stage):
         marks += [text("Borrower still owes Bank A", .75, role="question")]
     if stage == "wealth":
         marks += [text("Borrower: +$100,000 deposit", .72), text("and +$100,000 debt", .77)]
+    if stage == "savings":
+        marks += [text("Separate savings at Bank A", .72), text(money(accounts["A"]["savings"]), .77, role="value")]
     if stage == "repayment":
         marks += [text("Bank A savings: $1,000 to $0", .73), text("Principal only", .78)]
     return marks

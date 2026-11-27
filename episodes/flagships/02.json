@@ -186,8 +186,8 @@
       ],
       "stages": [
         [
-          "outstanding",
-          "Before repayment, locate the original loan."
+          "savings",
+          "Before repayment, locate the original loan and separate savings."
         ],
         [
           "repayment",
@@ -196,7 +196,7 @@
       ],
       "words": "115–140 (around 40 per visual state)",
       "stage_claims": {
-        "outstanding": [
+        "savings": [
           "The borrower owes Bank A the original $100,000. Separately, the borrower has $1,000 of pre-existing savings at Bank A. That's where the repayment funds are held."
         ],
         "repayment": [
