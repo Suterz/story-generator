@@ -85,6 +85,8 @@ def ordinary_run(args):
     identity = {"brief_file": sha(args.input), "freeze": sha(Path(freeze)), "voice": args.voice,
                 "model": args.model, "endpoint": args.video_url, "adapter": args.daily,
                 "skill": args.episode_skill, "runtime": str(args.runtime), "weights": str(args.models)}
+    if getattr(args, "body_instruction", "historical") != "historical":
+        identity["body_instruction"] = args.body_instruction
     binding = root / "workflow-inputs.json"
     if binding.exists() and read(binding) != identity:
         raise ValueError("daily workflow inputs changed; use a new run directory")
