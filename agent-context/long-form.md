@@ -1,5 +1,11 @@
 # Long-form development
 
+## 2026-11-27 — Flagship trio qualified and published on candidate 09
+
+- Clock, bank and citation passed independent review on the same frozen story `2816156`, video `d5c7696` (8940) and frames `050f932` build. Clock 226.77 s, decisive cue 1:56.23, no automatic repairs; bank 235.90 s, 1:29.63, no repairs; citation 209.10 s, 2:17.30, two automatic writer revisions. Review used decoded 360×640 frames, cue manifests and delivered MP4 ASR; no human/perceptual listening.
+- The three MP4s decoded on the XPS and matched the original workstation receipts. They are published as `Watch first/01.mp4` through `03.mp4` with an ordered playlist and separate review key. Earlier chapter previews are unchanged.
+- Candidate 09 transfer runs are underway via `episode_batch.py --include-transfer` on that exact freeze. Do not add a transfer clip to the playlist before independent review. The matched skills-v2 test did not establish that the included techniques outperformed their controls end to end.
+
 ## 2026-11-27 — Two flagship passes on one freeze
 
 - Candidate 08 **bank passed** at 235.90 s with no automatic repairs. At 1:29.63 A debits the borrower, reserves settle the payment, B credits the seller, and the loan stays at A. The rate-to-demand view and separate $1,000 savings/loan reductions also match the brief.
