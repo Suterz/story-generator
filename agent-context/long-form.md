@@ -1,5 +1,12 @@
 # Long-form development
 
+## 2026-11-27 — Two flagship passes on one freeze
+
+- Candidate 08 **bank passed** at 235.90 s with no automatic repairs. At 1:29.63 A debits the borrower, reserves settle the payment, B credits the seller, and the loan stays at A. The rate-to-demand view and separate $1,000 savings/loan reductions also match the brief.
+- Candidate 08 **citation passed** at 209.10 s with two automatic writer revisions. At 2:17.30 the displayed GPT-3.5 passage cannot support the GPT-4 question. The 18% answer is scoped to the study sample. Setup repeats; no perceptual listening judgment was made.
+- Candidate 08 **clock failed** at 224.47 s. The five-unit path length is spoken during the shift before the diagonal appears at 1:55.43. The narration at the 0.99c comparison also says the path stretches Earth's clock. These override the exact geometry and corrected reference frames and GPS signs. Candidate 09 freezes `2816156` with staged video `d5c7696`/8940, requires the answer to land with the path, and re-runs the trio.
+- All thirteen skills-v2 first narrations were blind-judged by hash. No arm delivered a clip: eight writing refusals and five renderer withholdings. Purpose improved the clock explanation relative to baseline and preserved the citation distinction in authored text; duration and caption limits stopped both renders. The exact-clock explanation also improved under continuity and entities, but their bank tests did not pass. No technique earned selection on these matched results. Keep benchmark and skill results outside the release gate.
+
 ## 2026-11-27 — Correct event order and contraction timing
 
 - Candidate 07's clock shows a correct physical path at 1:46.60, but its delivered narration at 0:54.40 says the upper mirror has already shifted at emission, and suggests vertical ship motion. Candidate 06's clock had the same defect. On the bank film, the policy-rate-to-demand view now works at 2:51.83; the spoken conclusion still incorrectly treats loan retention as a general rule. These are hash-bound negative judgments, not render refusals.
