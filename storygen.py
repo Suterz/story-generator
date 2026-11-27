@@ -867,7 +867,8 @@ def main():
     p.add_argument("--runtime", type=Path, default=HOME / "ai/storyboard-rehearsal/writer/runtime/build/bin/llama-server")
     p.add_argument("--lease", type=Path, default=HOME / "ai/storyboard-build/v2/gpu.lock")
     p.add_argument("--voice", choices=("heart", "ryan", "drama3-A", "drama3-E", "drama3-F"), default="ryan")
-    p.add_argument("--opening-preview", choices=("baseline-v1", "visible-question-v2", "question-before-answer-v3"),
+    p.add_argument("--opening-preview", choices=("baseline-v1", "visible-question-v2", "question-before-answer-v3",
+                                                 "short-question-v4"),
                    help="render and adjudicate a daily/2 opening without making a full film")
     p.add_argument("--opening-reviewer", choices=("observable-opening-v2", "literal-evidence-v3"),
                    default="observable-opening-v2")
@@ -880,6 +881,8 @@ def main():
     p.add_argument("--frames-repo", type=Path, help="frames-renderer checkout matching the server")
     p.add_argument("--video-repo", type=Path, help="video-renderer checkout matching the server")
     args = p.parse_args()
+    if args.opening_preview and (args.command != "run" or args.raw_text or not args.input.is_file()):
+        p.error("--opening-preview requires run with a structured input file")
     native = (args.validator_python, args.frames_repo, args.video_repo)
     if any(native):
         if not all(native):

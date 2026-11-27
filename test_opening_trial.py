@@ -4,7 +4,7 @@ import unittest
 
 from daily_evidence import persist
 from opening_score import score, sha
-from opening_review import heard_numbers
+from opening_review import early_quantity, heard_numbers
 from opening_trial import compile_preview, repair_focus
 
 
@@ -13,6 +13,12 @@ class OpeningTests(unittest.TestCase):
         self.assertEqual(heard_numbers("seventy-five kilowatt-hours"), {75})
         self.assertEqual(heard_numbers("75 kWh"), {75})
         self.assertEqual(heard_numbers("75.5 kWh"), {75.5})
+
+    def test_early_number_gate_uses_actual_offset_and_boundary(self):
+        heard = [{"word": " 80", "start": 1.2, "end": 1.4}]
+        self.assertEqual(early_quantity(heard, 80, 12, origin=10)["start_seconds"], 11.2)
+        self.assertIsNone(early_quantity(heard, 80, 11, origin=10))
+        self.assertIsNone(early_quantity(heard, 75, 12, origin=10))
 
     def test_focus_repair_keeps_reading_values_and_speech(self):
         meters = [{"object": key, "readings": [{"label": "return", "display": str(value),

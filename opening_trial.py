@@ -39,6 +39,7 @@ QUESTION_BEFORE_ANSWER = (
     "For a nonnumerical topic, use the actual object or exact relationship when it is the evidence; "
     "use local artwork when it is only illustrative. Ask what makes the observation surprising."
 )
+SHORT_LINES = " Make each narration field one sentence of seven to ten words. Four short lines, not paragraphs."
 EXECUTE = ("Write one short opening chapter, three or four visual states, roughly 30–40 spoken words in total. "
            "Write spoken numbers as words and use digits in labels. "
            'visual_data for exact is {"operation":"meters","meters":[{"object":"name","readings":'
@@ -61,7 +62,8 @@ def compile_preview(brief, plan, approved, voice):
         if not set(section["claim_ids"]) <= approved:
             raise ValueError(f"{key}: unsupported claim ID")
         narration = section["narration"]
-        cue = " ".join(words(narration)[:4])
+        # Choose whole authored words before tokenization expands compounds.
+        cue = " ".join(narration.split()[:3])
         if len(words(cue)) < 2:
             raise ValueError(f"{key}: no usable spoken cue")
         script.append({"id": key, "text": narration, "caption": narration})
@@ -85,6 +87,7 @@ def study(args, root, out, story, result):
     if story:
         report["route_sequence"] = [b["panel"]["daily"]["kind"] for b in story["beats"]]
         report["captioned_utterances"] = sum(bool(row.get("caption")) for row in story["script"])
+        report["authored_words"] = sum(len(row["text"].split()) for row in story["script"])
     if (out / "decoded-review.json").exists():
         decoded = json.loads((out / "decoded-review.json").read_text())
         report.update(duration_seconds=decoded["duration"], cues=decoded["cues"])
@@ -127,7 +130,17 @@ def run_opening(args):
                 "freeze_sha256": hashlib.sha256(freeze.read_bytes()).hexdigest(), "voice": args.voice,
                 "writer": args.opening_preview, "reviewer": args.opening_reviewer, "budget": 1,
                 "writer_weights": read(ROOT / "models.json")[args.model]["sha256"],
-                "endpoint": args.video_url, "seed": 437}
+                       "endpoint": args.video_url, "seed": 437,
+                       "instruction_sha256": hashlib.sha256(
+                           {"baseline-v1": BASELINE + EXECUTE, "visible-question-v2": VISIBLE_QUESTION + EXECUTE,
+                            "question-before-answer-v3": QUESTION_BEFORE_ANSWER + EXECUTE,
+                            "short-question-v4": QUESTION_BEFORE_ANSWER + SHORT_LINES + EXECUTE}
+                           [args.opening_preview].encode()).hexdigest()}
+    if args.voice.startswith("drama3-") and args.video_repo:
+        registry = args.video_repo / "voices/drama3/narrators.json"
+        profile = read(registry)
+        identity["narrator"] = profile["narrators"][args.voice[-1]]["sha256"]
+        identity["voice_registry_sha256"] = hashlib.sha256(registry.read_bytes()).hexdigest()
     path = root / "input-lock.json"
     if path.exists() and read(path) != identity:
         raise ValueError("opening experiment inputs changed")
@@ -184,8 +197,9 @@ def run_opening(args):
                         packet["outline"] = outline
                         instruction = "Follow the proposed opening. " + EXECUTE
                     else:
-                        selected = (QUESTION_BEFORE_ANSWER if args.opening_preview == "question-before-answer-v3"
-                                    else VISIBLE_QUESTION)
+                        selected = VISIBLE_QUESTION if args.opening_preview == "visible-question-v2" else QUESTION_BEFORE_ANSWER
+                        if args.opening_preview == "short-question-v4":
+                            selected += SHORT_LINES
                         instruction = selected + " " + EXECUTE
                     if previous:
                         instruction += " Repair only the specific observed defect and preserve the supported facts."

@@ -45,6 +45,26 @@ def heard_numbers(text):
     return numbers
 
 
+def early_quantity(words, quantity, through, origin=0):
+    """Detect a forbidden answer in delivered ASR, including split spoken numbers."""
+    for i, row in enumerate(words):
+        onset = row["start"] + origin
+        if onset >= through:
+            break
+        text = row["word"].strip()
+        tens = {"twenty", "thirty", "forty", "fifty", "sixty", "seventy", "eighty", "ninety"}
+        ones = {"one", "two", "three", "four", "five", "six", "seven", "eight", "nine"}
+        if text.casefold() in tens and i+1 < len(words):
+            next_word = words[i+1]["word"].strip(" -.,!?").casefold()
+            if next_word in ones:
+                text += " " + next_word
+        if quantity in heard_numbers(text):
+            return {"status": "failed", "code": "early_reveal", "start_seconds": onset,
+                    "detail": f"Delivered audio states {quantity:g} before the {through:g}s reveal boundary.",
+                    "repair": "Move the answer to the permitted reveal or remove it from the opening."}
+    return None
+
+
 def meter_faults(out, decoded, manifest, words):
     """Check the focus mark in actual pixels, not only in the drawing request."""
     media = Path(os.getenv("DAILY_MEDIA", Path.home() / "ai/tools/media/bin"))
