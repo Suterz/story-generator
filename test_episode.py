@@ -23,6 +23,9 @@ class EvidenceTests(unittest.TestCase):
             with self.subTest(fixture=fixture), self.assertRaises(ValueError):
                 check_transfer_explanation(fixture, stage, sentence)
         check_transfer_explanation("shutter", "comparison", "The second streak is forty pixels.")
+        check_transfer_explanation("map", "patches", "On Earth, they’re the same size.")
+        with self.assertRaisesRegex(ValueError, "current card"):
+            check_transfer_explanation("study", "question", "Look at the title of the first document.")
 
     def test_clock_answer_follows_the_path_and_does_not_change_the_earth_clock(self):
         with self.assertRaisesRegex(ValueError, "without giving"):

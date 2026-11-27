@@ -172,11 +172,22 @@ def check_transfer_explanation(fixture, stage, narration):
         raise ValueError(forbidden[1])
     if fixture == "queue" and re.search(r"\bD arrived.{0,20}\b(?:after|when) B (?:left|departed)\b", narration, re.I):
         raise ValueError("D arrives at minute two; A leaves at minute two and B leaves at minute four")
-    if fixture == "map" and re.search(
+    if fixture == "map" and stage != "patches" and re.search(
             r"\b(?:they(?:['’]re| are)|regions are|continents are)\s+(?:actually )?(?:the )?same size\b|"
             r"\b(?:both|they(?:['’]re| are))\s+(?:both\s+)?near the equator\b|"
             r"\b(?:their )?actual sizes match\b", narration, re.I):
         raise ValueError("South America is larger than Greenland; only the two example patches have equal area")
+    if fixture == "map" and stage == "patches" and re.search(r"\bnear (?:greenland|south america)\b", narration, re.I):
+        raise ValueError("the independent patches are at the labeled latitudes; do not identify them by nearby land")
+    if (fixture, stage) == ("queue", "prediction") and re.search(
+            r"\b(?:will finish|will start|will arrive|joins.{0,25}leaves)\b", narration, re.I):
+        raise ValueError("ask what happens at minute two without predicting the answer aloud on the minute-one panel")
+    if fixture == "seasons" and re.search(
+            r"\b(?:both months share the same|distance to the sun hasn['’]t changed|sun['’]s just as far away)\b",
+            narration, re.I):
+        raise ValueError("seasons are due chiefly to tilt; compare equal distances across hemispheres at the same instant, not across months")
+    if (fixture, stage) == ("study", "question") and re.search(r"\b(?:look|point) at the (?:title|document)\b", narration, re.I):
+        raise ValueError("the current card shows only the question; save discussion of the documents for later")
     if fixture == "salary" and re.search(
             r"\b(?:averages?|mean(?: salary)? (?:is|was|of))\s+(?:eighty thousand|\$80[,.]?000)\b|"
             r"\btotal pay.{0,65}\bto (?:sixty thousand|\$60[,.]?000)\b", narration, re.I):
@@ -251,6 +262,9 @@ def author_state(args, context, work, endpoint, prior, prior_opening, index, sta
               "properties": {"text": {"type": "string"}, "cue": {"type": "string"},
                              "focus": {"enum": ["", *dict.fromkeys(labels)]}}}
     editorial = {k: v for k,v in context.items() if k not in ("stages", "chapter_claims")}
+    if context.get("visual_fixture"):
+        editorial.pop("stage_claims", None)
+        editorial.pop("current_evidence_only", None)
     instruction = (f"{skill}\nWrite the spoken narration for just this visual state in {low}–{high} words. "
                    f"Visual state: {stage_id}. What it shows: {objective}\n"
                    "Speak naturally to the viewer, without announcing steps or reading any metadata aloud. "

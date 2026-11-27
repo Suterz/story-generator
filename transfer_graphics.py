@@ -15,7 +15,8 @@ def disc(x, y, w, ink="pale"):
 
 
 def seasons(stage):
-    marks = [text("MINNEAPOLIS · ABOUT 45° N", .12, role="value")]
+    marks = [text("SOUTHERN COMPARISON · 45° S" if stage == "south" else "MINNEAPOLIS · ABOUT 45° N",
+                  .12, role="value")]
     if stage in ("orbit", "axis"):
         marks += [disc(.50,.47,.20,"accent"), text("Sun",.56),
                   disc(.20,.47,.16), disc(.80,.47,.16),
@@ -150,6 +151,8 @@ def map_view(stage):
             x0, x1 = -6-span/2, -6+span/2
             marks += [polygon([project(x0,lat-3,mode),project(x1,lat-3,mode),
                                project(x1,lat+3,mode),project(x0,lat+3,mode)],"pale")]
+            marks += [text("Equator" if lat == 0 else "60° N", project(-6,lat,mode)[1], .83)]
+        marks += [text("Patches have equal area on Earth",.73,role="support")]
     marks += [text("Greenland / South America",.80)]
     return marks
 
