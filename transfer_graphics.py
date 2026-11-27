@@ -101,15 +101,18 @@ def study(stage):
              text("attempt count after viewing?",.23),rect(.5,.49,.86,.40)]
     if stage in ("review","mismatch"):
         marks += [text("Brame · Reviewing Guo et al.",.33,role="value"),
-                  text("Reports viewing time by length.",.43),
-                  text("No attempt window in this passage.",.50)]
+                  text("“They observed that the median",.41),
+                  text("engagement time for videos",.455),
+                  text("less than 6 minutes long was",.50),
+                  text("close to 100%”",.545)]
         if stage == "mismatch":
             marks += [text("Relevant study; different measure",.65,role="question")]
     elif stage in ("method","answer"):
         marks += [text("Guo et al. · Measuring Engagement",.33,role="value"),
                   text("“whether a student attempted",.41),
-                  text("the follow-up problem within",.46),
-                  text("30 minutes after watching”",.51,role="value")]
+                  text("to answer the follow-up problem",.455),
+                  text("within 30 minutes after",.50,role="value"),
+                  text("watching a video”",.545)]
         if stage == "answer":
             marks += [text("Supports the 30-minute definition",.65,role="question")]
     else:

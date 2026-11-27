@@ -64,7 +64,8 @@ def assemble():
     }
     a["chapters"][2]["stage_claims"] = {
         "ship": ["The same pulse travels upward from emission E at the lower mirror to reflection R at the upper mirror in the ship frame. Four units."],
-        "shift": ["The whole ship shifts three units sideways in Earth's frame between emission and reflection. The pulse is not traveling horizontally."],
+        "shift": ["The whole ship shifts three units sideways in Earth's frame between emission and reflection.",
+                  "The new upper-mirror position is marked R. Save the complete light path for the next visual."],
         "path": ["The diagonal leaves E and arrives at R at the new upper mirror position; five units versus four in the ship.",
                  "Both frames measure the same light speed. Earth therefore assigns more time to this same half-tick, emission to reflection."],
     }

@@ -9,6 +9,8 @@
 
 Current branch work on the generic storyteller is recorded in
 [Communication iteration](agent-context/README.md).
+Long-form staging and the separate qualification gate are in
+[Long-form development](agent-context/long-form.md).
 
 ## Decisions, newest first
 

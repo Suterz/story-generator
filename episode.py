@@ -192,7 +192,7 @@ def write_chapter(args, brief, folder, endpoint, *, short=True, prefix="chapter"
     raise ValueError(reason)
 
 
-def author_state(args, context, work, endpoint, prior, index, stage, bounds):
+def author_state(args, context, work, endpoint, prior, prior_opening, index, stage, bounds):
     from storygen import read, request, save, words
 
     stage_id, objective = stage
@@ -217,7 +217,8 @@ def author_state(args, context, work, endpoint, prior, index, stage, bounds):
                    f"Exact labels available to emphasize with focus: {labels!r}. Omit focus if unnecessary. "
                    f"Only authorized facts for this state: {context['current_evidence_only']!r}. "
                    f"Editorial context: {json.dumps(editorial, ensure_ascii=False)}\n"
-                   f"Previously spoken ending: {prior!r}")
+                   f"Previously spoken ending: {prior!r}. Vary phrasing; avoid reusing this preceding opening: "
+                   f"{prior_opening!r}.")
     defect = ""
     for attempt in range(2):
         payload = {"messages": [{"role": "user", "content": instruction + defect}],
@@ -248,6 +249,13 @@ def author_state(args, context, work, endpoint, prior, index, stage, bounds):
             if stage_id in {"speed", "one-year", "compare-years"} and re.search(
                     r"\bnine[- ]tenths\b|\b0\.9\s*c\b|\bninety percent\b", narration, re.I):
                 raise ValueError("the supplied speed is ninety-nine percent of light speed, not ninety percent")
+            if context["obligation"] == "spatial" and not context.get("visual_fixture"):
+                if stage_id in {"ship","shift","path"} and re.search(
+                        r"\b(?:four|five|[45])[- ]+units? of time\b|"
+                        r"\b(?:not|does not) (?:travel(?:s|ing)? )?sideways\b", narration, re.I):
+                    raise ValueError("four and five are distances; the Earth ray has a sideways component")
+                if stage_id == "one-year" and re.search(r"\bsame time\b", narration, re.I):
+                    raise ValueError("same leg, different elapsed times; do not say same time")
             focus = value.get("focus", "")
             if focus and focus not in labels:
                 raise ValueError("focus must name an actual support label")
@@ -268,7 +276,7 @@ def author_state(args, context, work, endpoint, prior, index, stage, bounds):
 
 def write_episode(args, brief, out, endpoint):
     script, beats, starts = [], [], []
-    prior = ""
+    prior = prior_opening = ""
     for i, chapter in enumerate(brief["chapters"], 1):
         label = f"c{i:02d}"
         chapter_brief = {k: v for k, v in brief.items() if k not in
@@ -286,9 +294,10 @@ def write_episode(args, brief, out, endpoint):
             authored_context = {**chapter_brief, "current_evidence_only":
                                 chapter.get("stage_claims", {}).get(stage[0], chapter["chapter_claims"])}
             section = author_state(args, authored_context, out / "chapters" / label / str(index),
-                                   endpoint, prior, index, stage, target)
+                                   endpoint, prior, prior_opening, index, stage, target)
             sections.append(section)
             prior = " ".join(section["text"].split()[-30:])
+            prior_opening = " ".join(section["text"].split()[:6])
         part, visuals = compile_chapter(chapter_brief, {"sections": [
             {k: v for k,v in section.items() if k != "focus"} for section in sections]}, label, short=False)
         for section, beat in zip(sections, visuals, strict=True):
