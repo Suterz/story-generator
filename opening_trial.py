@@ -248,7 +248,10 @@ def run_opening(args):
                             "visible-split-v7": PROMISE_SPEC + LITERAL_EMBARGO + VISIBLE_SPLIT + QUESTION_BEFORE_ANSWER
                             + SHORT_LINES + LOCKED_PROMISE + EXECUTE,
                             "stable-comparison-v8": STABLE_COMPARISON,
-                            "same-property-v9": STABLE_COMPARISON + SAME_PROPERTY}
+                            "same-property-v9": STABLE_COMPARISON + SAME_PROPERTY,
+                            "source-bound-v10": "source-bound-v10\n" + Path(__file__).with_name("opening_bindings.py").read_text(),
+                            "neutral-question-v11": "neutral-question-v11\n" + Path(__file__).with_name("opening_bindings.py").read_text(),
+                            "bound-options-v12": "bound-options-v12\n" + Path(__file__).with_name("opening_bindings.py").read_text()}
                            [args.opening_preview].encode()).hexdigest()}
     if args.voice.startswith("drama3-") and args.video_repo:
         registry = args.video_repo / "voices/drama3/narrators.json"
@@ -282,9 +285,20 @@ def run_opening(args):
                 continue
             if not (root / "evidence.json").exists():
                 with writer(args, model, root / "intent.log") as endpoint:
+                    intent_brief = brief
+                    if args.opening_preview in ("source-bound-v10", "neutral-question-v11", "bound-options-v12"):
+                        # Misconceptions are editorial negatives, not candidate claims.
+                        intent_brief = {k: v for k, v in brief.items() if k != "misconceptions"}
+                    intent_schema = INTENT
+                    if args.opening_preview == "bound-options-v12" and facts:
+                        import copy
+
+                        intent_schema = copy.deepcopy(INTENT)
+                        intent_schema["properties"]["claims"]["items"]["properties"]["fact_indices"]["items"] = {
+                            "enum": list(range(len(facts)))}
                     intent = ask(endpoint, "Identify indispensable factual claims and their zero-based supporting "
                                  "caller fact indices. Group related facts; do not invent facts or duplicates.",
-                                 brief, INTENT, 850, root / "intent-response.json")
+                                 intent_brief, intent_schema, 850, root / "intent-response.json")
                 claims = extract_claims(intent, facts)
                 ledger = collect(Namespace(**{**vars(args), "out": root}), {"claims": claims},
                                  model, datetime.now(timezone.utc).date())
@@ -304,10 +318,31 @@ def run_opening(args):
                 packet = {**brief, "approved": approved}
                 if previous:
                     packet["repair"] = previous
-                    packet["previous_plan"] = read(root / "attempt-01/plan.json")
+                    previous_plan = root / "attempt-01/plan.json"
+                    if previous_plan.exists():
+                        packet["previous_plan"] = read(previous_plan)
                 with writer(args, model, out / "opening.log") as endpoint:
-                    structured = args.opening_preview in ("stable-comparison-v8", "same-property-v9")
-                    if structured:
+                    source_bound = args.opening_preview in ("source-bound-v10", "neutral-question-v11", "bound-options-v12")
+                    structured = source_bound or args.opening_preview in ("stable-comparison-v8", "same-property-v9")
+                    if source_bound:
+                        from opening_bindings import bound_opening
+
+                        try:
+                            plan = bound_opening(endpoint, packet, approved, out,
+                                                 neutral_question=args.opening_preview != "source-bound-v10",
+                                                 menu=args.opening_preview == "bound-options-v12")
+                        except ValueError as error:
+                            result = {"status": "withheld", "code": "plan_guard", "detail": str(error)}
+                            if (out / "binding-selection.json").is_file():
+                                result["repair"] = "Choose parallel rows and keep the comparison unresolved."
+                            persist(out / "opening-outcome.json", result)
+                            if i == 0:
+                                persist(first, {**identity, **result})
+                                if result.get("repair"):
+                                    previous = result
+                                    continue
+                            break
+                    elif structured:
                         same = args.opening_preview == "same-property-v9"
                         instruction = STABLE_COMPARISON + (SAME_PROPERTY if same else "")
                         state = ask(endpoint, instruction, packet, COMPARISON, 850,

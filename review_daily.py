@@ -105,7 +105,7 @@ def inspect_media(args, story, manifest):
     return decoded, audio, aligned
 
 
-def visual_windows(args, story, manifest, decoded):
+def visual_windows(args, story, manifest, decoded, *, include_previous=True):
     out = args.out
     runtime = Path(os.environ.get("DAILY_RUNTIME_ROOT", Path.home() / "ai/storyboard-rehearsal/fresh"))
     frames = Path(os.environ["DAILY_FRAMES_REPO"])
@@ -116,9 +116,11 @@ def visual_windows(args, story, manifest, decoded):
         next_frame = (manifest["beats"][i+1]["frame"] if i+1 < len(manifest["beats"])
                       else manifest["verification"]["expected_video_frames"])
         middle = (frame+next_frame)//2
-        selected = sorted({frame, max(0, frame - 1)} | ({middle} if middle in frame_number else set()))
+        selected = {frame} | ({middle} if middle in frame_number else set())
+        if include_previous:
+            selected.add(max(0, frame - 1))
         queries.append({"images": [[f"Delivered frame {i}", str(out / f"phone/{frame_number[i]:03d}.png")]
-                                   for i in selected],
+                                   for i in sorted(selected)],
                         "prompt": "Observe the decoded phone-size frames. Transcribe key labels or credits and "
                                   "describe exactly what changes in subjects, positions and quantities. "
                                   "Mention obscured areas and uncertainty. Do not infer unseen values."})

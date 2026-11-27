@@ -31,13 +31,22 @@ OPENING_NOT_ANSWER = (
     "specific words or pixels that expose the correct answer or its embargoed evidence before the planned "
     "reveal. Never diagnose early_reveal because the answer is not yet possible to derive."
 )
+FOCUS_IS_RELATION = (
+    "A comparison's focus can be the relationship between two objects. A speaker can direct attention with "
+    "'this' if the corresponding object is visibly highlighted in that interval. Do not require that the "
+    "viewer choose a winner before the reveal. Check the first intervals one at a time: use decoded_focus_mark "
+    "when present, match the actually spoken reading, then check the question against the stated objective. "
+    "This does not permit giving the answer early, using a wrong measurement, or covering up an incorrect "
+    "spoken assertion. Preserve those independent failures."
+)
 REVIEWERS = {
     "observable-opening-v2": RUBRIC,
     "literal-evidence-v3": LITERAL_FIRST + " " + RUBRIC,
     "unanswered-is-valid-v4": OPENING_NOT_ANSWER + " " + LITERAL_FIRST + " " + RUBRIC,
+    "focus-is-relation-v5": FOCUS_IS_RELATION + " " + LITERAL_FIRST + " " + RUBRIC,
 }
 VERDICT = obj({"status": {"enum": ["accepted", "failed", "uncertain"]},
-               "code": {"enum": ["ok", "unclear_focus", "wrong_value", "wrong_object", "early_reveal",
+               "code": {"enum": ["ok", "unclear_focus", "wrong_value", "wrong_unit", "wrong_object", "early_reveal",
                                   "wrong_route", "illegible", "unsupported", "timing", "unobservable"]},
                "start_seconds": {"type": "number", "minimum": 0},
                "detail": {**TEXT, "maxLength": 420}, "repair": {"type": "string", "maxLength": 320}})
@@ -54,6 +63,16 @@ def heard_numbers(text):
         elif word in tens:
             numbers.add(tens[word] + (ones.get(words[i+1], 0) if i+1 < len(words) else 0))
     return numbers
+
+
+def measured_quantities(text):
+    """Corroborate narrow, unambiguous energy/power forms without dropping the unit."""
+    pattern = (r"(?P<amount>\d+(?:\.\d+)?|[a-z]+(?:[ -][a-z]+)?)\s*"
+               r"(?P<unit>kwh|kw|kilowatt[ -]hours?|kilowatts?)(?![a-z])")
+    for match in re.finditer(pattern, text.casefold()):
+        numbers = heard_numbers(match["amount"])
+        if len(numbers) == 1:
+            yield next(iter(numbers)), ("kWh" if "hour" in match["unit"] or match["unit"] == "kwh" else "kW")
 
 
 def early_quantity(words, quantity, through, origin=0):
@@ -76,7 +95,7 @@ def early_quantity(words, quantity, through, origin=0):
     return None
 
 
-def meter_faults(out, decoded, manifest, words):
+def meter_faults(out, decoded, manifest, words, observed_focus=None):
     """Check the focus mark in actual pixels, not only in the drawing request."""
     media = Path(os.getenv("DAILY_MEDIA", Path.home() / "ai/tools/media/bin"))
     indices = {frame: i for i, frame in enumerate(decoded["frames"], 1)}
@@ -104,9 +123,22 @@ def meter_faults(out, decoded, manifest, words):
                                "repair": "Restore the intended focus state for that beat."})
         if len(focus_marks) != 1:
             continue
+        if observed_focus is not None:
+            mark = focus_marks[0]
+            observed_focus[cue["id"]] = {k: mark[k] for k in ("object", "label", "display")}
         end = decoded["cues"][index+1]["seconds"] if index+1 < len(decoded["cues"]) else decoded["duration"]
-        spoken = heard_numbers("".join(word["word"] for word in words
-                                        if cue["seconds"] <= (word["start"]+word["end"])/2 < end))
+        heard = "".join(word["word"] for word in words if cue["seconds"] <= (word["start"]+word["end"])/2 < end)
+        spoken = heard_numbers(heard)
+        focused_values = set(measured_quantities(focus_marks[0]["display"]))
+        spoken_values = set(measured_quantities(heard))
+        if len(focused_values) == 1 and len(spoken_values) == 1:
+            observed_value, observed_unit = next(iter(spoken_values))
+            expected_value, expected_unit = next(iter(focused_values))
+            if observed_value == expected_value and observed_unit != expected_unit:
+                faults.append({"status": "failed", "code": "wrong_unit", "start_seconds": cue["seconds"],
+                               "detail": f"At this focus the audio says {observed_value:g} {observed_unit}, "
+                                         f"but the reading is {expected_value:g} {expected_unit}.",
+                               "repair": "Correct the spoken unit for this reading and recheck alignment."})
         if len(spoken) != 1:
             continue
         number = next(iter(spoken))
@@ -128,7 +160,8 @@ def review(args, brief, evidence, identity):
     manifest, story = read(out / "manifest.json"), read(out / "story.json")
     lock = {"mp4_sha256": hashlib.sha256((out / "video.mp4").read_bytes()).hexdigest(),
             "manifest_sha256": digest(manifest), "configuration_sha256": digest(identity),
-            "evidence_sha256": digest(evidence), "story_sha256": digest(story)}
+            "evidence_sha256": digest(evidence), "story_sha256": digest(story),
+            "observation_version": "current-beat-frames/2"}
     existing = out / "local-opening-verdict.json"
     if existing.exists():
         cached = read(existing)
@@ -136,19 +169,21 @@ def review(args, brief, evidence, identity):
             raise ValueError("opening review input changed")
         return cached
     decoded, words, _ = inspect_media(args, story, manifest)
-    faults = meter_faults(out, decoded, manifest, words)
+    observed_focus = {}
+    faults = meter_faults(out, decoded, manifest, words, observed_focus)
     persist(out / "decoded-meter-checks.json", faults)
     if faults:
         result = {**faults[0], **lock, "reviewer": "decoded-meter-probes/1"}
         persist(existing, result)
         return result
-    observations = visual_windows(args, story, manifest, decoded)
     starts = [cue["seconds"] for cue in decoded["cues"]]
+    observations = visual_windows(args, story, manifest, decoded, include_previous=False)
     intervals = []
     for i, (start, observed) in enumerate(zip(starts, observations, strict=True)):
         end = starts[i+1] if i+1 < len(starts) else decoded["duration"]
-        intervals.append({"start": start, "end": end, "pixels": observed,
+        intervals.append({"start": start, "end": end, "pixels": observed, "frame_scope": "Current beat only",
                           "heard": "".join(w["word"] for w in words if start <= (w["start"]+w["end"])/2 < end),
+                          "decoded_focus_mark": observed_focus.get(decoded["cues"][i]["id"]),
                           "frame_receipt": manifest["panels"][i].get("daily_visual", {}).get("route")})
     packet = {"objective": brief["objective"], "facts": brief.get("facts", []), "sources": evidence,
               "duration": decoded["duration"], "delivered": intervals}

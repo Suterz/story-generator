@@ -3,6 +3,7 @@ import argparse
 import hashlib
 import json
 from pathlib import Path
+from qualification_stats import lower_successes
 
 
 def read(path):
@@ -19,7 +20,8 @@ def score(seal, labels, results, qualification=False):
     if lock["labels_sha256"] != sha(labels) or set(lock["clips"]) != set(truth):
         raise ValueError("reveal key does not match the predeclared seal")
     counts = {"bad": 0, "good": 0, "bad_accepted": 0, "good_withheld": 0,
-              "correctly_localized": 0, "incorrect_diagnosis_on_withholds": 0}
+              "correctly_localized": 0, "incorrect_diagnosis_on_withholds": 0,
+              "critical_bad": 0, "critical_localized": 0}
     details = {}
     tolerance = lock["timing_tolerance_seconds"]
     for case, label in truth.items():
@@ -37,18 +39,30 @@ def score(seal, labels, results, qualification=False):
         counts[quality] += 1
         counts["bad_accepted"] += quality == "bad" and accepted
         counts["good_withheld"] += quality == "good" and not accepted
+        critical = quality == "bad" and label.get("critical", True)
+        counts["critical_bad"] += critical
         localized = False
         if quality == "bad" and not accepted:
             moment = prediction["start_seconds"]
             start, end = label["interval_seconds"]
-            localized = prediction["code"] == label["defect"] and start-tolerance <= moment <= end+tolerance
+            localized = (prediction["status"] == "failed" and prediction["code"] == label["defect"]
+                         and start-tolerance <= moment <= end+tolerance)
             counts["correctly_localized"] += localized
             counts["incorrect_diagnosis_on_withholds"] += not localized
+            counts["critical_localized"] += critical and localized
         details[case] = {"label": label, "prediction": prediction, "localized": localized}
     if qualification and (counts["bad"] != 12 or counts["good"] != 12):
         raise ValueError("qualification requires 12 bad and 12 good cases")
-    counts["gate_passed"] = bool(qualification and counts["bad_accepted"] == 0 and counts["good_withheld"] <= 1)
-    return {"counts": counts, "details": details, "rubric": lock["rubric"]}
+    counts["gate_passed"] = bool(qualification and counts["bad_accepted"] == 0 and counts["good_withheld"] <= 1
+                                and counts["critical_localized"] == counts["critical_bad"])
+    confidence = {}
+    for metric, events, total in (("bad_accepted", counts["bad_accepted"], counts["bad"]),
+                                  ("good_withheld", counts["good_withheld"], counts["good"]),
+                                  ("correctly_localized", counts["correctly_localized"], counts["bad"])):
+        confidence[metric] = {"numerator": events, "denominator": total,
+                              "one_sided_95_lower": lower_successes(events, total),
+                              "one_sided_95_upper": 1-lower_successes(total-events, total) if total else None}
+    return {"counts": counts, "confidence": confidence, "details": details, "rubric": lock["rubric"]}
 
 
 if __name__ == "__main__":
