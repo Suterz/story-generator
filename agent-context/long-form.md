@@ -1,5 +1,11 @@
 # Long-form development
 
+## 2026-11-27 — Flagships requalified; transfer rerender underway
+
+- Candidate 11 (`58c59cb`, video `f97b944` on 8941, frames `050f932`) independently passed all three new flagship MP4s on that exact freeze. Clock 226.77 s, bank 235.90 s, citation 209.10 s. The clock and bank needed zero automatic repairs; the citation used two automatic writing revisions. Phone-size decoded frames, cue timing, and delivered MP4 ASR were reviewed without listening.
+- Candidate 09's remaining transfers are terminal: map exported with factual narration errors about Greenland and South America; average pay was withheld at cue corroboration and its draft also ended on an incorrect mean. The corrected map and salary state facts are in `58c59cb`. The archived percentage PCM binds the intended “you’d” on the new timing at 29.12 s in its chapter; the original refusal remains.
+- The normal candidate 11 transfer run and audit have started for 04–10. Candidate 09's published flagship MP4s and chapter previews remain intact. A verified copy of the published candidate 09 watch folder, key, and evidence is at `Evidence/Published candidate 09/`; keep it when preparing any replacement.
+
 ## 2026-11-27 — Transfer failures after flagship qualification
 
 - Candidate 09 transfers 04, 05, 07 and 08 exported but failed independent review. The seasons lesson says shallow rays scatter and gives the angles before the panel changes; the queue lesson assigns D the wrong departure event and mixes the two queue cases; the shutter lesson names the 40-pixel streak while only the 10-pixel panel is visible; the source-check lesson attributes Brame's review quote to Guo's methods. Negatives are tied to the original MP4 hashes in the run store and the XPS evidence folder.
