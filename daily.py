@@ -351,7 +351,10 @@ def run_daily(args):
                         f"{skill}\nPlan three or four chapters for this portrait explanation. Teach in evidence order. "
                         "Give a distinct one-sentence goal of at most twelve words per chapter. Use four chapters "
                         "when the brief asks for at least three minutes. "
-                        "Open directly on a picture and compelling question or promise. Choose a visual "
+                        "Open directly on a picture that poses the question. If the comparison depends on "
+                        "readings, positions or relationships, choose a schematic with the opening evidence "
+                        "visible at phone size; a generic illustration does not establish the comparison. "
+                        "Choose a visual "
                         "for the evidence: exact for quantities and persistent objects, authentic for real "
                         "items whose appearance matters, illustration when appearance may vary. "
                         "Return only the requested JSON.", packet, DAILY_OUTLINE if ordinary else OUTLINE,
@@ -381,6 +384,9 @@ def run_daily(args):
                             'For documentary use {"subject":"short public search phrase or stated catalog key"}; '
                             "for an illustration use an empty object. "
                             "Speak quantities in words, without digits or abbreviated units. "
+                            "For the opening, point at recognizable evidence in the very first spoken line. "
+                            "Use concrete observations rather than announcing the topic. For prediction openings, "
+                            "initially conceal the decisive unknown and do not say the answer before it appears. "
                             "Do not invent data. Follow the selected chapter goal without repeating earlier chapters.",
                             {"brief": packet, "chapter": chapter, "previous": chapters[-1:],
                              "opening": outline.get("hook") if i == 0 else None,
