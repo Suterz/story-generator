@@ -61,6 +61,8 @@ def run(args):
             raise ValueError(f"brief changed after sealing: {slot}")
     repos = freeze["repositories"]
     runtime = freeze["runtime"]
+    if not runtime.get("draft_gallery"):
+        raise ValueError("freeze must name the automatic draft-gallery destination")
     endpoint = urlsplit(runtime["video_url"])
     if endpoint.scheme != "http" or endpoint.hostname != "127.0.0.1":
         raise ValueError("video service must be on loopback")
@@ -68,6 +70,7 @@ def run(args):
     output.mkdir(parents=True, exist_ok=False)
     environment = {**os.environ, "DAILY_FREEZE": str(args.freeze.resolve()),
                    "DAILY_FRAMES_REPO": repos["frames"]["path"], "DAILY_VIDEO_REPO": repos["video"]["path"],
+                   "DAILY_DRAFT_GALLERY": runtime["draft_gallery"],
                    "HF_HUB_OFFLINE": "1", "TRANSFORMERS_OFFLINE": "1"}
     persist(output / "batch.json", {"seal_sha256": sha(args.seal), "freeze_sha256": sha(args.freeze),
                                    "started": datetime.now(timezone.utc).isoformat()})
@@ -76,7 +79,7 @@ def run(args):
         folder.mkdir()
         command = [sys.executable, "-B", str(Path(repos["story"]["path"]) / "storygen.py"),
                    "run", str(args.briefs / f"{slot}.json"), "--out", str(folder),
-                   "--model", runtime["writer"], "--voice", "heart",
+                   "--model", runtime["writer"], "--voice", runtime.get("voice", "heart"),
                    "--video-url", runtime["video_url"], "--runtime", runtime["llama"],
                    "--models", runtime["weights"], "--lease", runtime["lease"],
                    "--validator-python", runtime["validator_python"],
@@ -89,12 +92,22 @@ def run(args):
             except subprocess.TimeoutExpired:
                 rc = "timeout"
         first = folder / "first-outcome.json"
+        terminal = folder / "terminal-outcome.json"
         if not first.exists():
-            persist(first, {"status": "infrastructure_stop", "reason": f"runner exit: {rc}",
-                            "brief_file_sha256": cases[slot], "freeze_sha256": sha(args.freeze)})
+            attempt = folder / "attempt-01" / "first-outcome.json"
+            if attempt.exists():
+                persist(first, read(attempt))
+            else:
+                persist(first, {"status": "infrastructure_stop", "reason": f"runner exit: {rc}",
+                                "brief_file_sha256": cases[slot], "freeze_sha256": sha(args.freeze)})
+        if not terminal.exists():
+            persist(terminal, {"status": "infrastructure_stop", "reason": f"runner exit: {rc}",
+                               "brief_file_sha256": cases[slot], "freeze_sha256": sha(args.freeze)})
         persist(folder / "measurement.json", {"wall_seconds": time.monotonic() - started,
-                    "exit": rc, "first_outcome_sha256": sha(first), "manual_interventions_observed_by_runner": 0})
+                    "exit": rc, "first_outcome_sha256": sha(first), "terminal_outcome_sha256": sha(terminal),
+                    "manual_interventions_observed_by_runner": 0})
         first.chmod(0o444)
+        terminal.chmod(0o444)
 
 
 if __name__ == "__main__":

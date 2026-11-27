@@ -867,6 +867,7 @@ def main():
     p.add_argument("--lease", type=Path, default=HOME / "ai/storyboard-build/v2/gpu.lock")
     p.add_argument("--voice", choices=("heart", "ryan"), default="ryan")
     p.add_argument("--raw-text", action="store_true", help="read a rough brief from a text file or stdin (-)")
+    p.add_argument("--daily", action="store_true", help="adapt an unstaged episode brief for daily authoring")
     p.add_argument("--communication-skill", help="version of the shared communication skill to test")
     p.add_argument("--episode-skill", choices=("routed", "baseline", "entities", "purpose", "continuity",
                                                "visual-first", "verification"), default="routed")
@@ -890,9 +891,14 @@ def main():
         fcntl.flock(lock, fcntl.LOCK_EX | fcntl.LOCK_NB)
         try:
             if (not args.raw_text and args.command == "run" and args.input.is_file()
-                    and read(args.input).get("schema_version") == "daily/1"):
+                    and (args.daily or read(args.input).get("schema_version") in ("daily/1", "daily/2"))):
                 from daily import run_daily
-                run_daily(args)
+                if args.daily or read(args.input).get("schema_version") == "daily/2":
+                    from daily_flow import ordinary_run
+
+                    ordinary_run(args)
+                else:
+                    run_daily(args)
                 return
             if (not args.raw_text and args.command in ("write", "run") and args.input.is_file()
                     and read(args.input).get("schema_version") == "episode/1"):
