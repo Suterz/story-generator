@@ -11,6 +11,9 @@ import time
 from urllib.parse import urlsplit
 
 from daily_evidence import persist
+from jsonschema import Draft202012Validator
+
+from daily import ORDINARY
 
 
 def sha(path):
@@ -57,8 +60,10 @@ def run(args):
     if sorted(cases) != ["01", "02", "03", "04", "05"] or not release["expected_outcome_commitment"]:
         raise ValueError("sealed release requires five brief hashes and a separate outcome commitment")
     for slot, expected in cases.items():
-        if sha(args.briefs / f"{slot}.json") != expected:
+        path = args.briefs / f"{slot}.json"
+        if sha(path) != expected:
             raise ValueError(f"brief changed after sealing: {slot}")
+        Draft202012Validator(ORDINARY).validate(read(path))
     repos = freeze["repositories"]
     runtime = freeze["runtime"]
     if not runtime.get("draft_gallery"):

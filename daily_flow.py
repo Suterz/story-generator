@@ -47,6 +47,13 @@ def deliver(attempt, destination):
         subprocess.run([str(media / "ffmpeg"), "-v", "error", "-xerror", "-i", str(copied),
                         "-map", "0:v:0", "-map", "0:a:0", "-f", "null", "-"],
                        check=True, timeout=310)
+        next_chapter = next(iter(manifest.get("chapter_starts", [])[1:]), None)
+        cut = next((row["start_sample"] / 48000 for row in manifest.get("speech_groups", [])
+                    if row["first_utterance"] == next_chapter), 25)
+        opening = stage / "opening.mp4"
+        subprocess.run([str(media / "ffmpeg"), "-v", "error", "-xerror", "-i", str(copied),
+                        "-t", str(min(cut, 45)), "-map", "0:v:0", "-map", "0:a:0", "-c:v", "libx264",
+                        "-pix_fmt", "yuv420p", "-c:a", "aac", str(opening)], check=True, timeout=150)
         credits = {}
         for row in manifest["panels"]:
             rights = row.get("daily_visual", {}).get("rights")
@@ -56,6 +63,7 @@ def deliver(attempt, destination):
                 credits[rights["sha256"]] = rights
         persist(stage / "credits.json", list(credits.values()))
         persist(stage / "outcome.json", outcome)
+        persist(stage / "media-sha256.json", {"video.mp4": sha(copied), "opening.mp4": sha(opening)})
         persist(stage / "scene-decisions.json", [{"id": row["id"], "frame_sha256": row["sha256"],
                                                  **row.get("daily_visual", {})}
                                                 for row in manifest["panels"]])
