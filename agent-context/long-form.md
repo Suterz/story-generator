@@ -1,5 +1,10 @@
 # Long-form development
 
+## 2026-11-27 — Candidate 13 requalified
+
+- All three fresh Candidate 13 flagship MP4s independently passed on `3e1a726` / `39eeed6` / `050f932` at 226.77, 235.90, and 209.10 seconds. Automatic writer revisions: 0, 0, and 2. Evidence is decoded phone-size before/on cue frames, timing manifests, and ASR of the delivered MP4s; no listening.
+- The transfer and media-audit jobs are now running slots 04–10 after the same-freeze gate. Candidate 09 remains the sole published set; its archive and existing chapter previews are unchanged.
+
 ## 2026-11-27 — Three transfer passes; remaining narration fixes
 
 - Candidate 12 passed 07 shutter (167.60 s, one automatic writing revision), 08 source check (168.70 s, zero), and 09 map (186.77 s, zero). Their judgments bind to the returned clip hashes and Candidate 12 freeze. Combined with the trio, six episodes passed on that freeze; only the three older published flagships remain in the XPS playlist.
