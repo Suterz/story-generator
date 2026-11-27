@@ -1,5 +1,11 @@
 # Long-form development
 
+## 2026-11-27 — One transfer passed; next requalification started
+
+- Candidate 11's shutter episode (07) independently passed at 158.37 s with one automatic writing revision. The 40-pixel comparison arrives at 1:37.87. The other six transfers did not pass: 04 confuses the southern comparison heading and asserts equal Earth–Sun distance across months; 05 speaks the prediction answer early; 08 points to titles not on screen; 06 and 10 were withheld at speech checks; 09's guard rejected a legitimate equal-area patch sentence.
+- Candidate 12 freezes storyteller `cb1bbf7`, video `39eeed6` on 8942 and frames `050f932`. The revised map labels its patches, the southern comparison has its own heading, and transfer narration gets only the current state's claims. Exact-PCM replay corroborates the original $100 cue and rejects a substituted $1,000. The archived payroll chapter still scores below the ASR threshold after numeric normalization; do not count the diagnostic as a pass.
+- Candidate 09 remains published and archived. Candidate 12 must pass its flagship trio before transfer jobs can launch. Do not mix the passing Candidate 11 shutter episode into another freeze.
+
 ## 2026-11-27 — Flagships requalified; transfer rerender underway
 
 - Candidate 11 (`58c59cb`, video `f97b944` on 8941, frames `050f932`) independently passed all three new flagship MP4s on that exact freeze. Clock 226.77 s, bank 235.90 s, citation 209.10 s. The clock and bank needed zero automatic repairs; the citation used two automatic writing revisions. Phone-size decoded frames, cue timing, and delivered MP4 ASR were reviewed without listening.
