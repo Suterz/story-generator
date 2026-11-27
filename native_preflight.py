@@ -45,7 +45,7 @@ def check_label_spacing(panel, session, temp):
 def main():
     raw = json.load(sys.stdin)
     try:
-        model = api.EpisodeVideo if "chapter_starts" in raw else api.Video
+        model = api.episode_model(raw) if "chapter_starts" in raw else api.Video
         video = model.model_validate(raw)
         session = Session.model_validate(video.visual)
         with TemporaryDirectory(prefix="storygen-preflight-") as folder:

@@ -822,7 +822,8 @@ def render(args, story):
     receipt = out / "submission.json"
     base = args.video_url.rstrip("/")
     info = {"key": key, "digest": digest, "endpoint": base}
-    route = "/v2/episodes" if "chapter_starts" in story else "/v2/renders"
+    route = ("/v2/openings" if story.get("opening_preview") else
+             "/v2/episodes" if "chapter_starts" in story else "/v2/renders")
     if receipt.exists():
         if read(receipt) != info:
             raise ValueError("cannot resume with a different story or endpoint")
@@ -865,7 +866,11 @@ def main():
     p.add_argument("--models", type=Path, default=HOME / "ai/storyboard-rehearsal/writer/models")
     p.add_argument("--runtime", type=Path, default=HOME / "ai/storyboard-rehearsal/writer/runtime/build/bin/llama-server")
     p.add_argument("--lease", type=Path, default=HOME / "ai/storyboard-build/v2/gpu.lock")
-    p.add_argument("--voice", choices=("heart", "ryan"), default="ryan")
+    p.add_argument("--voice", choices=("heart", "ryan", "drama3-A", "drama3-E", "drama3-F"), default="ryan")
+    p.add_argument("--opening-preview", choices=("baseline-v1", "visible-question-v2", "question-before-answer-v3"),
+                   help="render and adjudicate a daily/2 opening without making a full film")
+    p.add_argument("--opening-reviewer", choices=("observable-opening-v2", "literal-evidence-v3"),
+                   default="observable-opening-v2")
     p.add_argument("--raw-text", action="store_true", help="read a rough brief from a text file or stdin (-)")
     p.add_argument("--daily", action="store_true", help="adapt an unstaged episode brief for daily authoring")
     p.add_argument("--communication-skill", help="version of the shared communication skill to test")
@@ -893,7 +898,11 @@ def main():
             if (not args.raw_text and args.command == "run" and args.input.is_file()
                     and (args.daily or read(args.input).get("schema_version") in ("daily/1", "daily/2"))):
                 from daily import run_daily
-                if args.daily or read(args.input).get("schema_version") == "daily/2":
+                if args.opening_preview:
+                    from opening_trial import run_opening
+
+                    run_opening(args)
+                elif args.daily or read(args.input).get("schema_version") == "daily/2":
                     from daily_flow import ordinary_run
 
                     ordinary_run(args)
