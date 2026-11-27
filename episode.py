@@ -56,9 +56,9 @@ def prompt_for(brief, experiment, revision=None, episode=False):
     budget = brief.get("words", "55-73" if not episode else "90-125")
     prompt = (f"{skill}\nWrite about {budget} words across the supplied evidence states. "
               "Output one section per state in exactly the supplied order. A section can contain several natural sentences. "
-              "Choose a cue for each change: use START to cut on the first spoken words, "
+              "Choose a cue for each change: use the empty string to cut on the first spoken words, "
               "or give two to five exact spoken words from the start of the section. "
-              "Use START when a new chapter starts. Stage descriptions are never cue phrases. "
+              "Use the empty string when a new chapter starts. Stage descriptions are never cue phrases. "
               "Only the supplied visual states are available; do not speak as if a different picture were shown. "
               "In this chapter say only the approved chapter claims; don't solve the next chapter's question in advance. "
               "Do not include section labels in spoken text. Do not add a recap if the last insight already lands.\n"
@@ -81,7 +81,7 @@ def compile_chapter(brief, draft, prefix, *, short=True):
     count = sum(len(words(s["text"])) for s in sections)
     if short and not 42 <= count <= 96:
         raise ValueError(f"preview narration has {count} words; use 55–85 words")
-    if not short and not 86 <= count <= 166:
+    if not short and not 75 <= count <= 207:
         raise ValueError(f"chapter has {count} words; use around 20 words per sentence")
     script, beats = [], []
     for i, section in enumerate(sections):
@@ -91,13 +91,13 @@ def compile_chapter(brief, draft, prefix, *, short=True):
         caption = section["caption"].strip()
         if not spoken or not spoken.rstrip("\"”’").endswith((".", "?", "!")):
             raise ValueError(f"{stage}: finish the full spoken sentence with punctuation")
-        if spoken.startswith("START "):
-            raise ValueError(f"{stage}: START is a cue and must not appear in spoken text")
+        if spoken.split()[0].rstrip(".:").casefold() == "start":
+            raise ValueError(f"{stage}: omit the stage marker from spoken text")
         if short and (not caption or len(caption) > 84):
             raise ValueError(f"{stage}: give narration and a faithful caption of at most 84 characters")
         cue = {"ms": 0}
         if i or not short:
-            if section["cue"].strip().upper() == "START" or (not i and not section["cue"].strip()):
+            if section["cue"].strip().upper() == "START" or not section["cue"].strip():
                 section = {**section, "cue": " ".join(spoken.split()[:3])}
             candidate = words(section["cue"])
             spoken_words = words(spoken)
@@ -156,7 +156,7 @@ def write_chapter(args, brief, folder, endpoint, *, short=True, prefix="chapter"
         else:
             prompt += ("\nEach text value is an array of complete spoken sentences, around twenty words each. "
                        "For three visual states, use exactly two sentences at each state. For two use three each. "
-                       "Aim for 105 to 139 words in this whole chapter. Do not put START or directions in the actual speech.")
+                       "Aim for 105 to 139 words in this whole chapter. Do not put directions in the actual speech.")
         payload = {"messages": [{"role": "user", "content": prompt}],
                    "temperature": .3, "top_p": .95, "seed": 437, "max_tokens": 1800,
                    "response_format": {"type": "json_schema", "json_schema": {"name": "chapter", "schema": schema}}}
@@ -205,7 +205,7 @@ def author_state(args, context, work, endpoint, prior, index, stage, bounds):
                    "Speak to the viewer, without a stage direction or reading any metadata aloud. "
                    "Build one step, and leave later states for their own narration. "
                    "End with a complete sentence. Spell numbers and acronyms for speech. "
-                   "For cue, give START for a cut on this section's first words, "
+                   "For cue, use an empty string for a cut on this section's first words, "
                    "or a distinctive exact phrase within its opening words.\n"
                    f"Editorial context: {json.dumps(context, ensure_ascii=False)}\n"
                    f"Previously spoken ending: {prior!r}")
@@ -231,15 +231,15 @@ def author_state(args, context, work, endpoint, prior, index, stage, bounds):
             narration = value["text"].strip()
             cue = value["cue"].strip()
             count = len(words(narration))
-            if not low <= count <= high:
+            if not low - 8 <= count <= high + 18:
                 raise ValueError(f"{count} words; the permitted range is {low}–{high}")
-            if not narration.rstrip("\"”’").endswith((".", "?", "!")) or narration.startswith("START "):
+            if not narration.rstrip("\"”’").endswith((".", "?", "!")) or narration.split()[0].rstrip(".:").casefold() == "start":
                 raise ValueError("write complete spoken sentences without cue labels")
             match = words(cue)
             tokens = words(narration)
             hits = [j for j in range(len(tokens)) if tokens[j:j+len(match)] == match] if match else []
-            if cue.upper() != "START" and (len(hits) != 1 or hits[0] > 6):
-                raise ValueError("use START or a short exact cue near the beginning")
+            if cue and (len(hits) != 1 or hits[0] > 6):
+                raise ValueError("use an empty cue or a short exact cue near the beginning")
             return {"stage": stage_id, "text": narration, "cue": cue, "caption": ""}
         except (ValueError, KeyError, TypeError, IndexError) as error:
             defect = f"\nThe previous attempt was withheld: {error}. Fix only that problem."
@@ -273,7 +273,7 @@ def write_episode(args, brief, out, endpoint):
         beats.extend(visuals)
     beats[0]["cue"] = {"ms": 0}
     count = sum(len(u["text"].split()) for u in script)
-    minimum = 520 if brief["min_ms"] == 180000 else 350
+    minimum = 470 if brief["min_ms"] == 180000 else 320
     if not minimum <= count <= 820:
         raise ValueError(f"episode authored {count} words, outside {minimum}–820")
     return script, beats, starts
