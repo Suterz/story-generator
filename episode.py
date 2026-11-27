@@ -148,6 +148,15 @@ def plain_narration(value):
                   lambda m: m[1] if m[1] is not None else m[2], value).strip()
 
 
+def check_clock_explanation(stage, narration):
+    if stage == "shift" and re.search(r"\b(?:five|5)[ -]units?\b", narration, re.I):
+        raise ValueError("at the shift, explain the new mirror position without giving the five-unit path length")
+    if stage == "one-year" and re.search(
+            r"\bstretch\w*.{0,30}\bearth(?:['’]s| frame)?\s+clock\b|"
+            r"\bearth(?:['’]s| frame)?\s+clock.{0,25}\b(?:speeds|slows|stretch\w*)\b", narration, re.I):
+        raise ValueError("Earth-frame elapsed time is about 7.09 years; Earth's clock did not change rate")
+
+
 def write_chapter(args, brief, folder, endpoint, *, short=True, prefix="chapter"):
     from storygen import read, request, save
 
@@ -257,6 +266,7 @@ def author_state(args, context, work, endpoint, prior, prior_opening, index, sta
                     r"\bnine[- ]tenths\b|\b0\.9\s*c\b|\bninety percent\b", narration, re.I):
                 raise ValueError("the supplied speed is ninety-nine percent of light speed, not ninety percent")
             if context["obligation"] == "spatial" and not context.get("visual_fixture"):
+                check_clock_explanation(stage_id, narration)
                 if stage_id in {"ship","shift","path"} and re.search(
                         r"\b(?:four|five|[45])[- ]+units? of time\b|"
                         r"\b(?:not|does not) (?:travel(?:s|ing)? )?sideways\b|"

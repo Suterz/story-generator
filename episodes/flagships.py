@@ -52,7 +52,8 @@ def assemble():
     a["chapters"][3]["stage_claims"] = {
         "speed": ["This is a new demonstration: ninety-nine percent of the speed of light.",
                   "Show a one year reading on the ship for this constant-speed leg. Earth number is still hidden."],
-        "one-year": ["Ninety-nine percent of light speed, exactly as shown. One year on ship; about seven point zero nine years of Earth-frame time."],
+        "one-year": ["For this one constant-speed leg at ninety-nine percent of light speed, one year passes on the ship clock. About seven point zero nine years elapse between the same endpoints in the Earth frame.",
+                     "The factor is about seven point zero nine for this speed. The compared intervals differ; nobody changes the rate of a clock on Earth."],
         "compare-years": ["Both clocks work normally, but they do not assign the same elapsed time to this leg.",
                           "The traveler feels normal because their watch and everything aboard follow the same local time.",
                           "This is one constant-speed leg, not the full trip."],
@@ -66,7 +67,7 @@ def assemble():
     a["chapters"][2]["stage_claims"] = {
         "ship": ["The same pulse travels upward from emission E at the lower mirror to reflection R at the upper mirror in the ship frame. Four units."],
         "shift": ["The whole ship shifts three units sideways in Earth's frame between emission and reflection.",
-                  "The new upper-mirror position is marked R. Save the complete light path for the next visual."],
+                  "The shifted upper-mirror position is marked R. The diagonal is not yet drawn. Let the viewer predict how the new mirror location changes the light path. Do not give the path length yet."],
         "path": ["The diagonal leaves E and arrives at R at the new upper mirror position; five units versus four in the ship.",
                  "Both frames measure the same light speed. Earth therefore assigns more time to this same half-tick, emission to reflection."],
     }

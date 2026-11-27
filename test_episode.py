@@ -4,13 +4,22 @@ import json
 from copy import deepcopy
 from pathlib import Path
 
-from episode import compile_chapter, skill_for
+from episode import check_clock_explanation, compile_chapter, skill_for
 from episode_graphics import CITATION_PACKET, bank, citation, clock, ledger_at, light_events
 from source_pack import evidence_for
 from transfer_graphics import project, queue_at
 
 
 class EvidenceTests(unittest.TestCase):
+    def test_clock_answer_follows_the_path_and_does_not_change_the_earth_clock(self):
+        with self.assertRaisesRegex(ValueError, "without giving"):
+            check_clock_explanation("shift", "The light path stretches to five units.")
+        check_clock_explanation("shift", "The mirror is three units farther right at reflection.")
+        check_clock_explanation("path", "The light path is five units.")
+        with self.assertRaisesRegex(ValueError, "did not change"):
+            check_clock_explanation("one-year", "The path through space stretches Earth’s clock’s numbers.")
+        check_clock_explanation("one-year", "Earth measures about seven point zero nine years for that leg.")
+
     def test_clock_rays_end_on_the_same_named_mirror_event(self):
         emission, reflection = light_events((.39, .76), 3)
         overlays = clock("path")
