@@ -1,5 +1,11 @@
 # Long-form development
 
+## 2026-11-27 — Seven passes on Candidate 14
+
+- Candidate 14's full review is complete. The trio and transfers 04 seasons, 07 shutter, 08 source check, and 09 maps passed (7/10 on the same freeze). The three remaining exports were incorrect: queue reversed the delayed arrival comparison and counted two new arrivals at minute two; percentage gave the result before its reveal and called the increase a subtraction; payroll described one salary as absent on the original roster and attributed the mean increase to group size alone.
+- Original negative judgments and rendered evidence are hash-bound and saved. The targeted guard replay rejects the observed queue and price statements without rejecting the Candidate 14 seasons narration. Candidate 15 (`7b8d05f`, video `2dca361` on 8943, frames `050f932`) now reruns the entire flagship trio before transfers.
+- Candidate 09 remains the published trio. Do not mix candidates or replace the published set before a verified complete successor.
+
 ## 2026-11-27 — Candidate 14 requalified
 
 - The three fresh flagship films passed independently on storyteller `1c5e7aa`, video `2dca361`, frames `050f932`, endpoint 8943. Runtimes were 226.77 s, 235.90 s, and 209.10 s; automatic writer revisions were 0, 0, and 2. The hash-bound judgments use decoded phone-size frames before and on cue boundaries, cue timing, and ASR of the delivered MP4s. No listening was performed.
