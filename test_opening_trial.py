@@ -5,7 +5,7 @@ import unittest
 from daily_evidence import persist
 from opening_score import score, sha
 from opening_review import early_quantity, heard_numbers
-from opening_trial import compile_preview, repair_focus
+from opening_trial import compile_preview, guard_promise, repair_focus
 
 
 class OpeningTests(unittest.TestCase):
@@ -19,6 +19,18 @@ class OpeningTests(unittest.TestCase):
         self.assertEqual(early_quantity(heard, 80, 12, origin=10)["start_seconds"], 11.2)
         self.assertIsNone(early_quantity(heard, 80, 11, origin=10))
         self.assertIsNone(early_quantity(heard, 75, 12, origin=10))
+
+    def test_opening_guard_requires_promise_and_hidden_value(self):
+        objective = {"line": "Which battery did better?", "withheld": [80]}
+        plan = {"states": [{"narration": objective["line"], "visual_data": {
+            "rows": [["First battery", 75], ["Second battery", 80]]}}]}
+        with self.assertRaisesRegex(ValueError, "image includes"):
+            guard_promise(plan, objective)
+        plan["states"][0]["visual_data"]["rows"].pop()
+        guard_promise(plan, objective)
+        plan["states"][0]["narration"] = "Today, battery efficiency."
+        with self.assertRaisesRegex(ValueError, "omitted"):
+            guard_promise(plan, objective)
 
     def test_focus_repair_keeps_reading_values_and_speech(self):
         meters = [{"object": key, "readings": [{"label": "return", "display": str(value),

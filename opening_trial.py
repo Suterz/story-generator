@@ -40,6 +40,13 @@ QUESTION_BEFORE_ANSWER = (
     "use local artwork when it is only illustrative. Ask what makes the observation surprising."
 )
 SHORT_LINES = " Make each narration field one sentence of seven to ten words. Four short lines, not paragraphs."
+PROMISE_SPEC = (
+    "Choose a good opening for this viewer. Write one short spoken question or promise. Specify what evidence "
+    "must be visible before it and the answer or evidence that belongs AFTER the opening. Choose a prediction "
+    "only if viewers can make a fair guess. Do not teach the answer yet."
+)
+LOCKED_PROMISE = (" Use the locked promise verbatim in a spoken line. All states occur before the answer. "
+                  "Do not put the withheld evidence into narration, captions, titles or drawings.")
 EXECUTE = ("Write one short opening chapter, three or four visual states, roughly 30–40 spoken words in total. "
            "Write spoken numbers as words and use digits in labels. "
            'visual_data for exact is {"operation":"meters","meters":[{"object":"name","readings":'
@@ -51,6 +58,28 @@ SCENE = obj({**SECTION["properties"], "kind": {"enum": ["exact", "authentic", "i
              "route_reason": {**TEXT, "maxLength": 180}},
             ["narration", "visible", "claim_ids", "visual_data", "kind"])
 OPEN = obj({"promise": {**TEXT, "maxLength": 120}, "states": array(SCENE, 3, 4)})
+PROMISE = obj({"line": {**TEXT, "maxLength": 85}, "visible_now": {**TEXT, "maxLength": 180},
+               "withheld": array({"type": "number"}, maximum=5), "why_wait": {**TEXT, "maxLength": 170}})
+
+
+def guard_promise(plan, lock):
+    import re
+    from opening_review import heard_numbers
+
+    promise = lock["line"].strip()
+    spoken = " ".join(s["narration"] for s in plan["states"])
+    if promise.casefold() not in spoken.casefold():
+        raise ValueError("opening omitted its locked spoken promise")
+    embargoed = set(lock["withheld"])
+    if embargoed & heard_numbers(spoken):
+        raise ValueError("opening narration includes an embargoed quantity")
+    for state in plan["states"]:
+        data = state["visual_data"]
+        visible = [r["display"] for m in data.get("meters", []) for r in m["readings"]]
+        visible += [str(row[1]) for row in data.get("rows", [])]
+        numbers = {float(n) for n in re.findall(r"\d+(?:\.\d+)?", " ".join(visible))}
+        if embargoed & numbers:
+            raise ValueError("opening image includes an embargoed quantity")
 
 
 def compile_preview(brief, plan, approved, voice):
@@ -134,7 +163,8 @@ def run_opening(args):
                        "instruction_sha256": hashlib.sha256(
                            {"baseline-v1": BASELINE + EXECUTE, "visible-question-v2": VISIBLE_QUESTION + EXECUTE,
                             "question-before-answer-v3": QUESTION_BEFORE_ANSWER + EXECUTE,
-                            "short-question-v4": QUESTION_BEFORE_ANSWER + SHORT_LINES + EXECUTE}
+                            "short-question-v4": QUESTION_BEFORE_ANSWER + SHORT_LINES + EXECUTE,
+                            "locked-promise-v5": PROMISE_SPEC + QUESTION_BEFORE_ANSWER + SHORT_LINES + LOCKED_PROMISE + EXECUTE}
                            [args.opening_preview].encode()).hexdigest()}
     if args.voice.startswith("drama3-") and args.video_repo:
         registry = args.video_repo / "voices/drama3/narrators.json"
@@ -198,13 +228,32 @@ def run_opening(args):
                         instruction = "Follow the proposed opening. " + EXECUTE
                     else:
                         selected = VISIBLE_QUESTION if args.opening_preview == "visible-question-v2" else QUESTION_BEFORE_ANSWER
-                        if args.opening_preview == "short-question-v4":
+                        if args.opening_preview in ("short-question-v4", "locked-promise-v5"):
                             selected += SHORT_LINES
+                        if args.opening_preview == "locked-promise-v5":
+                            spec = root / "promise.json"
+                            if not spec.exists():
+                                persist(spec, ask(endpoint, PROMISE_SPEC, packet, PROMISE, 450,
+                                                  root / "promise-response.json"))
+                            packet["locked_promise"] = read(spec)
+                            selected += LOCKED_PROMISE
                         instruction = selected + " " + EXECUTE
                     if previous:
                         instruction += " Repair only the specific observed defect and preserve the supported facts."
                     plan = ask(endpoint, instruction, packet, OPEN, 2000, out / "plan-response.json")
                 persist(out / "plan.json", plan)
+                if args.opening_preview == "locked-promise-v5":
+                    try:
+                        guard_promise(plan, packet["locked_promise"])
+                    except ValueError as error:
+                        result = {"status": "withheld", "code": "plan_guard", "detail": str(error),
+                                  "repair": "Keep the locked spoken promise and remove the information embargo breach."}
+                        persist(out / "opening-outcome.json", result)
+                        if i == 0:
+                            persist(first, {**identity, **result})
+                            previous = result
+                            continue
+                        break
                 story = validate_native(compile_preview(brief, plan, set(approved), args.voice))
                 persist(out / "story.json", story)
             story = read(out / "story.json")
