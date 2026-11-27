@@ -160,7 +160,7 @@ def collect(args, brief, model_path, today):
                     {"claim": item["text"], "scope": item["scope"], "document": source["text"][:14000]}, EXTRACT)
             if getattr(args, "body_instruction", "historical") in ("advancing-bound-v2", "advancing-ratio-v3",
                                                                  "advancing-repair-v4", "advancing-scope-v5",
-                                                                 "advancing-no-copy-v6"):
+                                                                 "advancing-no-copy-v6", "advancing-grounded-v7"):
                 from body_progress import comparison_support
 
                 exact = comparison_support(item["text"], source["passage"],
@@ -339,6 +339,13 @@ def run_daily(args):
             packet = {k: v for k, v in brief.items() if k != "claims"}
             packet["approved"] = {k: {"claim": v["claim"], "passages": [s["passage"][:1000] for s in v["approved"]]}
                                   for k, v in collected.items() if v["approved"]}
+            grounded = getattr(args, "body_instruction", None) == "advancing-grounded-v7"
+            if grounded:
+                from body_progress import rate_evidence
+
+                packet["verified_rate_operands"] = rate_evidence(
+                    [p for row in packet["approved"].values() for p in row["passages"]])
+                persist(out / "verified-rate-operands.json", packet["verified_rate_operands"])
             if getattr(args, "repair_feedback", None):
                 packet["prior_attempt_defect"] = args.repair_feedback
             optional_omissions = [v["claim"] for v in collected.values() if not v["approved"]]
@@ -374,7 +381,9 @@ def run_daily(args):
                         "Choose a visual "
                         "for the evidence: exact for quantities and persistent objects, authentic for real "
                         "items whose appearance matters, illustration when appearance may vary. "
-                        "Return only the requested JSON." + (" " + OUTLINE_DIRECTION if advancing else ""),
+                        "Return only the requested JSON." + (" " + OUTLINE_DIRECTION if advancing else "")
+                        + (" For transfer, ask the viewer to name what would have to change, without inventing a third "
+                           "worked numerical example. Use only the supplied exact ratio comparisons." if grounded else ""),
                         packet, progress_outline if advancing else DAILY_OUTLINE if ordinary else OUTLINE,
                         out / "outline-response.json", 1250, revisions))
                 outline = read(outline_path)
@@ -386,8 +395,8 @@ def run_daily(args):
                 for i, chapter in enumerate(outline["chapters"]):
                     checkpoint = out / f"chapter-{i}.json"
                     target_words = "155–175" if brief["min_ms"] == 180000 else "125–150"
-                    no_copy = getattr(args, "body_instruction", None) == "advancing-no-copy-v6"
-                    scoped = getattr(args, "body_instruction", None) in ("advancing-scope-v5", "advancing-no-copy-v6")
+                    no_copy = getattr(args, "body_instruction", None) in ("advancing-no-copy-v6", "advancing-grounded-v7")
+                    scoped = no_copy or getattr(args, "body_instruction", None) == "advancing-scope-v5"
                     chapter_input = {"brief": packet, "chapter": chapter, "previous": chapters[-1:],
                                      "opening": outline.get("hook") if i == 0 else None,
                                      "assigned_visual": f"visual-{i}" if ordinary else None}
@@ -425,7 +434,7 @@ def run_daily(args):
                             out / f"chapter-{i}-response.json", 1900, revisions))
                     current = read(checkpoint)
                     if getattr(args, "body_instruction", None) in ("advancing-repair-v4", "advancing-scope-v5",
-                                                                    "advancing-no-copy-v6"):
+                                                                    "advancing-no-copy-v6", "advancing-grounded-v7"):
                         duplicate = duplicated(chapters + [current])
                         if duplicate:
                             repaired = out / f"chapter-{i}-progress-repair.json"

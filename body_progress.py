@@ -65,6 +65,27 @@ def comparison_support(claim, source, *, allow_ratio=False):
     return "supports" if supported else "contradicts"
 
 
+def rate_evidence(passages):
+    """Compute parallel ratios from source operands, retaining exact fractions."""
+    from opening_bindings import literal_rows
+
+    rows = literal_rows(passages)
+    families = (("return", "input"), ("distance", "duration"), ("cost", "yield"))
+    results = {}
+    for top, bottom in families:
+        for entity in dict.fromkeys(row["entity"] for row in rows):
+            candidates = [{(r["value"], r["unit"]) for r in rows
+                           if r["entity"] == entity and r["property"] == prop} for prop in (top, bottom)]
+            if not all(len(c) == 1 for c in candidates):
+                continue
+            (n, n_unit), (d, d_unit) = map(lambda items: next(iter(items)), candidates)
+            if d <= 0:
+                continue
+            key = f"{top}/{bottom} ({n_unit}/{d_unit})"
+            results.setdefault(key, []).append({"entity": entity, "numerator": n, "denominator": d,
+                                                 "exact_rate": str(Fraction(n, d))})
+    return results
+
 def duplicated(chapters):
     from storygen import words
 

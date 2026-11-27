@@ -1,6 +1,6 @@
 import unittest
 
-from body_progress import comparison_support, duplicated
+from body_progress import comparison_support, duplicated, rate_evidence
 from discovery_review import locate
 from derive_assertions import derive, search
 
@@ -46,3 +46,8 @@ class WholeQualification(unittest.TestCase):
         self.assertIsNone(search(timed(rewind), rule))
         self.assertIsNone(search(timed("The remaining salaries are $30,000 and $50,000."), rule))
         self.assertEqual(search(timed("The remaining salaries are $20,000 and $50,000."), rule)["start_seconds"], 0)
+
+    def test_exact_rate_distinguishes_equal_results_from_close_values(self):
+        values = rate_evidence(["Park route covers 9 km and takes 27 min. "
+                                "New route covers 15 km and takes 45 min."])["distance/duration (km/min)"]
+        self.assertEqual([r["exact_rate"] for r in values], ["1/3", "1/3"])
