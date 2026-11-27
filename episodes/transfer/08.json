@@ -34,7 +34,15 @@
           "Open a real review discussing related results."
         ]
       ],
-      "words": "115–140 (around 40 per visual state)"
+      "words": "115–140 (around 40 per visual state)",
+      "stage_claims": {
+        "question": [
+          "Ask how soon an assessment attempt counted after viewing. The requested quantity is the time window; no source or answer is shown here."
+        ],
+        "review": [
+          "Brame's review reports viewing time relative to video duration. This is a different measure from the follow-up attempt window."
+        ]
+      }
     },
     {
       "question": "What does the review actually say here?",
@@ -51,7 +59,15 @@
           "Mark exactly what is missing."
         ]
       ],
-      "words": "115–140 (around 40 per visual state)"
+      "words": "115–140 (around 40 per visual state)",
+      "stage_claims": {
+        "review": [
+          "Brame's review excerpt covers median viewing time. Refer to the median, not nearly all viewers."
+        ],
+        "mismatch": [
+          "Brame's displayed excerpt omits timing of attempts. It is relevant to viewing time but cannot establish the method for counting attempts."
+        ]
+      }
     },
     {
       "question": "Where would the definition be recorded?",
@@ -68,7 +84,15 @@
           "Show the primary methods excerpt."
         ]
       ],
-      "words": "115–140 (around 40 per visual state)"
+      "words": "115–140 (around 40 per visual state)",
+      "stage_claims": {
+        "question": [
+          "The same question asks for a time window. Suggest looking in the original study's methods without giving the number yet."
+        ],
+        "method": [
+          "Guo and colleagues explicitly count attempts to answer the follow-up problem within thirty minutes after viewing. That is the definition asked for."
+        ]
+      }
     },
     {
       "question": "Which citation earns the statement?",
@@ -85,7 +109,15 @@
           "Show the supporting passage and reason."
         ]
       ],
-      "words": "115–140 (around 40 per visual state)"
+      "words": "115–140 (around 40 per visual state)",
+      "stage_claims": {
+        "mismatch": [
+          "This is Brame's review, not Guo's methods. This excerpt supports a claim about viewing time only."
+        ],
+        "answer": [
+          "This is Guo and colleagues' methods section. The thirty-minute limit is explicit here and answers the original question. An attempt is not proof of learning."
+        ]
+      }
     }
   ],
   "transfer": {

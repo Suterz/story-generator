@@ -4,13 +4,24 @@ import json
 from copy import deepcopy
 from pathlib import Path
 
-from episode import check_clock_explanation, compile_chapter, skill_for
+from episode import check_clock_explanation, check_transfer_explanation, compile_chapter, skill_for
 from episode_graphics import CITATION_PACKET, bank, citation, clock, ledger_at, light_events
 from source_pack import evidence_for
 from transfer_graphics import project, queue_at
 
 
 class EvidenceTests(unittest.TestCase):
+    def test_transfer_state_rejects_inconsistent_narration(self):
+        for fixture, stage, sentence in (
+            ("queue", "next", "D arrived right after B left."),
+            ("shutter", "short", "The short exposure shows forty pixels."),
+            ("study", "mismatch", "Guo and colleagues wrote about viewing time."),
+            ("seasons", "angle", "The sunlight scatters at this angle."),
+        ):
+            with self.subTest(fixture=fixture), self.assertRaises(ValueError):
+                check_transfer_explanation(fixture, stage, sentence)
+        check_transfer_explanation("shutter", "comparison", "The second streak is forty pixels.")
+
     def test_clock_answer_follows_the_path_and_does_not_change_the_earth_clock(self):
         with self.assertRaisesRegex(ValueError, "without giving"):
             check_clock_explanation("shift", "The light path stretches to five units.")

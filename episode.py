@@ -157,6 +157,25 @@ def check_clock_explanation(stage, narration):
         raise ValueError("Earth-frame elapsed time is about 7.09 years; Earth's clock did not change rate")
 
 
+def check_transfer_explanation(fixture, stage, narration):
+    forbidden = {
+        ("seasons", "angle"): (r"\bscatter\w*\b", "shallow rays spread the same energy over more surface area"),
+        ("seasons", "day"): (r"\b(?:68|21)\.5\b|\b(?:sixty-eight|twenty-one) point five\b",
+                             "save the angles for the angle panel"),
+        ("shutter", "short"): (r"\b(?:forty|40)[ -]pixels?\b|\b(?:1/25|twenty-fifth)\b",
+                                "only the ten-pixel, one-hundredth-second example is displayed"),
+        ("study", "question"): (r"\b(?:thirty|30)[ -]minutes?\b", "save the answer for the methods excerpt"),
+        ("study", "mismatch"): (r"\bguo and colleagues (?:wrote|said)\b|\blook at the methods\b",
+                                 "this is Brame's review excerpt, not Guo and colleagues' methods"),
+    }.get((fixture, stage))
+    if forbidden and re.search(forbidden[0], narration, re.I):
+        raise ValueError(forbidden[1])
+    if fixture == "queue" and re.search(r"\bD arrived.{0,20}\b(?:after|when) B (?:left|departed)\b", narration, re.I):
+        raise ValueError("D arrives at minute two; A leaves at minute two and B leaves at minute four")
+    if fixture and re.search(r"^(?:what it shows|hold minute|show the|isolate the)\b", narration, re.I):
+        raise ValueError("speak to the audience, without repeating the stage direction")
+
+
 def write_chapter(args, brief, folder, endpoint, *, short=True, prefix="chapter"):
     from storygen import read, request, save
 
@@ -255,6 +274,7 @@ def author_state(args, context, work, endpoint, prior, prior_opening, index, sta
             raw = read(candidate)["choices"][0]["message"]["content"]
             value = json.loads(raw)
             narration = plain_narration(value["text"])
+            check_transfer_explanation(context.get("visual_fixture"), stage_id, narration)
             cue = value["cue"].strip()
             count = len(words(narration))
             if not low - 14 <= count <= high + 42:

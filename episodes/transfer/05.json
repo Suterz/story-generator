@@ -34,7 +34,15 @@
           "Show B and C arrive at minute one."
         ]
       ],
-      "words": "115–140 (around 40 per visual state)"
+      "words": "115–140 (around 40 per visual state)",
+      "stage_claims": {
+        "rules": [
+          "At minute zero A arrives and begins two minutes of service, with no one waiting."
+        ],
+        "arrivals": [
+          "At minute one A is still served; B then C arrive and both wait, in that order."
+        ]
+      }
     },
     {
       "question": "What happens at the same minute as a departure?",
@@ -51,7 +59,15 @@
           "Reveal B serving and C, D waiting."
         ]
       ],
-      "words": "115–140 (around 40 per visual state)"
+      "words": "115–140 (around 40 per visual state)",
+      "stage_claims": {
+        "prediction": [
+          "At minute one A is served and B and C are waiting. Ask the viewer to apply the tie rule next: finish service, then serve the oldest waiter, then append a new arrival."
+        ],
+        "second": [
+          "Minute two: A finishes, B begins service, and D joins behind C. C and D wait. D arrives when A leaves, not when B leaves."
+        ]
+      }
     },
     {
       "question": "Did service speed change when the line grew?",
@@ -68,7 +84,15 @@
           "Show the last person departed at minute eight."
         ]
       ],
-      "words": "115–140 (around 40 per visual state)"
+      "words": "115–140 (around 40 per visual state)",
+      "stage_claims": {
+        "next": [
+          "Minute four: A and B have departed, C begins service, and D waits. D arrived at minute two and has not arrived again."
+        ],
+        "drain": [
+          "C completes service at minute six, D starts immediately, and D leaves at minute eight. The service interval stayed at two minutes."
+        ]
+      }
     },
     {
       "question": "What if D comes a minute later?",
@@ -85,7 +109,15 @@
           "Contrast the counterfactual and conclude."
         ]
       ],
-      "words": "115–140 (around 40 per visual state)"
+      "words": "115–140 (around 40 per visual state)",
+      "stage_claims": {
+        "second": [
+          "In the original case, at minute two B is in service and C and D are waiting."
+        ],
+        "delay": [
+          "Only D's arrival changes to minute three. At minute two B is served and only C waits."
+        ]
+      }
     }
   ],
   "transfer": {

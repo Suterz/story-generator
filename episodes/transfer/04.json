@@ -34,7 +34,15 @@
           "Compare parallel rotation axes."
         ]
       ],
-      "words": "115–140 (around 40 per visual state)"
+      "words": "115–140 (around 40 per visual state)",
+      "stage_claims": {
+        "orbit": [
+          "The North Pole points the same way in space in June and December. Minneapolis rotates with Earth."
+        ],
+        "axis": [
+          "Earth's north axis leans toward the Sun in June and away in December. The axis does not reverse."
+        ]
+      }
     },
     {
       "question": "Does the city spend the same time in sunlight?",
@@ -51,7 +59,15 @@
           "Compare each lit share of a full rotation."
         ]
       ],
-      "words": "115–140 (around 40 per visual state)"
+      "words": "115–140 (around 40 per visual state)",
+      "stage_claims": {
+        "axis": [
+          "At either orbital position, Minneapolis completes one rotation each day. Its time on the lit side can differ."
+        ],
+        "day": [
+          "At 45° north the June daylight bar is longer than December's. These are illustrative shares of a rotation."
+        ]
+      }
     },
     {
       "question": "Does the same Sun strike the ground in the same way?",
@@ -68,7 +84,15 @@
           "Compare both noon angles on the same ground."
         ]
       ],
-      "words": "115–140 (around 40 per visual state)"
+      "words": "115–140 (around 40 per visual state)",
+      "stage_claims": {
+        "day": [
+          "The two bars compare time in daylight only. Ask whether the same surface also receives sunlight at different angles."
+        ],
+        "angle": [
+          "At idealized 45° north, noon sunlight is 68.5° in June and 21.5° in December. The same beam covers more ground at a shallower angle, so less energy reaches each square meter."
+        ]
+      }
     },
     {
       "question": "What happens across the equator?",
@@ -85,7 +109,15 @@
           "Contrast corresponding southern conditions."
         ]
       ],
-      "words": "115–140 (around 40 per visual state)"
+      "words": "115–140 (around 40 per visual state)",
+      "stage_claims": {
+        "angle": [
+          "The 45° north noon angle is higher in June and lower in December."
+        ],
+        "south": [
+          "At 45° south, June has shorter daylight and a lower noon Sun; December reverses both. The hemispheres have the same Earth–Sun distance at a given time."
+        ]
+      }
     }
   ],
   "transfer": {

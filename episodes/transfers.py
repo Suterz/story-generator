@@ -2,8 +2,56 @@
 from episodes.flagships import chapter
 
 
+STATE_CLAIMS = {
+    "seasons": [
+        (["The North Pole points the same way in space in June and December. Minneapolis rotates with Earth."],
+         ["Earth's north axis leans toward the Sun in June and away in December. The axis does not reverse."]),
+        (["At either orbital position, Minneapolis completes one rotation each day. Its time on the lit side can differ."],
+         ["At 45° north the June daylight bar is longer than December's. These are illustrative shares of a rotation."]),
+        (["The two bars compare time in daylight only. Ask whether the same surface also receives sunlight at different angles."],
+         ["At idealized 45° north, noon sunlight is 68.5° in June and 21.5° in December. The same beam covers more ground at a shallower angle, so less energy reaches each square meter."]),
+        (["The 45° north noon angle is higher in June and lower in December."],
+         ["At 45° south, June has shorter daylight and a lower noon Sun; December reverses both. The hemispheres have the same Earth–Sun distance at a given time."]),
+    ],
+    "queue": [
+        (["At minute zero A arrives and begins two minutes of service, with no one waiting."],
+         ["At minute one A is still served; B then C arrive and both wait, in that order."]),
+        (["At minute one A is served and B and C are waiting. Ask the viewer to apply the tie rule next: finish service, then serve the oldest waiter, then append a new arrival."],
+         ["Minute two: A finishes, B begins service, and D joins behind C. C and D wait. D arrives when A leaves, not when B leaves."]),
+        (["Minute four: A and B have departed, C begins service, and D waits. D arrived at minute two and has not arrived again."],
+         ["C completes service at minute six, D starts immediately, and D leaves at minute eight. The service interval stayed at two minutes."]),
+        (["In the original case, at minute two B is in service and C and D are waiting."],
+         ["Only D's arrival changes to minute three. At minute two B is served and only C waits."]),
+    ],
+    "shutter": [
+        (["The same subject moves horizontally at the same speed with a fixed camera. One exposure records ten pixels of travel and the other forty."],
+         ["The shorter exposure alone lasts one hundredth of a second, giving ten pixels of travel."]),
+        (["The object travels at one thousand image pixels per second. One hundredth of a second records ten pixels."],
+         ["Keep the ten-pixel example as the reference; the longer exposure records more positions of the same subject."]),
+        (["The single short streak is ten pixels at one hundredth of a second. Ask what the longer exposure will show."],
+         ["The second streak is forty pixels at one twenty-fifth of a second. The same speed and greater duration explain its length."]),
+        (["Four times the exposure gives four times the travel at this fixed speed. Doubling exposure would double the motion contribution."],
+         ["Back to the one-hundredth-second ten-pixel reference. Motion blur records changing positions during exposure, unlike defocus."]),
+    ],
+    "study": [
+        (["Ask how soon an assessment attempt counted after viewing. The requested quantity is the time window; no source or answer is shown here."],
+         ["Brame's review reports viewing time relative to video duration. This is a different measure from the follow-up attempt window."]),
+        (["Brame's review excerpt covers median viewing time. Refer to the median, not nearly all viewers."],
+         ["Brame's displayed excerpt omits timing of attempts. It is relevant to viewing time but cannot establish the method for counting attempts."]),
+        (["The same question asks for a time window. Suggest looking in the original study's methods without giving the number yet."],
+         ["Guo and colleagues explicitly count attempts to answer the follow-up problem within thirty minutes after viewing. That is the definition asked for."]),
+        (["This is Brame's review, not Guo's methods. This excerpt supports a claim about viewing time only."],
+         ["This is Guo and colleagues' methods section. The thirty-minute limit is explicit here and answers the original question. An attempt is not proof of learning."]),
+    ],
+}
+
+
 def make(slot, topic, audience, assumption, objective, takeaway, style, sources, visual, method,
          opening, misconception, question, answer, chapters):
+    if visual in STATE_CLAIMS:
+        for chapter_spec, facts in zip(chapters, STATE_CLAIMS[visual], strict=True):
+            chapter_spec["stage_claims"] = {state[0]: claim for state, claim in
+                                            zip(chapter_spec["stages"], facts, strict=True)}
     return {"schema_version":"episode/1", "id":slot, "topic":topic, "audience":audience, "prior":assumption,
             "tone":style, "objective":objective, "takeaway":takeaway, "sources":sources,
             "visual_fixture":visual, "obligation":method, "editorial_direction":opening,

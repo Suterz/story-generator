@@ -34,7 +34,15 @@
           "Isolate the short one."
         ]
       ],
-      "words": "115–140 (around 40 per visual state)"
+      "words": "115–140 (around 40 per visual state)",
+      "stage_claims": {
+        "comparison": [
+          "The same subject moves horizontally at the same speed with a fixed camera. One exposure records ten pixels of travel and the other forty."
+        ],
+        "short": [
+          "The shorter exposure alone lasts one hundredth of a second, giving ten pixels of travel."
+        ]
+      }
     },
     {
       "question": "How far can it move in the short window?",
@@ -51,7 +59,15 @@
           "Keep pixel scale for the next case."
         ]
       ],
-      "words": "115–140 (around 40 per visual state)"
+      "words": "115–140 (around 40 per visual state)",
+      "stage_claims": {
+        "short": [
+          "The object travels at one thousand image pixels per second. One hundredth of a second records ten pixels."
+        ],
+        "comparison": [
+          "Keep the ten-pixel example as the reference; the longer exposure records more positions of the same subject."
+        ]
+      }
     },
     {
       "question": "What does the longer window change?",
@@ -68,7 +84,15 @@
           "Compare motion paths and streaks."
         ]
       ],
-      "words": "115–140 (around 40 per visual state)"
+      "words": "115–140 (around 40 per visual state)",
+      "stage_claims": {
+        "short": [
+          "The single short streak is ten pixels at one hundredth of a second. Ask what the longer exposure will show."
+        ],
+        "comparison": [
+          "The second streak is forty pixels at one twenty-fifth of a second. The same speed and greater duration explain its length."
+        ]
+      }
     },
     {
       "question": "Can the viewer predict a new streak?",
@@ -85,7 +109,15 @@
           "Return to the original short exposure."
         ]
       ],
-      "words": "115–140 (around 40 per visual state)"
+      "words": "115–140 (around 40 per visual state)",
+      "stage_claims": {
+        "comparison": [
+          "Four times the exposure gives four times the travel at this fixed speed. Doubling exposure would double the motion contribution."
+        ],
+        "short": [
+          "Back to the one-hundredth-second ten-pixel reference. Motion blur records changing positions during exposure, unlike defocus."
+        ]
+      }
     }
   ],
   "transfer": {
