@@ -5,7 +5,7 @@ import unittest
 from daily_evidence import persist
 from opening_score import score, sha
 from opening_review import early_quantity, heard_numbers
-from opening_trial import check_embargo, compile_preview, guard_promise, repair_focus
+from opening_trial import check_embargo, comparison_plan, compile_preview, guard_promise, repair_focus
 
 
 class OpeningTests(unittest.TestCase):
@@ -36,6 +36,20 @@ class OpeningTests(unittest.TestCase):
         check_embargo({"withheld": [100, 60]}, ["A receives 100 kWh; B receives 60 kWh."])
         with self.assertRaisesRegex(ValueError, "not present"):
             check_embargo({"withheld": [1, 2]}, ["A receives 100 kWh; B receives 60 kWh."])
+
+    def test_comparison_keeps_object_identity_and_hides_missing_readings(self):
+        plan = comparison_plan({"objects": [{"label": "B", "reading": "48 kWh"},
+                                             {"label": "A", "reading": "75 kWh"}],
+                                "known_label": "Returned", "missing_label": "Input",
+                                "lines": ["This one returns forty-eight kilowatt-hours.",
+                                          "The other returns seventy-five kilowatt-hours.",
+                                          "Which made better use of what went in?",
+                                          "Before choosing, compare each return with its input."]}, {"fact-1"})
+        for i, state in enumerate(plan["states"]):
+            meters = state["visual_data"]["meters"]
+            self.assertEqual([m["object"] for m in meters], ["B", "A"])
+            self.assertEqual([m["readings"][1]["display"] for m in meters], ["?", "?"])
+            self.assertEqual([m["readings"][0]["focus"] for m in meters], [i == 0, i == 1])
 
     def test_focus_repair_keeps_reading_values_and_speech(self):
         meters = [{"object": key, "readings": [{"label": "return", "display": str(value),

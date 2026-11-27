@@ -67,6 +67,49 @@ SCENE = obj({**SECTION["properties"], "kind": {"enum": ["exact", "authentic", "i
 OPEN = obj({"promise": {**TEXT, "maxLength": 120}, "states": array(SCENE, 3, 4)})
 PROMISE = obj({"line": {**TEXT, "maxLength": 85}, "visible_now": {**TEXT, "maxLength": 180},
                "withheld": array({"type": "number"}, maximum=5), "why_wait": {**TEXT, "maxLength": 170}})
+STABLE_COMPARISON = (
+    "Make a four-line opening, not a summary. The brief compares two objects with measured readings. "
+    "Choose one comparable reading from each object which the viewer may see now, and name the other reading "
+    "they would need to answer the question. Do not output either hidden value in narration or labels. "
+    "The first line refers to the first given reading, the second to the second reading, the third asks the "
+    "question, and the fourth asks the viewer to look for the missing evidence. Each line is one short sentence, "
+    "five to nine words, 24 to 34 words total. Speak numbers and units in words. Use digits for the visible "
+    "reading labels. Output facts from the supplied evidence only. Put the actual spoken question in lines[2]."
+)
+COMPARISON = obj({"objects": array(obj({"label": {**TEXT, "maxLength": 25},
+                                       "reading": {**TEXT, "maxLength": 22}}), 2, 2),
+                  "known_label": {**TEXT, "maxLength": 23}, "missing_label": {**TEXT, "maxLength": 23},
+                  "lines": array({**TEXT, "maxLength": 90}, 4, 4)})
+
+
+def comparison_plan(value, approved):
+    import re
+    from opening_review import heard_numbers
+
+    if not value["lines"][2].endswith("?"):
+        raise ValueError("comparison does not ask a spoken question")
+    count = sum(len(line.split()) for line in value["lines"])
+    if not 24 <= count <= 37:
+        raise ValueError(f"comparison opening has {count} words; use 24–37")
+    if value["known_label"].casefold() == value["missing_label"].casefold():
+        raise ValueError("comparison uses the same label for known and missing values")
+    names = [item["label"] for item in value["objects"]]
+    if len(set(names)) != 2:
+        raise ValueError("comparison requires two distinct objects")
+    for item, line in zip(value["objects"], value["lines"][:2], strict=True):
+        reading = re.match(r"^\s*(\d+(?:\.\d+)?)\b", item["reading"])
+        if not reading or heard_numbers(line) != {float(reading[1])}:
+            raise ValueError("spoken opening does not identify each displayed numeric reading")
+    return {"promise": value["lines"][2], "states": [
+        {"narration": line, "visible": "The same two objects, with known readings and the missing readings hidden.",
+         "kind": "exact", "claim_ids": sorted(approved),
+         "route_reason": "The question depends on exact readings paired with persistent objects.",
+         "visual_data": {"operation": "meters", "meters": [
+             {"object": item["label"], "readings": [
+                 {"label": value["known_label"], "display": item["reading"], "focus": index == row},
+                 {"label": value["missing_label"], "display": "?", "focus": False}]}
+             for row, item in enumerate(value["objects"])]}}
+        for index, line in enumerate(value["lines"])]}
 
 
 def guard_promise(plan, lock):
@@ -188,7 +231,8 @@ def run_opening(args):
                             "literal-embargo-v6": PROMISE_SPEC + LITERAL_EMBARGO + QUESTION_BEFORE_ANSWER
                             + SHORT_LINES + LOCKED_PROMISE + EXECUTE,
                             "visible-split-v7": PROMISE_SPEC + LITERAL_EMBARGO + VISIBLE_SPLIT + QUESTION_BEFORE_ANSWER
-                            + SHORT_LINES + LOCKED_PROMISE + EXECUTE}
+                            + SHORT_LINES + LOCKED_PROMISE + EXECUTE,
+                            "stable-comparison-v8": STABLE_COMPARISON}
                            [args.opening_preview].encode()).hexdigest()}
     if args.voice.startswith("drama3-") and args.video_repo:
         registry = args.video_repo / "voices/drama3/narrators.json"
@@ -246,7 +290,23 @@ def run_opening(args):
                     packet["repair"] = previous
                     packet["previous_plan"] = read(root / "attempt-01/plan.json")
                 with writer(args, model, out / "opening.log") as endpoint:
-                    if args.opening_preview == "baseline-v1":
+                    if args.opening_preview == "stable-comparison-v8":
+                        state = ask(endpoint, STABLE_COMPARISON, packet, COMPARISON, 850,
+                                    out / "comparison-response.json")
+                        persist(out / "comparison.json", state)
+                        try:
+                            plan = comparison_plan(state, approved)
+                        except ValueError as error:
+                            result = {"status": "withheld", "code": "plan_guard", "detail": str(error),
+                                      "repair": "Apply the opening size and contrast rules."}
+                            persist(out / "plan.json", state)
+                            persist(out / "opening-outcome.json", result)
+                            if i == 0:
+                                persist(first, {**identity, **result})
+                                previous = result
+                                continue
+                            break
+                    elif args.opening_preview == "baseline-v1":
                         outline = ask(endpoint, BASELINE, packet, DAILY_OUTLINE, 1250, out / "outline-response.json")
                         packet["outline"] = outline
                         instruction = "Follow the proposed opening. " + EXECUTE
@@ -270,9 +330,10 @@ def run_opening(args):
                             packet["locked_promise"] = read(spec)
                             selected += LOCKED_PROMISE
                         instruction = selected + " " + EXECUTE
-                    if previous:
-                        instruction += " Repair only the specific observed defect and preserve the supported facts."
-                    plan = ask(endpoint, instruction, packet, OPEN, 2000, out / "plan-response.json")
+                    if args.opening_preview != "stable-comparison-v8":
+                        if previous:
+                            instruction += " Repair only the specific observed defect and preserve the supported facts."
+                        plan = ask(endpoint, instruction, packet, OPEN, 2000, out / "plan-response.json")
                 persist(out / "plan.json", plan)
                 if args.opening_preview in ("locked-promise-v5", "literal-embargo-v6", "visible-split-v7"):
                     try:

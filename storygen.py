@@ -869,7 +869,7 @@ def main():
     p.add_argument("--voice", choices=("heart", "ryan", "drama3-A", "drama3-E", "drama3-F"), default="ryan")
     p.add_argument("--opening-preview", choices=("baseline-v1", "visible-question-v2", "question-before-answer-v3",
                                                  "short-question-v4", "locked-promise-v5", "literal-embargo-v6",
-                                                 "visible-split-v7"),
+                                                 "visible-split-v7", "stable-comparison-v8"),
                    help="render and adjudicate a daily/2 opening without making a full film")
     p.add_argument("--opening-reviewer", choices=("observable-opening-v2", "literal-evidence-v3", "unanswered-is-valid-v4"),
                    default="observable-opening-v2")
