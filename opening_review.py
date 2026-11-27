@@ -120,6 +120,19 @@ def reading_number(probe):
     return float(value[1]) if value else None
 
 
+def reconcile_judgment(result, duration):
+    """Keep inconsistent model judgments as media-bound non-release evidence."""
+    result = dict(result)
+    if (result["status"] == "accepted") != (result["code"] == "ok") or result["start_seconds"] > duration:
+        result = {**result, "status": "uncertain", "code": "unobservable", "repair": "",
+                  "original_judgment": result,
+                  "detail": "Reviewer returned conflicting fields or a time outside the clip. "
+                            "Its raw judgment is preserved; no defect or acceptance was inferred."}
+    if result["status"] == "accepted":
+        result["repair"] = ""
+    return result
+
+
 def early_quantity(words, quantity, through, origin=0):
     """Detect a forbidden answer in delivered ASR, including split spoken numbers."""
     for i, row in enumerate(words):
@@ -244,12 +257,7 @@ def review(args, brief, evidence, identity):
     with writer(args, args.models / model["file"], out / "opening-reviewer.log") as endpoint:
         instructions = REVIEWERS[identity["reviewer"]]
         result = ask(endpoint, instructions, packet, VERDICT, 620, out / "opening-review-response.json")
-    if (result["status"] == "accepted") != (result["code"] == "ok"):
-        raise ValueError("reviewer status and defect disagree")
-    if result["start_seconds"] > decoded["duration"]:
-        raise ValueError("reviewer cited time outside the exported clip")
-    if result["status"] == "accepted":
-        result["repair"] = ""
+    result = reconcile_judgment(result, decoded["duration"])
     final = {**result, **lock, "reviewer_sha256": model["sha256"]}
     persist(existing, final)
     return final

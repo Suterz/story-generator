@@ -2,7 +2,7 @@ import unittest
 
 from opening_bindings import bind_selection, literal_rows, paired_options
 from opening_assertions import observed_assertion
-from opening_review import heard_numbers, measured_quantities
+from opening_review import heard_numbers, measured_quantities, reconcile_judgment
 from qualification_stats import lower_successes, paired
 
 
@@ -56,3 +56,12 @@ class BindingsTests(unittest.TestCase):
                 "expected": [60000, 80000]}
         self.assertIn("[40000.0, 80000.0]", observed_assertion(words, rule, origin=51)["detail"])
         self.assertIsNone(observed_assertion(words, {**rule, "expected": [40000, 80000]}, origin=51))
+
+    def test_conflicting_reviewer_fields_do_not_turn_into_an_approval(self):
+        observed = {"status": "uncertain", "code": "ok", "start_seconds": 0,
+                    "detail": "Missing focus", "repair": "Write a different opening"}
+        result = reconcile_judgment(observed, 15)
+        self.assertEqual(result["status"], "uncertain")
+        self.assertEqual(result["code"], "unobservable")
+        self.assertFalse(result["repair"])
+        self.assertEqual(result["original_judgment"], observed)
