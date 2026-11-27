@@ -1,5 +1,11 @@
 # Long-form development
 
+## 2026-11-27 — Three transfer passes; remaining narration fixes
+
+- Candidate 12 passed 07 shutter (167.60 s, one automatic writing revision), 08 source check (168.70 s, zero), and 09 map (186.77 s, zero). Their judgments bind to the returned clip hashes and Candidate 12 freeze. Combined with the trio, six episodes passed on that freeze; only the three older published flagships remain in the XPS playlist.
+- Candidate 12 has two incorrect accepted transfers: seasons describes one day's daylight bar as a slice of the annual orbit; percentage never speaks the 25% recovery answer shown on screen. Queue was withheld for repeating the wrong arrival event. Payroll was withheld on the `See B and` cue, transcribed as `CB and`, and its draft contains incorrect mean and payroll claims. The whole-chapter payroll ASR threshold was not bypassed.
+- Candidate 13 freezes `3e1a726`, video `39eeed6` on 8942 and frames `050f932`. It requires the spoken recovery result, narrows the final queue panel to the departure, and checks the observed seasons/payroll contradictions. The flagship rerender and audit are active; the transfer gate still requires three fresh passes on the same freeze.
+
 ## 2026-11-27 — Candidate 12 requalified
 
 - Fresh Candidate 12 flagship exports independently passed on the same freeze: clock 226.77 s, bank 235.90 s, citation 209.10 s. First-render repair counts were 0, 0 and 2 automatic writer revisions. The reviews are tied to each new MP4 hash and freeze receipt and use phone-size decoded frames, cue timing and delivered MP4 ASR; no listening.
