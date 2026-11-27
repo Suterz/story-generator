@@ -6,7 +6,8 @@ import unittest
 from unittest.mock import patch
 from urllib.error import HTTPError
 
-from daily_evidence import Retrieval, resolve
+from daily_evidence import Retrieval, persist, resolve
+from daily_publish import publish
 from storygen import render
 
 
@@ -109,4 +110,20 @@ class TestResume(unittest.TestCase):
             with patch("storygen.request", return_value=b'{"state":"needs_review"}') as request:
                 render(args, {})
                 self.assertEqual(request.call_count, 1)
-                self.assertIn("/v2/submissions/", request.call_args.args[0])
+            self.assertIn("/v2/submissions/", request.call_args.args[0])
+
+
+class TestPublication(unittest.TestCase):
+    def test_locally_accepted_clip_without_independent_acceptance_is_excluded(self):
+        with TemporaryDirectory() as folder:
+            root = Path(folder)
+            source = root / "runs"
+            case = source / "01"
+            case.mkdir(parents=True)
+            persist(case / "first-outcome.json", {"status": "accepted"})
+            audit = root / "audit.json"
+            persist(audit, {"01": {"status": "needs_review"}})
+            gallery = root / "Watch first"
+            with self.assertRaisesRegex(ValueError, "no independently audited"):
+                publish(source, audit, gallery)
+            self.assertFalse(gallery.exists())

@@ -128,13 +128,14 @@ def compile_story(brief, chapters, ids):
     from storygen import SIGNATURES, words
 
     obligations = {row["id"]: row for row in brief["visual_obligations"]}
-    beats, script, starts, covered = [], [], [], set()
+    beats, script, starts, covered, cited = [], [], [], set(), set()
     for number, chapter in enumerate(chapters, 1):
         starts.append(f"c{number}-s1")
         for position, section in enumerate(chapter["sections"], 1):
             key = f"c{number}-s{position}"
             if not set(section["claim_ids"]) <= ids:
                 raise ValueError(f"{key}: narration references an unsupported claim")
+            cited.update(section["claim_ids"])
             if not set(section["obligation_ids"]) <= obligations.keys():
                 raise ValueError(f"{key}: visual obligation ID is unknown")
             selected = [obligations[i] for i in section["obligation_ids"]]
@@ -163,6 +164,9 @@ def compile_story(brief, chapters, ids):
                                     "claims": section["claim_ids"]}, "retry_budget": 0}})
     if covered != obligations.keys():
         raise ValueError(f"missing visual obligations: {sorted(obligations.keys() - covered)}")
+    missing = {claim["id"] for claim in brief["claims"] if claim["essential"]} - cited
+    if missing:
+        raise ValueError(f"story omitted essential claims: {sorted(missing)}")
     signature = brief["signature"]
     return {"title": brief["topic"], "visual": {"story_context": brief["objective"],
             "visual_signature": SIGNATURES.get(signature, signature)}, "script": script, "beats": beats,
@@ -226,10 +230,25 @@ def run_daily(args):
         if not story_path.exists():
             packet = {k: v for k, v in brief.items() if k != "claims"}
             packet["approved"] = {k: v["claim"] for k, v in collected.items() if v["approved"]}
+            optional_omissions = [v["claim"] for v in collected.values() if not v["approved"]]
             requirements = {row["kind"] for row in brief["visual_obligations"]}
             obligation = "worked-example" if "exact" in requirements else "source-verification"
             skill, _ = skill_for({"obligation": obligation}, args.episode_skill)
             with writer(args, model_path, out / "author.log") as endpoint:
+                if optional_omissions:
+                    viability_file = out / "objective-viability.json"
+                    if not viability_file.exists():
+                        persist(viability_file, ask(endpoint,
+                            "Can the viewer achieve the full objective without the omitted claims? "
+                            "Do not weaken the objective, add evidence or assume the missing claim is true.",
+                            {"objective": brief["objective"], "approved": packet["approved"],
+                             "omitted": optional_omissions},
+                            obj({"survives": {"type": "boolean"}, "reason": {**TEXT, "maxLength": 420}}),
+                            tokens=420))
+                    viability = read(viability_file)
+                    if not viability["survives"]:
+                        finish("withheld", f'Unsupported claims are necessary: {viability["reason"]}')
+                        return
                 outline_path = out / "outline.json"
                 if not outline_path.exists():
                     persist(outline_path, ask(endpoint,
@@ -262,7 +281,7 @@ def run_daily(args):
         return
     status = render(args, read(story_path))
     if status["state"] != "succeeded":
-        finish("withheld", f'renderer: {status["state"]}', renderer=status)
+        finish("withheld", f'renderer: {status.get("error", status["state"])}', renderer=status)
         return
     from review_daily import review
 
