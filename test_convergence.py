@@ -2,7 +2,7 @@ import unittest
 
 from opening_bindings import bind_selection, literal_rows, paired_options
 from opening_assertions import observed_assertion
-from opening_review import measured_quantities
+from opening_review import heard_numbers, measured_quantities
 from qualification_stats import lower_successes, paired
 
 
@@ -46,6 +46,8 @@ class BindingsTests(unittest.TestCase):
         self.assertEqual(list(measured_quantities("seventy-five kilowatt-hours")), [(75, "kWh")])
         self.assertEqual(list(measured_quantities("75kWh")), [(75, "kWh")])
         self.assertEqual(list(measured_quantities("75 kW")), [(75, "kW")])
+        self.assertEqual(list(measured_quantities("one hundred and twenty kilowatt-hours")), [(120, "kWh")])
+        self.assertEqual(heard_numbers("This one returns forty-eight."), {48})
 
     def test_timed_value_list_keeps_comma_split_amount(self):
         words = [{"word": part, "start": index*.2, "end": index*.2+.15}

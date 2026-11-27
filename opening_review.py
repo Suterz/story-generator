@@ -54,20 +54,51 @@ VERDICT = obj({"status": {"enum": ["accepted", "failed", "uncertain"]},
 
 def heard_numbers(text):
     words = re.findall(r"\d+(?:\.\d+)?|[a-z]+", text.casefold())
-    ones = dict(zip("one two three four five six seven eight nine".split(), range(1, 10), strict=True))
+    ones = dict(zip(("zero one two three four five six seven eight nine ten eleven twelve thirteen fourteen "
+                     "fifteen sixteen seventeen eighteen nineteen").split(), range(20), strict=True))
     tens = dict(zip("twenty thirty forty fifty sixty seventy eighty ninety".split(), range(20, 100, 10), strict=True))
     numbers = set()
-    for i, word in enumerate(words):
+    i = 0
+    while i < len(words):
+        word = words[i]
+        if word == "one" and i and words[i-1] in ("this", "that", "which", "other"):
+            i += 1
+            continue
         if word[0].isdigit():
             numbers.add(float(word))
-        elif word in tens:
-            numbers.add(tens[word] + (ones.get(words[i+1], 0) if i+1 < len(words) else 0))
+            i += 1
+            continue
+        value = 0
+        if word in ones and 1 <= ones[word] <= 9 and words[i+1:i+2] == ["hundred"]:
+            value = ones[word] * 100
+            i += 2
+            if words[i:i+1] == ["and"] and i+1 < len(words) and (words[i+1] in tens or words[i+1] in ones):
+                i += 1
+            word = words[i] if i < len(words) else ""
+        if word in tens:
+            value += tens[word]
+            i += 1
+            tail = ones.get(words[i], 0) if i < len(words) else 0
+            if 1 <= tail <= 9:
+                value += tail
+                i += 1
+            numbers.add(value)
+        elif word in ones:
+            numbers.add(value + ones[word])
+            i += 1
+        elif value:
+            numbers.add(value)
+        else:
+            i += 1
     return numbers
 
 
 def measured_quantities(text):
     """Corroborate narrow, unambiguous energy/power forms without dropping the unit."""
-    pattern = (r"(?P<amount>\d+(?:\.\d+)?|[a-z]+(?:[ -][a-z]+)?)\s*"
+    words = ("zero one two three four five six seven eight nine ten eleven twelve thirteen fourteen fifteen "
+             "sixteen seventeen eighteen nineteen twenty thirty forty fifty sixty seventy eighty ninety hundred and")
+    numeric = r"(?:" + "|".join(words.split()) + r")\b"
+    pattern = (r"(?<!\w)(?P<amount>\d+(?:\.\d+)?|" + numeric + r"(?:[ -]+" + numeric + r"){0,4})\s*"
                r"(?P<unit>kwh|kw|kilowatt[ -]hours?|kilowatts?)(?![a-z])")
     for match in re.finditer(pattern, text.casefold()):
         numbers = heard_numbers(match["amount"])
@@ -136,6 +167,8 @@ def meter_faults(out, decoded, manifest, words, observed_focus=None):
         spoken = heard_numbers(heard)
         focused_values = set(measured_quantities(focus_marks[0]["display"]))
         spoken_values = set(measured_quantities(heard))
+        if len(spoken_values) == 1:
+            spoken = {number for number, _ in spoken_values}
         if len(focused_values) == 1 and len(spoken_values) == 1:
             observed_value, observed_unit = next(iter(spoken_values))
             expected_value, expected_unit = next(iter(focused_values))

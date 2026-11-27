@@ -57,7 +57,8 @@ docker run --rm --network none --user "$(id -u):$(id -g)" \
     --group-add "$(getent group render | cut -d: -f3)" --group-add "$(getent group video | cut -d: -f3)" \
     --device /dev/nvidia0 --device /dev/nvidiactl --device /dev/nvidia-uvm --device /dev/nvidia-modeset \
     "${drm[@]}" \
-    -v /usr/bin:/usr/bin:ro -v /usr/lib:/usr/lib:ro -v /usr/share/fonts:/usr/share/fonts:ro \
+    -v /usr/bin:/usr/bin:ro -v /usr/lib:/usr/lib:ro -v /usr/libexec:/usr/libexec:ro \
+    -v /usr/include:/usr/include:ro -v /usr/share/fonts:/usr/share/fonts:ro \
     -v /usr/share/vulkan:/usr/share/vulkan:ro -v "$HOME:$HOME:ro" -v "$store:$store" -v "$lease:$lease" \
     -e HOME="$HOME" -e DAILY_FREEZE="$freeze" -e DAILY_BROKER_SOCKET="$socket" \
     -e OPENING_WRITER="${OPENING_WRITER:-bound-options-v12}" \

@@ -26,6 +26,8 @@ export VIDEO_DRAMA3_OUTPUT="$store/fish-output"
 export VIDEO_SPEECH_ROOT="$fresh/speech" VIDEO_SPEECH_VENVS="$fresh/venvs"
 export DAILY_FETCH_PROGRAM="$repos/story/opening_broker.py"
 export DAILY_IMAGE_DISCOVERY="$repos/story/opening_broker.py"
+printf '#include <Python.h>\nint compiler_check(void) { return PY_MAJOR_VERSION; }\n' \
+    | /usr/bin/gcc -x c -shared -fPIC -I /usr/include/python3.12 -o "$store/compiler-check.so" -
 
 launch() {
     local name="$1"
