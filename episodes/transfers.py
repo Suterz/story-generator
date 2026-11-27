@@ -6,12 +6,12 @@ STATE_CLAIMS = {
     "seasons": [
         (["The North Pole points the same way in space in June and December. Minneapolis rotates with Earth."],
          ["Earth's north axis leans toward the Sun in June and away in December. The axis does not reverse."]),
-        (["At either orbital position, Minneapolis completes one rotation each day. Its time on the lit side can differ."],
-         ["At 45° north the June daylight bar is longer than December's. These are illustrative shares of a rotation."]),
+        (["Earth's axis tilts the Northern Hemisphere toward the Sun in June. A city moves through the lit and dark sides as Earth spins."],
+         ["Each bar is one day, not a piece of the yearly orbit. At 45° north the June daylight bar is longer than December's."]),
         (["The two bars compare time in daylight only. Ask whether the same surface also receives sunlight at different angles."],
          ["At idealized 45° north, noon sunlight is 68.5° in June and 21.5° in December. The same beam covers more ground at a shallower angle, so less energy reaches each square meter."]),
         (["The 45° north noon angle is higher in June and lower in December."],
-         ["At 45° south, June has shorter daylight and a lower noon Sun; December reverses both. The hemispheres have the same Earth–Sun distance at a given time."]),
+         ["Compare north and south on the same June day: it is summer in the north and winter in the south at the same Earth–Sun distance. In December the pattern reverses."]),
     ],
     "queue": [
         (["At minute zero A arrives and begins two minutes of service, with no one waiting."],
@@ -19,7 +19,7 @@ STATE_CLAIMS = {
         (["At minute one A is served and B and C are waiting. Ask the viewer to apply the tie rule next: finish service, then serve the oldest waiter, then append a new arrival."],
          ["Minute two: A finishes, B begins service, and D joins behind C. C and D wait. D arrives when A leaves, not when B leaves."]),
         (["Minute four: A and B have departed, C begins service, and D waits. D arrived at minute two and has not arrived again."],
-         ["C completes service at minute six, D starts immediately, and D leaves at minute eight. The service interval stayed at two minutes."]),
+         ["C completes service at minute six and D starts immediately. D leaves at minute eight and nobody remains. Every service interval lasted two minutes."]),
         (["In the original case, at minute two B is in service and C and D are waiting."],
          ["Only D's arrival changes to minute three. At minute two B is served and only C waits."]),
     ],
@@ -62,6 +62,16 @@ STATE_CLAIMS = {
          ["New total and mean: $140,000 divided by two gives $70,000. Total payroll fell but the mean rose."]),
         (["B and C each earn exactly what they earned in the first group: $60,000 and $80,000."],
          ["The roster changed, not the continuing employees' wages. A headline reporting only the mean cannot establish that a particular person got a raise."]),
+    ],
+    "percent": [
+        (["The starting price is $100. Explain what it means for that price to be a percentage base; ask what a 20 percent discount removes."],
+         ["A 20 percent drop takes $20 off the $100 starting price. The new price and new base are $80."]),
+        (["On the current card the $80 price is the base for the increase. Ask how many dollars are twenty percent of eighty."],
+         ["Twenty percent of $80 is $16, making the new price $96. Contrast the $20 removed with the $16 added."]),
+        (["$100 times 0.8 is $80, then $80 times 1.2 is $96. The two percentages act on different bases."],
+         ["Return to the $80 base and pose the recovery question: what fraction of eighty is the twenty dollars needed to get back?"]),
+        (["The price is $80. Ask what percentage increase from this base will restore the original hundred dollars. Do not give the answer yet."],
+         ["The answer is twenty-five percent: twenty dollars divided by eighty is one quarter. Adding twenty dollars restores the original one hundred."]),
     ],
 }
 

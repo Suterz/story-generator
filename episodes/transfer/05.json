@@ -90,7 +90,7 @@
           "Minute four: A and B have departed, C begins service, and D waits. D arrived at minute two and has not arrived again."
         ],
         "drain": [
-          "C completes service at minute six, D starts immediately, and D leaves at minute eight. The service interval stayed at two minutes."
+          "C completes service at minute six and D starts immediately. D leaves at minute eight and nobody remains. Every service interval lasted two minutes."
         ]
       }
     },

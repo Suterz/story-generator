@@ -183,15 +183,24 @@ def check_transfer_explanation(fixture, stage, narration):
             r"\b(?:will finish|will start|will arrive|joins.{0,25}leaves)\b", narration, re.I):
         raise ValueError("ask what happens at minute two without predicting the answer aloud on the minute-one panel")
     if fixture == "seasons" and re.search(
-            r"\b(?:both months share the same|distance to the sun hasn['’]t changed|sun['’]s just as far away)\b",
+            r"\b(?:both months share the same|distance to the sun hasn['’]t changed|sun['’]s just as far away|"
+            r"minneapolis tilts|slices of earth['’]s yearly path)\b",
             narration, re.I):
-        raise ValueError("seasons are due chiefly to tilt; compare equal distances across hemispheres at the same instant, not across months")
+        raise ValueError("Earth's axis tilts; each bar is one rotation. Compare equal distance across hemispheres on the same day")
+    if (fixture, stage) == ("percent", "restore") and not re.search(r"\b(?:twenty[ -]five percent|25\s*(?:%|percent))", narration, re.I):
+        raise ValueError("say the result: twenty-five percent of eighty dollars is the twenty dollars needed")
     if (fixture, stage) == ("study", "question") and re.search(r"\b(?:look|point) at the (?:title|document)\b", narration, re.I):
         raise ValueError("the current card shows only the question; save discussion of the documents for later")
     if fixture == "salary" and re.search(
             r"\b(?:averages?|mean(?: salary)? (?:is|was|of))\s+(?:eighty thousand|\$80[,.]?000)\b|"
-            r"\btotal pay.{0,65}\bto (?:sixty thousand|\$60[,.]?000)\b", narration, re.I):
-        raise ValueError("the revised payroll is $140,000 and its mean is $70,000; $80,000 is C's individual salary")
+            r"\btotal pay.{0,65}\bto (?:sixty thousand|\$60[,.]?000)\b|"
+            r"\b(?:sixty thousand|\$60,?000) divided by three\b|"
+            r"\b(?:employee )?B (?:still )?(?:earns|makes) eighty thousand\b|"
+            r"\b(?:employee )?C (?:still )?(?:earns|makes) forty thousand\b|"
+            r"\b(?:one hundred twenty thousand|one hundred and twenty thousand|\$120,?000)\b|"
+            r"\b(?:taking|took) (?:their )?sixty thousand\b|"
+            r"\b(?:twenty thousand|\$20,?000) less than before\b", narration, re.I):
+        raise ValueError("A earned $40,000; B $60,000; C $80,000. The mean goes from $180,000/3 = $60,000 to $140,000/2 = $70,000")
     if fixture and re.search(r"^(?:what it shows|hold minute|show the|isolate the)\b", narration, re.I):
         raise ValueError("speak to the audience, without repeating the stage direction")
 
@@ -277,6 +286,12 @@ def author_state(args, context, work, endpoint, prior, prior_opening, index, sta
                    f"Editorial context: {json.dumps(editorial, ensure_ascii=False)}\n"
                    f"Previously spoken ending: {prior!r}. Vary phrasing; avoid reusing this preceding opening: "
                    f"{prior_opening!r}.")
+    if context.get("visual_fixture") == "queue" and stage_id == "drain":
+        instruction += " Stay with the final service and departure; do not recap when D arrived."
+    if context.get("visual_fixture") == "salary":
+        instruction += (" Do not reuse numbers from the previous narration. "
+                        "Employee A is the $40,000 salary removed; B and C never change salary. "
+                        "Do not state a total or mean that is not visible on this panel.")
     defect = ""
     for attempt in range(2):
         payload = {"messages": [{"role": "user", "content": instruction + defect}],

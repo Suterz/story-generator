@@ -24,6 +24,12 @@ class EvidenceTests(unittest.TestCase):
                 check_transfer_explanation(fixture, stage, sentence)
         check_transfer_explanation("shutter", "comparison", "The second streak is forty pixels.")
         check_transfer_explanation("map", "patches", "On Earth, they’re the same size.")
+        check_transfer_explanation("percent", "restore", "Twenty-five percent restores the price.")
+        check_transfer_explanation("salary", "after", "B earns sixty thousand and C earns eighty thousand.")
+        with self.assertRaisesRegex(ValueError, "twenty-five percent"):
+            check_transfer_explanation("percent", "restore", "Twenty percent is not enough.")
+        with self.assertRaisesRegex(ValueError, "mean goes"):
+            check_transfer_explanation("salary", "before", "The mean is sixty thousand divided by three.")
         with self.assertRaisesRegex(ValueError, "current card"):
             check_transfer_explanation("study", "question", "Look at the title of the first document.")
 

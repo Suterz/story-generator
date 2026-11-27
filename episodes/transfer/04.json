@@ -62,10 +62,10 @@
       "words": "115–140 (around 40 per visual state)",
       "stage_claims": {
         "axis": [
-          "At either orbital position, Minneapolis completes one rotation each day. Its time on the lit side can differ."
+          "Earth's axis tilts the Northern Hemisphere toward the Sun in June. A city moves through the lit and dark sides as Earth spins."
         ],
         "day": [
-          "At 45° north the June daylight bar is longer than December's. These are illustrative shares of a rotation."
+          "Each bar is one day, not a piece of the yearly orbit. At 45° north the June daylight bar is longer than December's."
         ]
       }
     },
@@ -115,7 +115,7 @@
           "The 45° north noon angle is higher in June and lower in December."
         ],
         "south": [
-          "At 45° south, June has shorter daylight and a lower noon Sun; December reverses both. The hemispheres have the same Earth–Sun distance at a given time."
+          "Compare north and south on the same June day: it is summer in the north and winter in the south at the same Earth–Sun distance. In December the pattern reverses."
         ]
       }
     }
