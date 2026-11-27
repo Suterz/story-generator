@@ -8,8 +8,13 @@ from jsonschema import Draft202012Validator
 from episode_graphics import CITATION_PACKET, RENDER
 
 
-def chapter_schema(ids, compact=False):
-    text = {"type": "string", "minLength": 1, **({"maxLength": 183} if compact else {})}
+def chapter_schema(ids, compact=False, *, sentences=False):
+    if sentences:
+        per_stage = 2 if len(ids) >= 3 else 3
+        text = {"type": "array", "minItems": per_stage, "maxItems": per_stage,
+                "items": {"type": "string", "minLength": 45, "maxLength": 153}}
+    else:
+        text = {"type": "string", "minLength": 1, **({"maxLength": 183} if compact else {})}
     return {
         "type": "object", "additionalProperties": False, "required": ["sections"],
         "properties": {"sections": {"type": "array", "minItems": len(ids), "maxItems": len(ids),
@@ -75,15 +80,17 @@ def compile_chapter(brief, draft, prefix, *, short=True):
     count = sum(len(words(s["text"])) for s in sections)
     if short and not 42 <= count <= 96:
         raise ValueError(f"preview narration has {count} words; use 55–85 words")
-    if not short and not 94 <= count <= 157:
-        raise ValueError(f"chapter has {count} words; write 115–140 words total")
+    if not short and not 86 <= count <= 166:
+        raise ValueError(f"chapter has {count} words; use around 20 words per sentence")
     script, beats = [], []
     for i, section in enumerate(sections):
         stage = section["stage"]
         ident = f"{prefix}-{i + 1}-{stage}"
         spoken = section["text"].strip()
         caption = section["caption"].strip()
-        if not spoken or spoken[-1] not in ".?!”’" or (short and (not caption or len(caption) > 84)):
+        if not spoken or not spoken.rstrip("\"”’").endswith((".", "?", "!")):
+            raise ValueError(f"{stage}: finish the full spoken sentence with punctuation")
+        if short and (not caption or len(caption) > 84):
             raise ValueError(f"{stage}: give narration and a faithful caption of at most 84 characters")
         cue = {"ms": 0}
         if i or not short:
@@ -132,7 +139,8 @@ def write_chapter(args, brief, folder, endpoint, *, short=True, prefix="chapter"
     from storygen import read, request, save
 
     folder.mkdir(parents=True, exist_ok=True)
-    schema = chapter_schema([s[0] for s in brief["stages"]], compact=short)
+    ids = [s[0] for s in brief["stages"]]
+    schema = chapter_schema(ids, compact=short, sentences=not short)
     reason = None
     for attempt in range(2):
         prompt, selected = prompt_for(brief, args.episode_skill, reason, episode=not short)
@@ -140,6 +148,10 @@ def write_chapter(args, brief, folder, endpoint, *, short=True, prefix="chapter"
             prompt += ("\nHard limit: each of the three text fields is one short sentence, roughly twenty words, "
                        "and no more than 183 characters including final punctuation. "
                        "The final text must be short enough to speak in under forty-five seconds.")
+        else:
+            prompt += ("\nEach text value is an array of complete spoken sentences, around twenty words each. "
+                       "For three visual states, use exactly two sentences at each state. For two use three each. "
+                       "Aim for 105 to 139 words in this whole chapter. Do not put START or directions in the actual speech.")
         payload = {"messages": [{"role": "user", "content": prompt}],
                    "temperature": .3, "top_p": .95, "seed": 437, "max_tokens": 1800,
                    "response_format": {"type": "json_schema", "json_schema": {"name": "chapter", "schema": schema}}}
@@ -160,10 +172,14 @@ def write_chapter(args, brief, folder, endpoint, *, short=True, prefix="chapter"
             save(response_file, response)
         try:
             draft = json.loads(response["choices"][0]["message"]["content"])
-            if short:
-                errors = list(Draft202012Validator(schema).iter_errors(draft))
-                if errors:
-                    raise ValueError(errors[0].message)
+            errors = list(Draft202012Validator(schema).iter_errors(draft))
+            if errors:
+                raise ValueError(errors[0].message)
+            if not short:
+                for section in draft["sections"]:
+                    if any(not s.rstrip(" \"”’").endswith((".", "?", "!")) for s in section["text"]):
+                        raise ValueError("Every sentence in the array must be complete and end with punctuation")
+                    section["text"] = " ".join(section["text"])
             return compile_chapter(brief, draft, prefix, short=short)
         except (ValueError, KeyError, IndexError) as error:
             reason = str(error).splitlines()[0]
