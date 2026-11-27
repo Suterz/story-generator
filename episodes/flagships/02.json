@@ -65,7 +65,21 @@
           "See the borrower’s side."
         ]
       ],
-      "words": "115–140 (around 40 per visual state)"
+      "words": "115–140 (around 40 per visual state)",
+      "stage_claims": {
+        "before": [
+          "Loan and new transaction deposit are zero at the start; the seller deposit is zero too.",
+          "The loan has not been originated. Ask what will go on both sides."
+        ],
+        "origination": [
+          "Approval is not origination. At origination Bank A creates a matching loan asset and new deposit liability.",
+          "Explain who owes whom and that no other customer's deposit falls."
+        ],
+        "wealth": [
+          "Borrower deposit and borrower debt both increase by one hundred thousand dollars.",
+          "The deposit is the bank's liability; the debt is the borrower's liability."
+        ]
+      }
     },
     {
       "question": "Is the borrower a hundred thousand dollars richer?",

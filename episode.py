@@ -1,6 +1,7 @@
 """Chaptered educational production through the normal writer and video services."""
 import hashlib
 import json
+import re
 from pathlib import Path
 
 from jsonschema import Draft202012Validator
@@ -198,16 +199,24 @@ def author_state(args, context, work, endpoint, prior, index, stage, bounds):
     skill, selected = skill_for(context, args.episode_skill)
     low, high = bounds
     work.mkdir(parents=True, exist_ok=True)
+    renderer = (TRANSFER_RENDERERS[context["visual_fixture"]] if "visual_fixture" in context
+                else RENDER[context["obligation"]])
+    labels = [overlay["text"] for overlay in renderer(stage_id)
+              if overlay.get("role") == "support"]
     schema = {"type": "object", "additionalProperties": False, "required": ["text", "cue"],
-              "properties": {"text": {"type": "string"}, "cue": {"type": "string"}}}
+              "properties": {"text": {"type": "string"}, "cue": {"type": "string"},
+                             "focus": {"enum": ["", *dict.fromkeys(labels)]}}}
+    editorial = {k: v for k,v in context.items() if k not in ("stages", "chapter_claims")}
     instruction = (f"{skill}\nWrite the spoken narration for just this visual state in {low}–{high} words. "
                    f"Visual state: {stage_id}. What it shows: {objective}\n"
-                   "Speak to the viewer, without a stage direction or reading any metadata aloud. "
-                   "Build one step, and leave later states for their own narration. "
+                   "Speak naturally to the viewer, without announcing steps or reading any metadata aloud. "
+                   "Build one step. Do not state future information or explain its answer until its picture appears. "
                    "End with a complete sentence. Spell numbers and acronyms for speech. "
                    "For cue, use an empty string for a cut on this section's first words, "
                    "or a distinctive exact phrase within its opening words.\n"
-                   f"Editorial context: {json.dumps(context, ensure_ascii=False)}\n"
+                   f"Exact labels available to emphasize with focus: {labels!r}. Omit focus if unnecessary. "
+                   f"Only authorized facts for this state: {context['current_evidence_only']!r}. "
+                   f"Editorial context: {json.dumps(editorial, ensure_ascii=False)}\n"
                    f"Previously spoken ending: {prior!r}")
     defect = ""
     for attempt in range(2):
@@ -233,14 +242,21 @@ def author_state(args, context, work, endpoint, prior, index, stage, bounds):
             count = len(words(narration))
             if not low - 8 <= count <= high + 18:
                 raise ValueError(f"{count} words; the permitted range is {low}–{high}")
-            if not narration.rstrip("\"”’").endswith((".", "?", "!")) or narration.split()[0].rstrip(".:").casefold() == "start":
+            if (not narration.rstrip("\"”’").endswith((".", "?", "!"))
+                    or narration.split()[0].rstrip(".:").casefold() in {"start", "cue", "stage"}):
                 raise ValueError("write complete spoken sentences without cue labels")
+            if stage_id in {"speed", "one-year", "compare-years"} and re.search(
+                    r"\bnine[- ]tenths\b|\b0\.9\s*c\b|\bninety percent\b", narration, re.I):
+                raise ValueError("the supplied speed is ninety-nine percent of light speed, not ninety percent")
+            focus = value.get("focus", "")
+            if focus and focus not in labels:
+                raise ValueError("focus must name an actual support label")
             match = words(cue)
             tokens = words(narration)
             hits = [j for j in range(len(tokens)) if tokens[j:j+len(match)] == match] if match else []
             if cue and (len(hits) != 1 or hits[0] > 6):
                 raise ValueError("use an empty cue or a short exact cue near the beginning")
-            return {"stage": stage_id, "text": narration, "cue": cue, "caption": ""}
+            return {"stage": stage_id, "text": narration, "cue": cue, "caption": "", "focus": focus}
         except (ValueError, KeyError, TypeError, IndexError) as error:
             defect = f"\nThe previous attempt was withheld: {error}. Fix only that problem."
     raise ValueError(f"{stage_id} (state {index}): {defect.strip()}")
@@ -263,11 +279,19 @@ def write_episode(args, brief, out, endpoint):
         target = (29, 50) if count >= 3 else (43, 77)
         sections = []
         for index, stage in enumerate(chapter["stages"], 1):
-            section = author_state(args, chapter_brief, out / "chapters" / label / str(index),
+            authored_context = {**chapter_brief, "current_evidence_only":
+                                chapter.get("stage_claims", {}).get(stage[0], chapter["chapter_claims"])}
+            section = author_state(args, authored_context, out / "chapters" / label / str(index),
                                    endpoint, prior, index, stage, target)
             sections.append(section)
             prior = " ".join(section["text"].split()[-30:])
-        part, visuals = compile_chapter(chapter_brief, {"sections": sections}, label, short=False)
+        part, visuals = compile_chapter(chapter_brief, {"sections": [
+            {k: v for k,v in section.items() if k != "focus"} for section in sections]}, label, short=False)
+        for section, beat in zip(sections, visuals, strict=True):
+            for graphic in beat["panel"]["overlays"]:
+                if graphic.get("text") == section["focus"]:
+                    graphic["role"] = "question"
+                    break
         starts.append(part[0]["id"])
         script.extend(part)
         beats.extend(visuals)

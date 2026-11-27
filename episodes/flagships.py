@@ -43,6 +43,27 @@ def assemble():
                 ("gps","Brief application to satellite clock rates."),
                 ("reunion","Pay off the question of the two clocks.")),
     ]
+    a["chapters"][0]["stage_claims"] = {
+        "reunion": ["The reunited twins compare two clocks that ran normally. One measured less time.",
+                    "Ask how two working clocks disagree. Do not answer yet."],
+        "depart": ["At their common departure the clocks were synchronized. One twin stays on Earth and one travels.",
+                   "The twin feels normal. No claims about seeing tick speeds during the trip in this chapter."],
+    }
+    a["chapters"][3]["stage_claims"] = {
+        "speed": ["This is a NEW demonstration: ninety-nine percent of the speed of light, not nine tenths.",
+                  "Show a one year reading on the ship for this constant-speed leg. Earth number is still hidden."],
+        "one-year": ["Ninety-nine percent of light speed, exactly as shown. One year on ship; about seven point zero nine years of Earth-frame time."],
+        "compare-years": ["Both clocks work normally. The traveler does not feel slowed.",
+                          "The example is for one constant-speed leg, not the full trip."],
+    }
+    a["chapters"][4]["stage_claims"] = {
+        "paths": ["Both worldlines start and end together. The traveler changes inertial frame at turnaround.",
+                  "The elapsed proper time differs along the two paths. Do not infer elapsed time from drawn Euclidean line lengths."],
+        "gps": ["Motion AND weaker gravity affect GPS satellite clocks; the effects have opposite signs.",
+                "Do not say GPS orbiting clocks run slower overall. No drift numbers are required."],
+        "reunion": ["Return to the clocks: elapsed time is what each clock accumulated along its own path.",
+                    "Neither clock malfunctioned; the two different readings are compatible."],
+    }
     b["sources"]["B2"] = "https://www.bankofengland.co.uk/explainers/how-is-money-created"
     b["editorial_direction"] = ("Open just before a fictional $100,000 loan is booked. Follow the same borrower and seller. "
                                 "Never imply saved cash is passed to the borrower; dollars are illustrative, not a national regulation claim.")
@@ -71,6 +92,13 @@ def assemble():
                 ("outstanding","Before repayment, locate the original loan."),
                 ("repayment","Show the $99,000 result and savings source.")),
     ]
+    b["chapters"][0]["stage_claims"] = {
+        "before": ["Loan and new transaction deposit are zero at the start; the seller deposit is zero too.",
+                   "The loan has not been originated. Ask what will go on both sides."],
+        "origination": b["chapters"][0]["chapter_claims"],
+        "wealth": ["Borrower deposit and borrower debt both increase by one hundred thousand dollars.",
+                   "The deposit is the bank's liability; the debt is the borrower's liability."],
+    }
     c["sources"]["C1"] = "https://arxiv.org/abs/2509.04664"
     c["editorial_direction"] = ("Investigate rather than scold. Keep the fictional reference visibly fictional from the first frame. "
                                 "When using the real document, distinguish the question, passage and generated answer.")
@@ -99,4 +127,10 @@ def assemble():
                  "A search failure does not establish a work never existed. Refer back to the fictional card."],
                 ("fiction","Recall the opening question."), ("habit","Give the three-step action.")),
     ]
+    c["chapters"][0]["stage_claims"] = {
+        "fiction": ["The displayed citation is invented and explicitly labeled illustrative, not a source.",
+                    "Formatting does not tell us anyone checked it. Leave the mechanism unanswered."],
+        "prompt": ["Use exactly the example shown: ‘Please pass the …’, with salt and pepper as plausible continuations."],
+        "tokens": ["A token is a piece of text, often a word or part of a word. This is illustrative, not a measured distribution."],
+    }
     return a, b, c

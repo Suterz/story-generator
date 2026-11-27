@@ -65,7 +65,19 @@
           "Name ordinary pieces of text."
         ]
       ],
-      "words": "115–140 (around 40 per visual state)"
+      "words": "115–140 (around 40 per visual state)",
+      "stage_claims": {
+        "fiction": [
+          "The displayed citation is invented and explicitly labeled illustrative, not a source.",
+          "Formatting does not tell us anyone checked it. Leave the mechanism unanswered."
+        ],
+        "prompt": [
+          "Use exactly the example shown: ‘Please pass the …’, with salt and pepper as plausible continuations."
+        ],
+        "tokens": [
+          "A token is a piece of text, often a word or part of a word. This is illustrative, not a measured distribution."
+        ]
+      }
     },
     {
       "question": "What does predicting likely wording tell us about truth?",

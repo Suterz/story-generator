@@ -84,8 +84,12 @@ def twins(stage):
                   text("Depart", .73, .38), text("Reunite", .30, .38)]
     else:
         for x, name in ((.26,"Stays"),(.74,"Travels")):
-            marks += [rect(x,.45,.31,.31), dot([x,.38]),
-                      text(name,.50,x), text("Working clock",.56,x)]
+            marks += [rect(x,.45,.31,.31), {"type":"shape","shape":"disc","at":[x,.42],
+                                           "extent":[.19,.106875],"ink":"ink"},
+                      line([x,.42],[x,.381],"pale"),
+                      line([x,.42],[x + (.046 if stage == "depart" or x < .5 else -.046),.42],"pale"),
+                      text(name,.51,x),
+                      text(("More elapsed" if x < .5 else "Less elapsed") if stage == "reunion" else "Clock agrees",.56,x)]
         marks += [text("Readings disagree" if stage == "reunion" else "Clocks start together", .71, role="value")]
     return marks
 

@@ -27,7 +27,9 @@
                 "required": ["question", "chapter_claims", "stages", "words"],
                 "properties": {"question": {"$ref": "#/$defs/text"},
                                "chapter_claims": {"type": "array", "minItems": 1, "items": {"$ref": "#/$defs/text"}},
-                               "stages": {"$ref": "#/$defs/stages"}, "words": {"$ref": "#/$defs/text"}}}
+                               "stages": {"$ref": "#/$defs/stages"}, "words": {"$ref": "#/$defs/text"},
+                               "stage_claims": {"type":"object", "additionalProperties":
+                                 {"type":"array", "items":{"$ref":"#/$defs/text"}}}}}
     },
     "transfer": {"type": "object", "additionalProperties": false, "required": ["question", "answer"],
                  "properties": {"question": {"$ref": "#/$defs/text"}, "answer": {"$ref": "#/$defs/text"}}}

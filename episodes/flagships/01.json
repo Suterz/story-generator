@@ -65,7 +65,17 @@
           "Return to the disagreement."
         ]
       ],
-      "words": "115–140 (around 40 per visual state)"
+      "words": "115–140 (around 40 per visual state)",
+      "stage_claims": {
+        "reunion": [
+          "The reunited twins compare two clocks that ran normally. One measured less time.",
+          "Ask how two working clocks disagree. Do not answer yet."
+        ],
+        "depart": [
+          "At their common departure the clocks were synchronized. One twin stays on Earth and one travels.",
+          "The twin feels normal. No claims about seeing tick speeds during the trip in this chapter."
+        ]
+      }
     },
     {
       "question": "What makes a tick?",
@@ -129,7 +139,20 @@
           "Emphasize that both clocks behave normally."
         ]
       ],
-      "words": "115–140 (around 40 per visual state)"
+      "words": "115–140 (around 40 per visual state)",
+      "stage_claims": {
+        "speed": [
+          "This is a NEW demonstration: ninety-nine percent of the speed of light, not nine tenths.",
+          "Show a one year reading on the ship for this constant-speed leg. Earth number is still hidden."
+        ],
+        "one-year": [
+          "Ninety-nine percent of light speed, exactly as shown. One year on ship; about seven point zero nine years of Earth-frame time."
+        ],
+        "compare-years": [
+          "Both clocks work normally. The traveler does not feel slowed.",
+          "The example is for one constant-speed leg, not the full trip."
+        ]
+      }
     },
     {
       "question": "Why does the result not cancel at reunion?",
@@ -152,7 +175,21 @@
           "Pay off the question of the two clocks."
         ]
       ],
-      "words": "115–140 (around 40 per visual state)"
+      "words": "115–140 (around 40 per visual state)",
+      "stage_claims": {
+        "paths": [
+          "Both worldlines start and end together. The traveler changes inertial frame at turnaround.",
+          "The elapsed proper time differs along the two paths. Do not infer elapsed time from drawn Euclidean line lengths."
+        ],
+        "gps": [
+          "Motion AND weaker gravity affect GPS satellite clocks; the effects have opposite signs.",
+          "Do not say GPS orbiting clocks run slower overall. No drift numbers are required."
+        ],
+        "reunion": [
+          "Return to the clocks: elapsed time is what each clock accumulated along its own path.",
+          "Neither clock malfunctioned; the two different readings are compatible."
+        ]
+      }
     }
   ]
 }
