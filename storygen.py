@@ -880,7 +880,8 @@ def main():
     p.add_argument("--daily", action="store_true", help="adapt an unstaged episode brief for daily authoring")
     p.add_argument("--communication-skill", help="version of the shared communication skill to test")
     p.add_argument("--body-instruction", choices=("historical", "advancing-v1", "advancing-bound-v2",
-                                                "advancing-ratio-v3", "advancing-repair-v4"),
+                                                "advancing-ratio-v3", "advancing-repair-v4", "advancing-scope-v5",
+                                                "advancing-no-copy-v6"),
                    default="historical")
     p.add_argument("--episode-skill", choices=("routed", "baseline", "entities", "purpose", "continuity",
                                                "visual-first", "verification"), default="routed")

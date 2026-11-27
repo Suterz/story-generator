@@ -7,6 +7,13 @@ Neither is a production default. The exact duplicate guard checks text, not
 panel similarity. A highlight or a new diagram is not assumed to teach
 something new by itself.
 
+`advancing-ratio-v3` uses exact fractions when the source explicitly defines
+round-trip efficiency and provides the separately bound input and return.
+`advancing-repair-v4` gives a repeated chapter one local revision.
+`advancing-scope-v5` assigns earlier and later chapter scope.
+`advancing-no-copy-v6` holds that scope and removes previous chapter prose
+from the generation packet; it supplies the earlier planned inferences instead.
+
 `body_progress.py RUN` measures repetition, panel holds and captions on a
 delivered film. `body_assembly.py OPENING BODY OUTPUT --body-offset SECONDS`
 is a controlled screening utility, not the ordinary production path. It
@@ -22,6 +29,13 @@ are development arms; the existing timed-assertion fixtures remain a
 separate evaluator-guided control. Uniformly sampled frames can miss a
 short reveal, and transcript localization does not verify a visual-only
 fault. Never infer qualification from these diagnostics.
+
+`derive_assertions.py` checks a narrow set of derived spoken relations.
+An unmatched assertion is unknown, not a pass. Its rewind evidence is
+affirmative only about the recovered original roster. `reveal_witness.py`
+finds a sourced forbidden amount in the delivered speech, then records
+what is visible at the onset. A missing amount in the diagram is a
+review lead, not by itself proof of the approved global reveal boundary.
 
 ## Independent qualification handoff
 

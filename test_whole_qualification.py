@@ -25,6 +25,10 @@ class WholeQualification(unittest.TestCase):
                                             allow_ratio=True), "supports")
         self.assertEqual(comparison_support("A has higher round-trip efficiency than B.", source,
                                             allow_ratio=True), "contradicts")
+        self.assertEqual(comparison_support("B's round-trip efficiency is 80%.", source,
+                                            allow_ratio=True), "supports")
+        self.assertEqual(comparison_support("B's round-trip efficiency is 48%.", source,
+                                            allow_ratio=True), "contradicts")
 
     def test_locate_only_unique_exact_heard_quote(self):
         speech = [{"word": "two", "start": 4, "end": 4.2}, {"word": "people", "start": 4.2, "end": 4.5}]

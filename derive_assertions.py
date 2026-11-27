@@ -59,6 +59,35 @@ def search(words, rule):
     return observed_assertion(scan, {**rule, "interval": [scan[0]["start"], scan[-1]["end"]+.01]})
 
 
+def rewind_witness(source, objective, words, frames):
+    """Affirm only the rewind relation; it cannot clear a later contradiction."""
+    if not re.search(r"\brewind\b", objective, re.I):
+        return None
+    original = re.search(r"\boriginal roster ([^.]+)", source, re.I)
+    if not original:
+        return None
+    values = {int(x.replace(",", "")) for x in re.findall(DOLLARS, original[1])}
+    if len(values) < 2:
+        return None
+    for i, word in enumerate(words):
+        if word["word"].strip(" .,!?").lower() != "rewind":
+            continue
+        subsequent = words[i:i+32]
+        if "original" not in "".join(w["word"] for w in subsequent).casefold():
+            continue
+        for frame in frames:
+            if not word["start"] <= frame["seconds"] <= subsequent[-1]["end"]+1:
+                continue
+            text = frame["observed"]
+            seen = {int(x.replace(",", "")) for x in re.findall(DOLLARS, text)}
+            seen |= {int(x)*1000 for x in re.findall(r"\$(\d+)k\b", text, re.I)}
+            if values <= seen:
+                return {"relation": "original roster restored during explicit spoken rewind",
+                        "spoken_start_seconds": word["start"], "decoded_sample_seconds": frame["seconds"],
+                        "source_values": sorted(values), "observation": text}
+    return None
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     for key in ("packets", "observations", "output"):
@@ -78,7 +107,11 @@ def main():
             raise ValueError(f"{case}: immutable MP4 changed")
         words = read(args.observations / case / "actual-words.json")
         faults = [found for check in spec["checks"] if (found := search(words, check))]
-        rows[case] = {**spec, "faults": faults, "state": "contradiction" if faults else "not_established"}
+        packet = read(args.packets / case / "packet.json")
+        frames = read(args.observations / case / "sampled-observations.json")
+        witness = rewind_witness(packet["evidence"], packet["objective"], words, frames)
+        rows[case] = {**spec, "faults": faults, "rewind_witness": witness,
+                      "state": "contradiction" if faults else "not_established"}
     persist(args.output / "results.json", rows)
 
 

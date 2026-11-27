@@ -31,21 +31,27 @@ def comparison_support(claim, source, *, allow_ratio=False):
     if not match:
         ratio = re.fullmatch(r"(.+?) has (higher|lower) round[- ]trip efficiency than (.+?)[.]?",
                              claim.strip(), flags=re.I)
-        if not allow_ratio or ratio is None or not re.search(r"efficiency is returned energy divided by input energy", source, re.I):
+        absolute = re.fullmatch(r"(.+?)(?:'s|’s) round[- ]trip efficiency is (\d+(?:\.\d+)?)%[.]?",
+                                claim.strip(), flags=re.I)
+        if not allow_ratio or not (ratio or absolute) or not re.search(
+                r"efficiency is returned energy divided by input energy", source, re.I):
             return None
-        a, direction, b = ratio.groups()
+        entities = (ratio[1], ratio[3]) if ratio else (absolute[1],)
         rows = literal_rows([source])
         readings = []
-        for entity in (a, b):
-            values = [{(r["value"], r["unit"]) for r in rows if r["entity"].casefold()==entity.casefold()
-                       and r["property"]==prop} for prop in ("return", "input")]
-            if not all(len(v)==1 for v in values):
+        for entity in entities:
+            values = [{(r["value"], r["unit"]) for r in rows if r["entity"].casefold() == entity.casefold()
+                       and r["property"] == prop} for prop in ("return", "input")]
+            if not all(len(v) == 1 for v in values):
                 return None
             (returned, r_unit), (input_, i_unit) = (next(iter(v)) for v in values)
             if r_unit != i_unit or input_ <= 0:
                 return None
             readings.append(Fraction(returned, input_))
-        supported = readings[0] > readings[1] if direction.lower() == "higher" else readings[0] < readings[1]
+        if ratio:
+            supported = readings[0] > readings[1] if ratio[2].lower() == "higher" else readings[0] < readings[1]
+        else:
+            supported = readings[0] * 100 == Fraction(absolute[2])
         return "supports" if supported else "contradicts"
     a, verb, relation, unit, b = match.groups()
     prop = {"returns": "return", "covers": "distance", "costs": "cost", "takes in": "input"}[verb.lower()]
