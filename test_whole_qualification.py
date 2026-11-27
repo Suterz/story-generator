@@ -3,6 +3,7 @@ import unittest
 from body_progress import comparison_support, duplicated, rate_evidence
 from discovery_review import locate
 from derive_assertions import derive, search
+from daily import compile_story
 
 
 class WholeQualification(unittest.TestCase):
@@ -51,3 +52,12 @@ class WholeQualification(unittest.TestCase):
         values = rate_evidence(["Park route covers 9 km and takes 27 min. "
                                 "New route covers 15 km and takes 45 min."])["distance/duration (km/min)"]
         self.assertEqual([r["exact_rate"] for r in values], ["1/3", "1/3"])
+
+    def test_body_cue_does_not_cut_a_compound_in_half(self):
+        briefing = {"visual_obligations": [{"id": "v", "kind": "illustration", "why": "Example"}],
+                    "claims": [], "signature": "paper", "topic": "Clock", "objective": "Compare", "min_ms": 120000}
+        section = {"claim_ids": [], "obligation_ids": ["v"], "visual_data": {}, "visible": "A clock",
+                   "narration": "The river route took forty-eight minutes."}
+        result = compile_story(briefing, [{"sections": [section]}, {"sections": [section]}], set(),
+                               ordinary=True, compound_safe=True)
+        self.assertEqual(result["beats"][1]["cue"]["phrase"], "The river route")

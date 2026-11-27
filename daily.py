@@ -197,7 +197,7 @@ def collect(args, brief, model_path, today):
     return ledger
 
 
-def compile_story(brief, chapters, ids, *, voice="heart", ordinary=False):
+def compile_story(brief, chapters, ids, *, voice="heart", ordinary=False, compound_safe=False):
     from storygen import SIGNATURES, words
 
     obligations = {row["id"]: row for row in brief["visual_obligations"]}
@@ -225,11 +225,11 @@ def compile_story(brief, chapters, ids, *, voice="heart", ordinary=False):
                 raise ValueError(f"{key}: visible must describe a scene in plain words")
             covered.update(section["obligation_ids"])
             spoken = section["narration"].strip()
-            opening = words(spoken)[:5]
-            if len(opening) < 3:
+            opening = " ".join(spoken.split()[:3]) if compound_safe else " ".join(words(spoken)[:5])
+            if len(words(opening)) < 3:
                 raise ValueError(f"{key}: no usable spoken opening cue")
             script.append({"id": key, "text": spoken, "pause_after_ms": 0 if ordinary else 300})
-            cue = {"utterance_id": key, "phrase": " ".join(opening)} if beats else {"ms": 0}
+            cue = {"utterance_id": key, "phrase": opening} if beats else {"ms": 0}
             beats.append({"id": key, "cue": cue, "panel": {"op": "new_scene", "scene_id": key,
                           "objective": "; ".join(row["why"] for row in selected),
                           "instruction": section["visible"],
@@ -456,7 +456,8 @@ def run_daily(args):
             if advancing and (repeat := duplicated(chapters)):
                 persist(out / "body-repetitions.json", repeat)
                 raise ValueError("body repeats a previous chapter's spoken passage")
-            story = compile_story(brief, chapters, set(packet["approved"]), voice=voice, ordinary=ordinary)
+            story = compile_story(brief, chapters, set(packet["approved"]), voice=voice, ordinary=ordinary,
+                                  compound_safe=advancing)
             if advancing:
                 for row in story["script"]:
                     row["caption"] = row["text"]
