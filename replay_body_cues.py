@@ -30,6 +30,7 @@ if __name__ == "__main__":
             cue = " ".join(script[beat["cue"]["utterance_id"]].split()[:3])
             count += cue != beat["cue"]["phrase"]
             beat["cue"]["phrase"] = cue
+            beat["cue"]["occurrence"] = 1
     digest = sha(json.dumps(story, sort_keys=True).encode())
     key = "storygen-" + sha(f"{args.output.resolve()}:{digest}".encode())
     job_id = keyed_job(key)
