@@ -222,6 +222,15 @@ def check_transfer_explanation(fixture, stage, narration):
             r"\b(?:taking|took) (?:their )?sixty thousand\b|"
             r"\b(?:twenty thousand|\$20,?000) less than before\b", narration, re.I):
         raise ValueError("A earned $40,000; B $60,000; C $80,000. The mean goes from $180,000/3 = $60,000 to $140,000/2 = $70,000")
+    if (fixture, stage) == ("salary", "before") and re.search(
+            r"\b(?:one salary is gone now|the count has (?:just )?dropped)\b", narration, re.I):
+        raise ValueError("this panel still shows the original three employees")
+    if (fixture, stage) == ("salary", "leave") and re.search(
+            r"\bthe total is still there\b", narration, re.I):
+        raise ValueError("the two individual salaries stay the same, but total payroll falls")
+    if (fixture, stage) == ("salary", "transfer") and not re.search(
+            r"\b(?:lowest|lower|least paid|below the (?:old )?average|forty.thousand)\b", narration, re.I):
+        raise ValueError("explain why the average rose: the person who left earned less than the old average")
     if fixture and re.search(r"^(?:what it shows|hold minute|show the|isolate the)\b", narration, re.I):
         raise ValueError("speak to the audience, without repeating the stage direction")
 

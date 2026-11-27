@@ -61,7 +61,8 @@ STATE_CLAIMS = {
         (["Original total and mean: $180,000 divided by three gives $60,000."],
          ["New total and mean: $140,000 divided by two gives $70,000. Total payroll fell but the mean rose."]),
         (["B and C each earn exactly what they earned in the first group: $60,000 and $80,000."],
-         ["The roster changed, not the continuing employees' wages. A headline reporting only the mean cannot establish that a particular person got a raise."]),
+         ["The person who left earned less than the old mean. Removing a below-average salary raises the mean of the remaining group; a smaller group alone does not imply a higher mean.",
+          "A headline reporting only the mean cannot establish that a particular person got a raise."]),
     ],
     "percent": [
         (["The first discount is based on the original price of $100. Ask how much twenty percent of the original hundred removes."],

@@ -41,6 +41,11 @@ class EvidenceTests(unittest.TestCase):
             with self.subTest(stage=stage), self.assertRaises(ValueError):
                 check_transfer_explanation("percent", stage, line)
         check_transfer_explanation("salary", "after", "B earns sixty thousand and C earns eighty thousand.")
+        check_transfer_explanation("salary", "transfer", "The lowest earner left. Neither remaining employee got a raise.")
+        for stage, line in (("before", "One salary is gone now."), ("leave", "The total is still there."),
+                            ("transfer", "The average rose because the group shrank.")):
+            with self.subTest(stage=stage), self.assertRaises(ValueError):
+                check_transfer_explanation("salary", stage, line)
         with self.assertRaisesRegex(ValueError, "twenty-five percent"):
             check_transfer_explanation("percent", "restore", "Twenty percent is not enough.")
         with self.assertRaisesRegex(ValueError, "mean goes"):
