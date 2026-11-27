@@ -160,8 +160,8 @@
           "Hold the bank figures while distinguishing liquidity and other limits."
         ],
         [
-          "outstanding",
-          "Return to why the lender cares about the existing loan."
+          "policy",
+          "Show rate, loan cost and demand as influences, not a fixed rule."
         ]
       ],
       "words": "115–140 (around 40 per visual state)",
@@ -172,8 +172,9 @@
         "limits": [
           "Capital absorbs losses. Separate it from reserves used for settlement. Banks evaluate ability to repay, risk, and profitability."
         ],
-        "outstanding": [
-          "Bank A still owns the loan and bears its credit risk. Creditworthy borrowers must want loans; policy rates influence funding costs, rates and demand without a fixed result."
+        "policy": [
+          "Policy interest rates can influence funding costs and loan rates, which can affect how much borrowers want to borrow.",
+          "Bank A retains the credit risk in this example. Loans can be sold in separate transactions; the seller payment in this example did not move this loan."
         ]
       }
     },
@@ -200,7 +201,7 @@
           "The borrower owes Bank A the original $100,000. Separately, the borrower has $1,000 of pre-existing savings at Bank A. That's where the repayment funds are held."
         ],
         "repayment": [
-          "A reduces the borrower's savings deposit by $1,000 and the loan by $1,000 to $99,000. Both at A; no reserves move and B's deposit does not change.",
+          "A reduces the separate savings deposit from $1,000 to zero, and reduces the already-existing loan from $100,000 to $99,000. No new loan is created. No reserves move and B's deposit does not change.",
           "This is principal only. Interest is a separate bank income flow, not principal. Return to creation at origination."
         ]
       }

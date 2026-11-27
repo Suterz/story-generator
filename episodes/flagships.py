@@ -21,7 +21,7 @@ def assemble():
                 ["Fictional reunion; both clocks ran normally and were together at departure and return.",
                  "Compare elapsed time, not a clock fault or light-travel delay."],
                 ("reunion","Show both working clocks."),
-                ("depart","Return to synchronized departure."), ("reunion","Return to the disagreement.")),
+                 ("depart","Return to synchronized departure and lead into the light-clock mechanism.")),
         chapter("What makes a tick?",
                 ["A full tick is lower mirror to upper mirror and back.",
                  "Follow only emission E to reflection R, a half-tick; not the proper time of a photon."],
@@ -53,8 +53,9 @@ def assemble():
         "speed": ["This is a new demonstration: ninety-nine percent of the speed of light.",
                   "Show a one year reading on the ship for this constant-speed leg. Earth number is still hidden."],
         "one-year": ["Ninety-nine percent of light speed, exactly as shown. One year on ship; about seven point zero nine years of Earth-frame time."],
-        "compare-years": ["Both clocks work normally. The traveler does not feel slowed.",
-                          "The example is for one constant-speed leg, not the full trip."],
+        "compare-years": ["Both clocks work normally, but they do not assign the same elapsed time to this leg.",
+                          "The traveler feels normal because their watch and everything aboard follow the same local time.",
+                          "This is one constant-speed leg, not the full trip."],
     }
     a["chapters"][1]["stage_claims"] = {
         "ship": ["One full tick is the pulse from the lower mirror to the upper mirror and back to the lower mirror.",
@@ -70,8 +71,8 @@ def assemble():
                  "Both frames measure the same light speed. Earth therefore assigns more time to this same half-tick, emission to reflection."],
     }
     a["chapters"][4]["stage_claims"] = {
-        "paths": ["Both worldlines start and end together. The traveler changes inertial frame at turnaround.",
-                  "The elapsed proper time differs along the two paths. Do not infer elapsed time from drawn Euclidean line lengths."],
+        "paths": ["Both paths start and end together. The traveler changes from an outbound inertial frame to an inbound inertial frame at turnaround.",
+                  "Earth stays approximately in one frame. The elapsed proper time differs along the two paths."],
         "gps": ["Relative to the comparison clock on Earth, the effect of satellite motion is to slow its clock.",
                 "The weaker gravity at GPS orbital altitude makes the satellite clock run faster.",
                 "These effects do not exactly cancel. GPS accounts for both. No drift numbers are needed."],
@@ -98,7 +99,7 @@ def assemble():
                  "Policy interest rates influence costs and demand without a fixed loan result."],
                 ("settlement","Make the reduced A reserves inspectable."),
                 ("limits","Hold the bank figures while distinguishing liquidity and other limits."),
-                ("outstanding","Return to why the lender cares about the existing loan.")),
+                 ("policy","Show rate, loan cost and demand as influences, not a fixed rule.")),
         chapter("What disappears when the borrower repays principal?",
                 ["Use separate, pre-existing $1,000 savings at Bank A. These savings were not the spent deposit.",
                  "Pay down principal only: savings fall by $1,000 and Bank A loan falls from $100,000 to $99,000; B's seller deposit and reserves unchanged.",
@@ -127,11 +128,12 @@ def assemble():
     b["chapters"][3]["stage_claims"] = {
         "settlement": ["The reserve outflow shows why the bank needs settlement liquidity and funding. The bank cannot promise to settle an unlimited amount."],
         "limits": ["Capital absorbs losses. Separate it from reserves used for settlement. Banks evaluate ability to repay, risk, and profitability."],
-        "outstanding": ["Bank A still owns the loan and bears its credit risk. Creditworthy borrowers must want loans; policy rates influence funding costs, rates and demand without a fixed result."],
+        "policy": ["Policy interest rates can influence funding costs and loan rates, which can affect how much borrowers want to borrow.",
+                   "Bank A retains the credit risk in this example. Loans can be sold in separate transactions; the seller payment in this example did not move this loan."],
     }
     b["chapters"][4]["stage_claims"] = {
         "savings": ["The borrower owes Bank A the original $100,000. Separately, the borrower has $1,000 of pre-existing savings at Bank A. That's where the repayment funds are held."],
-        "repayment": ["A reduces the borrower's savings deposit by $1,000 and the loan by $1,000 to $99,000. Both at A; no reserves move and B's deposit does not change.",
+        "repayment": ["A reduces the separate savings deposit from $1,000 to zero, and reduces the already-existing loan from $100,000 to $99,000. No new loan is created. No reserves move and B's deposit does not change.",
                       "This is principal only. Interest is a separate bank income flow, not principal. Return to creation at origination."],
     }
     c["sources"]["C1"] = "https://arxiv.org/abs/2509.04664"

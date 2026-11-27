@@ -125,6 +125,12 @@ def money(cents):
 
 
 def bank(stage):
+    if stage == "policy":
+        return [text("POLICY RATES INFLUENCE LENDING", .13, role="value"),
+                *metric("Central bank", "Policy rate", .25),
+                arrow([.5,.36],[.5,.42]), *metric("Bank funding and lending", "Costs and loan rates", .46),
+                arrow([.5,.57],[.5,.63]), *metric("Borrowers", "Demand for loans", .67),
+                text("Influence, not a fixed result", .80)]
     count = {"before": 0, "origination": 1, "wealth": 1, "settlement": 2,
              "outstanding": 2, "limits": 2, "savings": 2, "repayment": 3}[stage]
     accounts = ledger_at(count)

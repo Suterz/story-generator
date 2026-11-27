@@ -58,11 +58,7 @@
         ],
         [
           "depart",
-          "Return to synchronized departure."
-        ],
-        [
-          "reunion",
-          "Return to the disagreement."
+          "Return to synchronized departure and lead into the light-clock mechanism."
         ]
       ],
       "words": "115–140 (around 40 per visual state)",
@@ -172,8 +168,9 @@
           "Ninety-nine percent of light speed, exactly as shown. One year on ship; about seven point zero nine years of Earth-frame time."
         ],
         "compare-years": [
-          "Both clocks work normally. The traveler does not feel slowed.",
-          "The example is for one constant-speed leg, not the full trip."
+          "Both clocks work normally, but they do not assign the same elapsed time to this leg.",
+          "The traveler feels normal because their watch and everything aboard follow the same local time.",
+          "This is one constant-speed leg, not the full trip."
         ]
       }
     },
@@ -201,8 +198,8 @@
       "words": "115–140 (around 40 per visual state)",
       "stage_claims": {
         "paths": [
-          "Both worldlines start and end together. The traveler changes inertial frame at turnaround.",
-          "The elapsed proper time differs along the two paths. Do not infer elapsed time from drawn Euclidean line lengths."
+          "Both paths start and end together. The traveler changes from an outbound inertial frame to an inbound inertial frame at turnaround.",
+          "Earth stays approximately in one frame. The elapsed proper time differs along the two paths."
         ],
         "gps": [
           "Relative to the comparison clock on Earth, the effect of satellite motion is to slow its clock.",
