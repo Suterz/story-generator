@@ -286,6 +286,16 @@ def author_state(args, context, work, endpoint, prior, prior_opening, index, sta
                 if stage_id == "repayment" and re.search(r"\breplac(?:ed|es|ing) (?:by|with) (?:a|the) .{0,40}\bloan\b",
                                                          narration, re.I):
                     raise ValueError("repayment reduces the original loan; it does not replace savings with a loan")
+            if context["obligation"] == "source-verification" and not context.get("visual_fixture"):
+                if stage_id in {"fiction", "fiction-return", "habit"} and re.search(
+                        r"\bgpt[- ]*(?:\d|three|four)|\b(?:55|18)%", narration, re.I):
+                    raise ValueError("the invented citation is about footnotes; model results belong only to the real study")
+                if stage_id == "source" and re.search(r"\b(?:this|the|here'?s the) paragraph\b", narration, re.I):
+                    raise ValueError("this opening view shows the title and question, not a results paragraph yet")
+                if re.search(r"\b(?:learns?|learning) patterns,? not facts\b", narration, re.I):
+                    raise ValueError("a model can learn facts; fluent output does not establish this particular claim")
+                if re.search(r"\btitle.{0,15}scientific reports\b", narration, re.I):
+                    raise ValueError("Scientific Reports is the journal; use the article title from the brief")
             focus = value.get("focus", "")
             if focus and focus not in labels:
                 raise ValueError("focus must name an actual support label")
