@@ -39,7 +39,8 @@ def main():
     parser.add_argument("--models", type=Path, default=writer_root / "models")
     parser.add_argument("--runtime", type=Path, default=writer_root / "runtime/build/bin/llama-server")
     parser.add_argument("--lease", type=Path, default=home / "ai/storyboard-build/v2/gpu.lock")
-    parser.add_argument("--version", choices=("route-v1", "route-v2", "route-v3"), default="route-v1")
+    parser.add_argument("--version", choices=("route-v1", "route-v2", "route-v3"), default="route-v3",
+                        help="v1 and v2 are retained for historical replay only")
     args = parser.parse_args()
     args.output.mkdir(parents=True, exist_ok=False)
     model = read(ROOT / "models.json")["mistral-small"]

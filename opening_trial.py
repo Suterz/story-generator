@@ -76,13 +76,17 @@ STABLE_COMPARISON = (
     "five to nine words, 24 to 34 words total. Speak numbers and units in words. Use digits for the visible "
     "reading labels. Output facts from the supplied evidence only. Put the actual spoken question in lines[2]."
 )
+SAME_PROPERTY = (" Compare the same measured property for both objects. Use the same measurement verb in "
+                 "lines one and two: for example, both measurements can be travel distance, but one "
+                 "distance and one duration are not comparable. known_label and missing_label name measured "
+                 "properties, not objects. Each line shares the same exact unit where numeric.")
 COMPARISON = obj({"objects": array(obj({"label": {**TEXT, "maxLength": 25},
                                        "reading": {**TEXT, "maxLength": 22}}), 2, 2),
                   "known_label": {**TEXT, "maxLength": 23}, "missing_label": {**TEXT, "maxLength": 23},
                   "lines": array({**TEXT, "maxLength": 90}, 4, 4)})
 
 
-def comparison_plan(value, approved):
+def comparison_plan(value, approved, *, same_property=False):
     import re
     from opening_review import heard_numbers
 
@@ -96,6 +100,17 @@ def comparison_plan(value, approved):
     names = [item["label"] for item in value["objects"]]
     if len(set(names)) != 2:
         raise ValueError("comparison requires two distinct objects")
+    if same_property:
+        import string
+
+        names = {name.casefold().strip() for name in names}
+        if any(value[key].casefold().strip() in names for key in ("known_label", "missing_label")):
+            raise ValueError("opening meter label names the object instead of the measured property")
+        motions = {"returns", "takes", "uses", "receives", "outputs", "travels", "lasts", "weighs", "costs"}
+        verbs = [set(line.casefold().translate(str.maketrans("", "", string.punctuation)).split()) & motions
+                 for line in value["lines"][:2]]
+        if all(verbs) and verbs[0].isdisjoint(verbs[1]):
+            raise ValueError("opening lines use different measurement verbs")
     for item, line in zip(value["objects"], value["lines"][:2], strict=True):
         reading = re.match(r"^\s*(\d+(?:\.\d+)?)\b", item["reading"])
         if not reading or heard_numbers(line) != {float(reading[1])}:
@@ -232,7 +247,8 @@ def run_opening(args):
                             + SHORT_LINES + LOCKED_PROMISE + EXECUTE,
                             "visible-split-v7": PROMISE_SPEC + LITERAL_EMBARGO + VISIBLE_SPLIT + QUESTION_BEFORE_ANSWER
                             + SHORT_LINES + LOCKED_PROMISE + EXECUTE,
-                            "stable-comparison-v8": STABLE_COMPARISON}
+                            "stable-comparison-v8": STABLE_COMPARISON,
+                            "same-property-v9": STABLE_COMPARISON + SAME_PROPERTY}
                            [args.opening_preview].encode()).hexdigest()}
     if args.voice.startswith("drama3-") and args.video_repo:
         registry = args.video_repo / "voices/drama3/narrators.json"
@@ -290,12 +306,15 @@ def run_opening(args):
                     packet["repair"] = previous
                     packet["previous_plan"] = read(root / "attempt-01/plan.json")
                 with writer(args, model, out / "opening.log") as endpoint:
-                    if args.opening_preview == "stable-comparison-v8":
-                        state = ask(endpoint, STABLE_COMPARISON, packet, COMPARISON, 850,
+                    structured = args.opening_preview in ("stable-comparison-v8", "same-property-v9")
+                    if structured:
+                        same = args.opening_preview == "same-property-v9"
+                        instruction = STABLE_COMPARISON + (SAME_PROPERTY if same else "")
+                        state = ask(endpoint, instruction, packet, COMPARISON, 850,
                                     out / "comparison-response.json")
                         persist(out / "comparison.json", state)
                         try:
-                            plan = comparison_plan(state, approved)
+                            plan = comparison_plan(state, approved, same_property=same)
                         except ValueError as error:
                             result = {"status": "withheld", "code": "plan_guard", "detail": str(error),
                                       "repair": "Apply the opening size and contrast rules."}
@@ -330,7 +349,7 @@ def run_opening(args):
                             packet["locked_promise"] = read(spec)
                             selected += LOCKED_PROMISE
                         instruction = selected + " " + EXECUTE
-                    if args.opening_preview != "stable-comparison-v8":
+                    if not structured:
                         if previous:
                             instruction += " Repair only the specific observed defect and preserve the supported facts."
                         plan = ask(endpoint, instruction, packet, OPEN, 2000, out / "plan-response.json")
