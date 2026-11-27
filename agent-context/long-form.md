@@ -1,5 +1,10 @@
 # Long-form development
 
+## 2026-11-27 — Candidate 14 requalified
+
+- The three fresh flagship films passed independently on storyteller `1c5e7aa`, video `2dca361`, frames `050f932`, endpoint 8943. Runtimes were 226.77 s, 235.90 s, and 209.10 s; automatic writer revisions were 0, 0, and 2. The hash-bound judgments use decoded phone-size frames before and on cue boundaries, cue timing, and ASR of the delivered MP4s. No listening was performed.
+- Candidate 14's same-freeze transfer render and audit now run slots 04–10. Candidate 09 remains published and archived. Do not replace it or alter the three chapter previews until a complete verified successor is staged.
+
 ## 2026-11-27 — Candidate 13 transfer review complete
 
 - The shutter, source-check and map films passed again, at 167.60 s, 168.70 s and 186.77 s. Shutter needed one automatic writer revision; the other two needed none. The queue export wrongly says D arrived after B departed; the percentage export now speaks the correct 25% recovery but also wrongly says 20% of $80 is 25. Both errors are verified in delivered MP4 ASR and bound to the original exports.
