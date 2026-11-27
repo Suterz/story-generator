@@ -1,5 +1,10 @@
 # Long-form development
 
+## 2026-11-27 — Published all ten episodes on Candidate 16
+
+- All ten episodes independently passed on the same freeze (`021d793` / `2dca361` / `050f932`, Mistral Small / Heart, routed skills). Decoded phone-size cue frames, cue timing and muxed-audio ASR are hash-bound to each episode and the freeze. No listening was performed. Four episodes (01, 02, 08, 09) needed no automatic revisions; the other six used eight writer revisions in total. All ten succeeded on their first renderer submission for this freeze.
+- Published at XPS `Long Form - 10 Episodes/Watch first/` with the ordered playlist and separate `Review key.md`. All ten XPS copies decoded and hash-match the frozen workstation outputs. Candidate 09 stays archived and the chapter previews were hash-verified unchanged. No production changes or sealed benchmark opening.
+
 ## 2026-11-27 — Candidate 16 requalified
 
 - The three fresh MP4s independently passed on story `021d793`, video `2dca361` at 8943, and frames `050f932`. Durations were 226.77, 235.90, and 209.10 seconds; automatic writer revisions were 0, 0, and 2. Each verdict is tied to the new MP4 and freeze hashes and based on decoded phone-size cue frames, measured timing, and ASR of delivered audio without listening.
