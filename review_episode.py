@@ -14,7 +14,10 @@ def review(folder, ffmpeg, ffprobe):
     clip = folder / "video.mp4"
     manifest = read(folder / "manifest.json")
     digest = hashlib.sha256(clip.read_bytes()).hexdigest()
-    if read(folder / "outcome.json")["download_sha256"] != digest:
+    receipt = folder / "download-receipt.json"
+    if not receipt.is_file():
+        receipt = folder / "outcome.json"
+    if read(receipt)["download_sha256"] != digest:
         raise ValueError("download differs from the original receipt")
     probe = json.loads(subprocess.check_output(
         [ffprobe, "-v", "error", "-show_format", "-show_streams", "-of", "json", str(clip)]))

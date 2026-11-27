@@ -191,8 +191,64 @@ def write_chapter(args, brief, folder, endpoint, *, short=True, prefix="chapter"
     raise ValueError(reason)
 
 
+def author_state(args, context, work, endpoint, prior, index, stage, bounds):
+    from storygen import read, request, save, words
+
+    stage_id, objective = stage
+    skill, selected = skill_for(context, args.episode_skill)
+    low, high = bounds
+    work.mkdir(parents=True, exist_ok=True)
+    schema = {"type": "object", "additionalProperties": False, "required": ["text", "cue"],
+              "properties": {"text": {"type": "string"}, "cue": {"type": "string"}}}
+    instruction = (f"{skill}\nWrite the spoken narration for just this visual state in {low}–{high} words. "
+                   f"Visual state: {stage_id}. What it shows: {objective}\n"
+                   "Speak to the viewer, without a stage direction or reading any metadata aloud. "
+                   "Build one step, and leave later states for their own narration. "
+                   "End with a complete sentence. Spell numbers and acronyms for speech. "
+                   "For cue, give START for a cut on this section's first words, "
+                   "or a distinctive exact phrase within its opening words.\n"
+                   f"Editorial context: {json.dumps(context, ensure_ascii=False)}\n"
+                   f"Previously spoken ending: {prior!r}")
+    defect = ""
+    for attempt in range(2):
+        payload = {"messages": [{"role": "user", "content": instruction + defect}],
+                   "temperature": .3, "top_p": .95, "seed": 437, "max_tokens": 600,
+                   "response_format": {"type": "json_schema", "json_schema": {"name": "state", "schema": schema}}}
+        identity = {"request_sha256": hashlib.sha256(json.dumps(payload, sort_keys=True).encode()).hexdigest(),
+                    "skills": list(selected)}
+        receipt = work / f"writer-attempt-{attempt}.receipt.json"
+        candidate = work / f"writer-attempt-{attempt}.json"
+        if receipt.exists() and read(receipt) != identity:
+            raise ValueError("writer state receipt inputs changed")
+        if not candidate.exists():
+            if receipt.exists():
+                raise RuntimeError(f"unknown writer state outcome: {receipt}")
+            save(receipt, identity)
+            save(candidate, json.loads(request(endpoint + "/v1/chat/completions", payload, timeout=150)))
+        try:
+            raw = read(candidate)["choices"][0]["message"]["content"]
+            value = json.loads(raw)
+            narration = value["text"].strip()
+            cue = value["cue"].strip()
+            count = len(words(narration))
+            if not low <= count <= high:
+                raise ValueError(f"{count} words; the permitted range is {low}–{high}")
+            if not narration.rstrip("\"”’").endswith((".", "?", "!")) or narration.startswith("START "):
+                raise ValueError("write complete spoken sentences without cue labels")
+            match = words(cue)
+            tokens = words(narration)
+            hits = [j for j in range(len(tokens)) if tokens[j:j+len(match)] == match] if match else []
+            if cue.upper() != "START" and (len(hits) != 1 or hits[0] > 6):
+                raise ValueError("use START or a short exact cue near the beginning")
+            return {"stage": stage_id, "text": narration, "cue": cue, "caption": ""}
+        except (ValueError, KeyError, TypeError, IndexError) as error:
+            defect = f"\nThe previous attempt was withheld: {error}. Fix only that problem."
+    raise ValueError(f"{stage_id} (state {index}): {defect.strip()}")
+
+
 def write_episode(args, brief, out, endpoint):
     script, beats, starts = [], [], []
+    prior = ""
     for i, chapter in enumerate(brief["chapters"], 1):
         label = f"c{i:02d}"
         chapter_brief = {k: v for k, v in brief.items() if k not in
@@ -203,8 +259,15 @@ def write_episode(args, brief, out, endpoint):
             "next": brief["chapters"][i]["question"] if i < len(brief["chapters"]) else None,
             "position": f"{i} of {len(brief['chapters'])}",
         }
-        part, visuals = write_chapter(args, chapter_brief, out / "chapters" / label, endpoint,
-                                      short=False, prefix=label)
+        count = len(chapter["stages"])
+        target = (29, 50) if count >= 3 else (43, 77)
+        sections = []
+        for index, stage in enumerate(chapter["stages"], 1):
+            section = author_state(args, chapter_brief, out / "chapters" / label / str(index),
+                                   endpoint, prior, index, stage, target)
+            sections.append(section)
+            prior = " ".join(section["text"].split()[-30:])
+        part, visuals = compile_chapter(chapter_brief, {"sections": sections}, label, short=False)
         starts.append(part[0]["id"])
         script.extend(part)
         beats.extend(visuals)
