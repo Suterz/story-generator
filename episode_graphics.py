@@ -1,4 +1,6 @@
 """Controlled evidence graphics. The writer selects states and their spoken cues."""
+import json
+from pathlib import Path
 
 
 def text(value, y, x=.5, role="support"):
@@ -147,10 +149,9 @@ def bank(stage):
 
 PAPER = "Walters & Wilder (2023)"
 QUERY = "GPT-4 citations: what share\nwere fabricated in this sample?"
-PASSAGES = {
-    "mismatch": ("GPT-3.5", ("Of the 222 works cited in", "the GPT-3.5 papers,", "55% are fabricated.")),
-    "support": ("GPT-4", ("The vast majority of GPT-4", "citations refer to works that", "are verifiably real.", "Only 18% are fabricated.")),
-}
+CITATION_PACKET = Path(__file__).with_name("episodes") / "citation-source.json"
+PASSAGES = {row["id"]: (row["population"], row["visible_lines"])
+            for row in json.loads(CITATION_PACKET.read_text())["passages"]}
 
 
 def citation(stage):

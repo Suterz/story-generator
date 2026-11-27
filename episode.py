@@ -5,7 +5,7 @@ from pathlib import Path
 
 from jsonschema import Draft202012Validator
 
-from episode_graphics import RENDER
+from episode_graphics import CITATION_PACKET, RENDER
 
 
 def chapter_schema(ids, compact=False):
@@ -205,6 +205,11 @@ def run(args):
     config = {"brief": brief, "model": model, "skill": args.episode_skill, "voice": args.voice,
               "runner": hashlib.sha256(Path(__file__).read_bytes()).hexdigest(),
               "graphics": hashlib.sha256(Path(__file__).with_name("episode_graphics.py").read_bytes()).hexdigest()}
+    if brief["obligation"] == "source-verification":
+        from source_pack import evidence_for
+
+        config["source_packet"] = hashlib.sha256(CITATION_PACKET.read_bytes()).hexdigest()
+        save(args.out / "source-evidence.json", evidence_for(read(CITATION_PACKET)))
     metadata = args.out / "episode.json"
     if metadata.exists() and read(metadata) != config:
         raise ValueError("episode run inputs changed")

@@ -1,0 +1,21 @@
+{
+  "url": "https://www.nature.com/articles/s41598-023-41032-5",
+  "locator": "Results / Extent of fabrication; Table 3",
+  "attribution": "William H. Walters and Esther Isabelle Wilder, Scientific Reports 13, 14045 (2023), CC BY 4.0",
+  "query": "What share of the works cited by GPT-4 were fabricated in this study?",
+  "population": "GPT-4",
+  "passages": [
+    {
+      "id": "mismatch",
+      "population": "GPT-3.5",
+      "visible_lines": ["Of the 222 works cited in", "the GPT-3.5 papers,", "55% are fabricated"],
+      "paragraph": "Of the 222 works cited in the GPT-3.5 papers, 55% are fabricated (Table 3). That is, they do not exist as actual works that have been published, presented, posted, or otherwise publicly disseminated. The articles and book chapters cited by GPT-3.5 are more likely to be fabricated than real, while the cited books and websites are more likely to be real."
+    },
+    {
+      "id": "support",
+      "population": "GPT-4",
+      "visible_lines": ["most of the GPT-4 citations", "refer to works that are", "verifiably real.", "Only 18% are fabricated."],
+      "paragraph": "Unlike the GPT-3.5 citations, most of the GPT-4 citations refer to works that are verifiably real. Only 18% are fabricated. Even with GPT-4, however, 70% of the cited book chapters are fabricated."
+    }
+  ]
+}
