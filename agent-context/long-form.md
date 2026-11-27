@@ -1,6 +1,13 @@
 # Long-form development
 
-## 2026-11-27 — Interviews, visual proofs, and writer screening
+## 2026-11-27 — XPS previews and episode qualification
+
+- The three short chapter previews are on the XPS, hash-matched and playback checked: clock 0:09.60, bank 0:09.20, citation 0:11.03. These are development artifacts. Actual MP4 ASR corroborates the essential narration; perceptual voice judgments are pending human listening.
+- Fresh full-length candidate 02's bank film exported at 230.90 s. It had correct settlement graphics but omitted the policy-rate connection, overstated loan ownership in the general case, and had no visible separate savings balance before repayment. It is not an accepted episode. Candidate 03's clock narration reversed the GPS effects and is disqualified despite rendering. The next source brief explicitly gives both signs, and the bank compiler now shows the existing savings before repayment.
+- Candidate 01 showed font metrics can require more than two lines at real export size. Replaying its exact opening PCM and paper frame corrected the defect through timed caption pagination, independently of writing. The XPS `Evidence/Caption paging diagnostic` keeps that control separate.
+- Latest frozen run: `~/ai/long-form/candidate-05`, storyteller `5c9e6b1`, staged video `2a985db` on 8936, frames `050f932` on 8927. Preserve earlier fixtures and receipts. Transfer production is gated on a hash-bound pass for all three flagship films on one freeze; the seven briefs and exact graphics exist, generation still awaits the gate.
+
+## 2026-11-27 — Visual proofs and writer screening
 
 - R4's six returned shorts were reviewed with opaque IDs and decoded phone frames before revealing brief/model. All six were marked `incorrect_accepted` in separate hash-bound records. The original outcomes and receipts remain in `~/ai/story-communication/r4`; the blind review is in `~/ai/long-form/r4-review`. Mistral NeMo had four returns and DeepSeek had two; neither earned selection from those clips.
 - On the same three decisive chapter inputs, first scripts from Mistral Small generally preserved mechanism and ownership but exceeded the initial short writer word cap. NeMo's first clock draft reversed the ray; its repair passed on the decoded 19-second development clip. DeepSeek often reproduced directions or overshot the budget; Qwen introduced an incorrect reserve balance and recited directions. Mistral Small / Heart is the provisional integration writer; this is not a release selection.
