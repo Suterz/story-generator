@@ -67,8 +67,14 @@ def rewind_witness(source, objective, words, frames):
     if not original:
         return None
     values = {int(x.replace(",", "")) for x in re.findall(DOLLARS, original[1])}
+    after = re.search(r"\bonly\b([^.]+?)\bremain\b", source, re.I)
+    retained = {int(x.replace(",", "")) for x in re.findall(DOLLARS, after[1])} if after else set()
     if len(values) < 2:
         return None
+    def seen_dollars(text):
+        exact = {int(x.replace(",", "")) for x in re.findall(DOLLARS, text)}
+        return exact | {int(x)*1000 for x in re.findall(r"\$(\d+)k\b", text, re.I)}
+
     for i, word in enumerate(words):
         if word["word"].strip(" .,!?").lower() != "rewind":
             continue
@@ -79,12 +85,15 @@ def rewind_witness(source, objective, words, frames):
             if not word["start"] <= frame["seconds"] <= subsequent[-1]["end"]+1:
                 continue
             text = frame["observed"]
-            seen = {int(x.replace(",", "")) for x in re.findall(DOLLARS, text)}
-            seen |= {int(x)*1000 for x in re.findall(r"\$(\d+)k\b", text, re.I)}
+            seen = seen_dollars(text)
             if values <= seen:
+                follow = next((item["seconds"] for item in frames if item["seconds"] > frame["seconds"]
+                               and retained and retained <= seen_dollars(item["observed"])
+                               and not (values-retained) & seen_dollars(item["observed"])), None)
                 return {"relation": "original roster restored during explicit spoken rewind",
                         "spoken_start_seconds": word["start"], "decoded_sample_seconds": frame["seconds"],
-                        "source_values": sorted(values), "observation": text}
+                        "source_values": sorted(values), "observation": text,
+                        "later_remaining_roster_sample": follow}
     return None
 
 
