@@ -874,7 +874,7 @@ def main():
                                                  "complete-pack-v13", "rate-question-v14"),
                    help="render and adjudicate a daily/2 opening without making a full film")
     p.add_argument("--opening-reviewer", choices=("observable-opening-v2", "literal-evidence-v3", "unanswered-is-valid-v4",
-                                                  "focus-is-relation-v5"),
+                                                  "focus-is-relation-v5", "promise-by-question-v6"),
                    default="observable-opening-v2")
     p.add_argument("--raw-text", action="store_true", help="read a rough brief from a text file or stdin (-)")
     p.add_argument("--daily", action="store_true", help="adapt an unstaged episode brief for daily authoring")

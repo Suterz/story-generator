@@ -94,10 +94,13 @@ PY
     sha256sum "$store/broker-image.jpg"
 fi
 mkdir -p "$TRITON_CACHE_DIR" "$TORCHINDUCTOR_CACHE_DIR" "$CUDA_CACHE_PATH"
-exec_status=0
-"$writer/venv/bin/python" -B storygen.py run "$brief" --out "$store/opening" \
-    --model mistral-small --voice drama3-A --opening-preview "${OPENING_WRITER:-complete-pack-v13}" \
-    --opening-reviewer focus-is-relation-v5 --video-url http://127.0.0.1:8965 \
-    --validator-python "$fresh/venvs/video-renderer/bin/python" --frames-repo "$repos/frames" --video-repo "$repos/video" \
-    || exec_status=$?
-exit "$exec_status"
+repeat="${OPENING_REPEAT:-1}"
+[[ "$repeat" =~ ^[1-3]$ ]]
+for ((i=1; i<=repeat; i++)); do
+    name=opening
+    if ((i>1)); then name="repeat-$i"; fi
+    "$writer/venv/bin/python" -B storygen.py run "$brief" --out "$store/$name" \
+        --model mistral-small --voice drama3-A --opening-preview "${OPENING_WRITER:-complete-pack-v13}" \
+        --opening-reviewer focus-is-relation-v5 --video-url http://127.0.0.1:8965 \
+        --validator-python "$fresh/venvs/video-renderer/bin/python" --frames-repo "$repos/frames" --video-repo "$repos/video"
+done

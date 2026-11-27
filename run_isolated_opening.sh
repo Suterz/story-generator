@@ -62,6 +62,7 @@ docker run --rm --network none --user "$(id -u):$(id -g)" \
     -v /usr/share/vulkan:/usr/share/vulkan:ro -v "$HOME:$HOME:ro" -v "$store:$store" -v "$lease:$lease" \
     -e HOME="$HOME" -e DAILY_FREEZE="$freeze" -e DAILY_BROKER_SOCKET="$socket" \
     -e OPENING_WRITER="${OPENING_WRITER:-bound-options-v12}" \
+    -e OPENING_REPEAT="${OPENING_REPEAT:-1}" \
     -e VK_DRIVER_FILES="$store/nvidia-egl.json" -e LD_LIBRARY_PATH=/usr/lib/x86_64-linux-gnu \
     -e DAILY_SMOKE_TEXT_URL=https://www.eia.gov/energyexplained/electricity/electricity-in-the-us.php \
     -e DAILY_SMOKE_IMAGE_URL=https://eol.jsc.nasa.gov/DatabaseImages/ESC/large/ISS064/ISS064-E-29444.JPG \

@@ -39,11 +39,20 @@ FOCUS_IS_RELATION = (
     "This does not permit giving the answer early, using a wrong measurement, or covering up an incorrect "
     "spoken assertion. Preserve those independent failures."
 )
+PROMISE_BY_QUESTION = (
+    "Do not require the first line or first highlight to state the entire teaching objective. For a comparison "
+    "with an evidence-first opening, the first line must orient the viewer to its own visible observation; "
+    "the later spoken question must clearly specify the comparison by the end of the opening. A cost or "
+    "distance highlight on the line stating that cost or distance is correct. Do not require a highlighted "
+    "question or mark this structure unclear solely because the question follows the observations. Still "
+    "reject physical discrepancies and early answers with specific offered evidence."
+)
 REVIEWERS = {
     "observable-opening-v2": RUBRIC,
     "literal-evidence-v3": LITERAL_FIRST + " " + RUBRIC,
     "unanswered-is-valid-v4": OPENING_NOT_ANSWER + " " + LITERAL_FIRST + " " + RUBRIC,
     "focus-is-relation-v5": FOCUS_IS_RELATION + " " + LITERAL_FIRST + " " + RUBRIC,
+    "promise-by-question-v6": PROMISE_BY_QUESTION + " " + FOCUS_IS_RELATION + " " + LITERAL_FIRST + " " + RUBRIC,
 }
 VERDICT = obj({"status": {"enum": ["accepted", "failed", "uncertain"]},
                "code": {"enum": ["ok", "unclear_focus", "wrong_value", "wrong_unit", "wrong_object", "early_reveal",
