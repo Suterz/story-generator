@@ -10,7 +10,7 @@ def read(path):
     return json.loads(path.read_text())
 
 
-def review(folder, ffmpeg, ffprobe):
+def review(folder, ffmpeg, ffprobe, *, sample_holds=False):
     clip = folder / "video.mp4"
     manifest = read(folder / "manifest.json")
     digest = hashlib.sha256(clip.read_bytes()).hexdigest()
@@ -34,6 +34,9 @@ def review(folder, ffmpeg, ffprobe):
     chapter_joins = [(x["start_sample"] * fps + 24000) // 48000
                      for x in manifest.get("speech_groups", [])]
     boundaries += chapter_joins
+    if sample_holds:
+        ordered = sorted({*boundaries, n})
+        boundaries = [*boundaries, *((a+b)//2 for a, b in zip(ordered, ordered[1:]) if b-a >= 6)]
     frames = sorted({0, n - 1, *boundaries, *(max(0, frame - 1) for frame in boundaries)})
     dest = folder / "phone"
     dest.mkdir(exist_ok=True)

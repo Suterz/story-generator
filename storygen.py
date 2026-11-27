@@ -12,7 +12,7 @@ import socket
 import subprocess
 import sys
 import time
-from urllib.error import URLError
+from urllib.error import HTTPError, URLError
 from urllib.request import Request, urlopen
 
 from jsonschema import Draft202012Validator, ValidationError
@@ -822,15 +822,22 @@ def render(args, story):
     receipt = out / "submission.json"
     base = args.video_url.rstrip("/")
     info = {"key": key, "digest": digest, "endpoint": base}
+    route = "/v2/episodes" if "chapter_starts" in story else "/v2/renders"
     if receipt.exists():
         if read(receipt) != info:
             raise ValueError("cannot resume with a different story or endpoint")
         if (out / "outcome.json").exists():
             return read(out / "outcome.json")
-        status = json.loads(request(f"{base}/v2/submissions/{key}"))
+        try:
+            status = json.loads(request(f"{base}/v2/submissions/{key}"))
+        except HTTPError as error:
+            if error.code != 404:
+                raise
+            # The client receipt is written before the POST. A crash in
+            # between can leave no remote submission; retry the same key.
+            status = json.loads(request(base + route, story, {"Idempotency-Key": key}))
     else:
         save(receipt, info)
-        route = "/v2/episodes" if "chapter_starts" in story else "/v2/renders"
         status = json.loads(request(base + route, story, {"Idempotency-Key": key}))
     deadline = time.monotonic() + 1800
     while status["state"] in {"queued", "running"} and time.monotonic() < deadline:
@@ -882,6 +889,11 @@ def main():
     with (args.out / ".run.lock").open("a") as lock:
         fcntl.flock(lock, fcntl.LOCK_EX | fcntl.LOCK_NB)
         try:
+            if (not args.raw_text and args.command == "run" and args.input.is_file()
+                    and read(args.input).get("schema_version") == "daily/1"):
+                from daily import run_daily
+                run_daily(args)
+                return
             if (not args.raw_text and args.command in ("write", "run") and args.input.is_file()
                     and read(args.input).get("schema_version") == "episode/1"):
                 from episode import run
