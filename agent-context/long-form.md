@@ -1,5 +1,11 @@
 # Long-form development
 
+## 2026-11-27 — Transfer failures after flagship qualification
+
+- Candidate 09 transfers 04, 05, 07 and 08 exported but failed independent review. The seasons lesson says shallow rays scatter and gives the angles before the panel changes; the queue lesson assigns D the wrong departure event and mixes the two queue cases; the shutter lesson names the 40-pixel streak while only the 10-pixel panel is visible; the source-check lesson attributes Brame's review quote to Guo's methods. Negatives are tied to the original MP4 hashes in the run store and the XPS evidence folder.
+- Transfer 06 was withheld on `youd` versus “you’d.” Video `f97b944` accepts that specific apostrophe omission but rejects a missing contraction. Story `895e5b2` gives the writer state-specific facts and rejects the observed contradictions before render.
+- Candidate 10 reruns the three flagships on the new freeze, story `895e5b2`, video `f97b944` (8941) and frames `050f932`. The published Candidate 09 flagships and chapter previews are unchanged. Candidate 09's map and pay outcomes still require review.
+
 ## 2026-11-27 — Flagship trio qualified and published on candidate 09
 
 - Clock, bank and citation passed independent review on the same frozen story `2816156`, video `d5c7696` (8940) and frames `050f932` build. Clock 226.77 s, decisive cue 1:56.23, no automatic repairs; bank 235.90 s, 1:29.63, no repairs; citation 209.10 s, 2:17.30, two automatic writer revisions. Review used decoded 360×640 frames, cue manifests and delivered MP4 ASR; no human/perceptual listening.
