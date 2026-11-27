@@ -17,6 +17,8 @@ export HF_HUB_OFFLINE=1 TRANSFORMERS_OFFLINE=1 PYTHONDONTWRITEBYTECODE=1
 export DAILY_FRAMES_REPO="$repos/frames" DAILY_VIDEO_REPO="$repos/video"
 export DAILY_SOURCE_CACHE="$store/source-cache" DAILY_ASSET_CACHE="$store/asset-cache"
 export HF_HOME="$store/hf-home" XDG_CACHE_HOME="$store/cache"
+export TRITON_CACHE_DIR="$store/cache/triton" TORCHINDUCTOR_CACHE_DIR="$store/cache/inductor"
+export CUDA_CACHE_PATH="$store/cache/cuda"
 export STORY_VISION_MODEL="$fresh/models/vision/qwen3-vl-8b"
 export STORY_FFMPEG="$media/ffmpeg" STORY_FFPROBE="$media/ffprobe"
 export STORY_COMFY_URL=http://127.0.0.1:8188 VIDEO_DRAMA3_PORT=8960
@@ -89,9 +91,10 @@ print("broker text allowed", packet["sha256"], flush=True)
 PY
     sha256sum "$store/broker-image.jpg"
 fi
+mkdir -p "$TRITON_CACHE_DIR" "$TORCHINDUCTOR_CACHE_DIR" "$CUDA_CACHE_PATH"
 exec_status=0
 "$writer/venv/bin/python" -B storygen.py run "$brief" --out "$store/opening" \
-    --model mistral-small --voice drama3-A --opening-preview "${OPENING_WRITER:-bound-options-v12}" \
+    --model mistral-small --voice drama3-A --opening-preview "${OPENING_WRITER:-complete-pack-v13}" \
     --opening-reviewer focus-is-relation-v5 --video-url http://127.0.0.1:8965 \
     --validator-python "$fresh/venvs/video-renderer/bin/python" --frames-repo "$repos/frames" --video-repo "$repos/video" \
     || exec_status=$?

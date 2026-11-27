@@ -9,6 +9,9 @@ from jsonschema import Draft202012Validator
 from daily import DAILY_OUTLINE, SECTION, adapt, array, ask, collect, extract_claims, INTENT, obj, TEXT
 from daily_evidence import digest, persist
 
+BOUND_VERSIONS = ("source-bound-v10", "neutral-question-v11", "bound-options-v12", "complete-pack-v13",
+                  "rate-question-v14")
+
 BASELINE = ("Plan three or four chapters for this portrait explanation. Teach in evidence order. "
             "Give a distinct one-sentence goal of at most twelve words per chapter. Use four chapters "
             "when the brief asks for at least three minutes. Open directly on a picture that poses the question. "
@@ -251,7 +254,9 @@ def run_opening(args):
                             "same-property-v9": STABLE_COMPARISON + SAME_PROPERTY,
                             "source-bound-v10": "source-bound-v10\n" + Path(__file__).with_name("opening_bindings.py").read_text(),
                             "neutral-question-v11": "neutral-question-v11\n" + Path(__file__).with_name("opening_bindings.py").read_text(),
-                            "bound-options-v12": "bound-options-v12\n" + Path(__file__).with_name("opening_bindings.py").read_text()}
+                            "bound-options-v12": "bound-options-v12\n" + Path(__file__).with_name("opening_bindings.py").read_text(),
+                            "complete-pack-v13": "complete-pack-v13\n" + Path(__file__).with_name("opening_bindings.py").read_text(),
+                            "rate-question-v14": "rate-question-v14\n" + Path(__file__).with_name("opening_bindings.py").read_text()}
                            [args.opening_preview].encode()).hexdigest()}
     if args.voice.startswith("drama3-") and args.video_repo:
         registry = args.video_repo / "voices/drama3/narrators.json"
@@ -286,11 +291,11 @@ def run_opening(args):
             if not (root / "evidence.json").exists():
                 with writer(args, model, root / "intent.log") as endpoint:
                     intent_brief = brief
-                    if args.opening_preview in ("source-bound-v10", "neutral-question-v11", "bound-options-v12"):
+                    if args.opening_preview in BOUND_VERSIONS:
                         # Misconceptions are editorial negatives, not candidate claims.
                         intent_brief = {k: v for k, v in brief.items() if k != "misconceptions"}
                     intent_schema = INTENT
-                    if args.opening_preview == "bound-options-v12" and facts:
+                    if args.opening_preview in BOUND_VERSIONS[2:] and facts:
                         import copy
 
                         intent_schema = copy.deepcopy(INTENT)
@@ -299,6 +304,9 @@ def run_opening(args):
                     intent = ask(endpoint, "Identify indispensable factual claims and their zero-based supporting "
                                  "caller fact indices. Group related facts; do not invent facts or duplicates.",
                                  intent_brief, intent_schema, 850, root / "intent-response.json")
+                if args.opening_preview in BOUND_VERSIONS[3:]:
+                    for claim in intent["claims"]:
+                        claim["fact_indices"] = list(dict.fromkeys([*claim["fact_indices"], *range(len(facts))]))
                 claims = extract_claims(intent, facts)
                 ledger = collect(Namespace(**{**vars(args), "out": root}), {"claims": claims},
                                  model, datetime.now(timezone.utc).date())
@@ -322,7 +330,7 @@ def run_opening(args):
                     if previous_plan.exists():
                         packet["previous_plan"] = read(previous_plan)
                 with writer(args, model, out / "opening.log") as endpoint:
-                    source_bound = args.opening_preview in ("source-bound-v10", "neutral-question-v11", "bound-options-v12")
+                    source_bound = args.opening_preview in BOUND_VERSIONS
                     structured = source_bound or args.opening_preview in ("stable-comparison-v8", "same-property-v9")
                     if source_bound:
                         from opening_bindings import bound_opening
@@ -330,7 +338,8 @@ def run_opening(args):
                         try:
                             plan = bound_opening(endpoint, packet, approved, out,
                                                  neutral_question=args.opening_preview != "source-bound-v10",
-                                                 menu=args.opening_preview == "bound-options-v12")
+                                                 menu=args.opening_preview in BOUND_VERSIONS[2:],
+                                                 rate_question=args.opening_preview == "rate-question-v14")
                         except ValueError as error:
                             result = {"status": "withheld", "code": "plan_guard", "detail": str(error)}
                             if (out / "binding-selection.json").is_file():
@@ -406,8 +415,9 @@ def run_opening(args):
             story = read(out / "story.json")
             render_result = render(args_here, story)
             if render_result["state"] != "succeeded":
-                result = {"status": "withheld", "code": "renderer", "detail": render_result.get("error", render_result["state"]),
-                          "repair": "Revise the opening narration or its visual cues to address the renderer message."}
+                result = {"status": "withheld", "code": "renderer", "detail": render_result.get("error", render_result["state"])}
+                if render_result["state"] == "needs_review":
+                    result["repair"] = "Revise the opening narration or its visual cues to address the renderer message."
             else:
                 result = review(args_here, brief, approved, identity)
         except (RuntimeError, URLError, KeyError, ValueError, OSError, subprocess.SubprocessError) as error:

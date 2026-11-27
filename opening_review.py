@@ -75,6 +75,11 @@ def measured_quantities(text):
             yield next(iter(numbers)), ("kWh" if "hour" in match["unit"] or match["unit"] == "kwh" else "kW")
 
 
+def reading_number(probe):
+    value = re.match(r"^\s*(\d+(?:\.\d+)?)\b", probe["display"])
+    return float(value[1]) if value else None
+
+
 def early_quantity(words, quantity, through, origin=0):
     """Detect a forbidden answer in delivered ASR, including split spoken numbers."""
     for i, row in enumerate(words):
@@ -150,6 +155,11 @@ def meter_faults(out, decoded, manifest, words, observed_focus=None):
                            "detail": f'The delivered speech says {number:g}, but the highlight is on {focus_marks[0]["object"]}.',
                            "repair": f'Focus {correct["object"]} / {correct["label"]} in {cue["id"]}.',
                            "focus_edit": {"beat": cue["id"], "object": correct["object"], "label": correct["label"]}})
+        elif not candidates and len(spoken_values) == 1 and reading_number(focus_marks[0]) is not None:
+            faults.append({"status": "failed", "code": "wrong_value", "start_seconds": cue["seconds"],
+                           "detail": f'The delivered audio says {number:g}, but no displayed reading of '
+                                     f'{focus_marks[0]["label"]!r} has that value.',
+                           "repair": "Reconcile the spoken value with the verified source and focused reading."})
     return faults
 
 

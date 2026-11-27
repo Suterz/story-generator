@@ -13,6 +13,11 @@ PROPERTIES = {
     "yield": ("produces", "yields"),
     "mass": ("weighs",),
 }
+KNOWN_RATE_QUESTIONS = {
+    frozenset(("input", "return")): "Which makes better use of its input?",
+    frozenset(("distance", "duration")): "Which covers more distance per minute?",
+    frozenset(("cost", "yield")): "Which costs less per usable unit?",
+}
 UNITS = {"kWh": "kilowatt-hours", "kW": "kilowatts", "km": "kilometers",
          "min": "minutes", "s": "seconds", "kg": "kilograms", "g": "grams",
          "L": "liters", "m": "meters", "USD": "dollars", "units": "units"}
@@ -133,7 +138,7 @@ def paired_options(rows):
     return options
 
 
-def bound_opening(endpoint, packet, approved, out, *, neutral_question=False, menu=False):
+def bound_opening(endpoint, packet, approved, out, *, neutral_question=False, menu=False, rate_question=False):
     sources = [passage for row in approved.values() for passage in row["passages"]]
     rows = literal_rows(sources)
     persist(out / "source-measurements.json", rows)
@@ -162,6 +167,13 @@ def bound_opening(endpoint, packet, approved, out, *, neutral_question=False, me
                        "Don't name either object in the question. Give a very short next line about where to look.")
         chosen = ask(endpoint, instruction, content, schema, 520, out / "binding-response.json")
         selection = {**options[chosen["option"]], **chosen}
+        if rate_question:
+            pair = frozenset((rows[selection["first"]]["property"], selection["hidden_property"]))
+            question = KNOWN_RATE_QUESTIONS.get(pair)
+            if question:
+                persist(out / "question-decision.json", {"writer_proposal": selection["question"],
+                        "bound_question": question, "properties": sorted(pair)})
+                selection["question"] = question
     else:
         selection = ask(endpoint, instruction, content, SELECT, 520, out / "binding-response.json")
     persist(out / "binding-selection.json", selection)
