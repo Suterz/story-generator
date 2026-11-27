@@ -114,7 +114,8 @@ def ordinary_run(args):
                 or (result["status"] == "needs_review" and result.get("stage") == "editorial")):
             break
     final = {**result, "first_attempt": attempts[0]["status"], "attempt_count": len(attempts),
-             "automatic_revision_count": len(attempts) - 1 + sum(len(a["automatic_revisions"]) for a in attempts)}
+             "automatic_revision_count": len(attempts) - 1 + sum(
+                 len(a["automatic_revisions"]) + sum(a.get("frame_revisions", {}).values()) for a in attempts)}
     if result["status"] == "accepted" and gallery:
         destination = Path(gallery) / (root.name + "-" + digest(identity)[:12])
         try:

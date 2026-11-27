@@ -224,7 +224,8 @@ def compile_story(brief, chapters, ids, *, voice="heart", ordinary=False):
                           "instruction": section["visible"],
                           "daily": {"kind": kind, "data": data, "obligations": selected,
                                     "claims": section["claim_ids"],
-                                    "route_reason": "; ".join(row["why"] for row in selected)}, "retry_budget": 0}})
+                                    "route_reason": "; ".join(row["why"] for row in selected)},
+                          "retry_budget": int(ordinary and kind == "illustration")}})
     if covered != obligations.keys():
         raise ValueError(f"missing visual obligations: {sorted(obligations.keys() - covered)}")
     missing = {claim["id"] for claim in brief["claims"] if claim["essential"]} - cited
@@ -407,5 +408,7 @@ def run_daily(args):
 
     verdict = review(args, brief, collected, identity)
     stage = "editorial" if verdict["reviewers"] else "media_review"
+    frame_revisions = {row["id"]: row["accepted_attempt"] for row in read(out / "manifest.json")["panels"]
+                       if row.get("accepted_attempt")}
     finish(verdict["status"], verdict["reason"], mp4_sha256=verdict["mp4_sha256"],
-           verdict_sha256=digest(verdict), stage=stage)
+           verdict_sha256=digest(verdict), frame_revisions=frame_revisions, stage=stage)
