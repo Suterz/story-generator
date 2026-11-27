@@ -9,7 +9,7 @@ from episode_graphics import RENDER
 
 
 def chapter_schema(ids, compact=False):
-    text = {"type": "string", "minLength": 1, **({"maxLength": 143} if compact else {})}
+    text = {"type": "string", "minLength": 1, **({"maxLength": 183} if compact else {})}
     return {
         "type": "object", "additionalProperties": False, "required": ["sections"],
         "properties": {"sections": {"type": "array", "minItems": len(ids), "maxItems": len(ids),
@@ -50,9 +50,11 @@ def prompt_for(brief, experiment, revision=None, episode=False):
     budget = brief.get("words", "55-73" if not episode else "90-125")
     prompt = (f"{skill}\nWrite about {budget} words across the supplied evidence states. "
               "Output one section per state in exactly the supplied order. A section can contain several natural sentences. "
-              "Choose a short exact spoken cue for the change, preferably the first few spoken words of that section. "
-              "The first cue may be empty. For every later section give a unique phrase from its own text. "
+              "Choose a cue for each change: use START to cut on the first spoken words, "
+              "or give two to five exact spoken words from the start of the section. "
+              "Use START when a new chapter starts. Stage descriptions are never cue phrases. "
               "Only the supplied visual states are available; do not speak as if a different picture were shown. "
+              "In this chapter say only the approved chapter claims; don't solve the next chapter's question in advance. "
               "Do not include section labels in spoken text. Do not add a recap if the last insight already lands.\n"
               + json.dumps(source, ensure_ascii=False))
     if revision:
@@ -71,19 +73,21 @@ def compile_chapter(brief, draft, prefix, *, short=True):
     if [s["stage"] for s in sections] != ids:
         raise ValueError("required evidence states must be shown once in order")
     count = sum(len(words(s["text"])) for s in sections)
-    if short and not 42 <= count <= 75:
-        raise ValueError(f"preview narration has {count} words; use 55–73 words")
+    if short and not 42 <= count <= 96:
+        raise ValueError(f"preview narration has {count} words; use 55–85 words")
+    if not short and not 94 <= count <= 157:
+        raise ValueError(f"chapter has {count} words; write 115–140 words total")
     script, beats = [], []
     for i, section in enumerate(sections):
         stage = section["stage"]
         ident = f"{prefix}-{i + 1}-{stage}"
         spoken = section["text"].strip()
         caption = section["caption"].strip()
-        if not spoken or not caption or len(caption) > 84:
+        if not spoken or spoken[-1] not in ".?!”’" or (short and (not caption or len(caption) > 84)):
             raise ValueError(f"{stage}: give narration and a faithful caption of at most 84 characters")
         cue = {"ms": 0}
         if i or not short:
-            if not i and not section["cue"].strip():
+            if section["cue"].strip().upper() == "START" or (not i and not section["cue"].strip()):
                 section = {**section, "cue": " ".join(spoken.split()[:3])}
             candidate = words(section["cue"])
             spoken_words = words(spoken)
@@ -134,7 +138,8 @@ def write_chapter(args, brief, folder, endpoint, *, short=True, prefix="chapter"
         prompt, selected = prompt_for(brief, args.episode_skill, reason, episode=not short)
         if short:
             prompt += ("\nHard limit: each of the three text fields is one short sentence, roughly twenty words, "
-                       "and no more than 143 characters. The final text must be short enough to speak in thirty seconds.")
+                       "and no more than 183 characters including final punctuation. "
+                       "The final text must be short enough to speak in under forty-five seconds.")
         payload = {"messages": [{"role": "user", "content": prompt}],
                    "temperature": .3, "top_p": .95, "seed": 437, "max_tokens": 1800,
                    "response_format": {"type": "json_schema", "json_schema": {"name": "chapter", "schema": schema}}}
@@ -169,7 +174,8 @@ def write_episode(args, brief, out, endpoint):
     script, beats, starts = [], [], []
     for i, chapter in enumerate(brief["chapters"], 1):
         label = f"c{i:02d}"
-        chapter_brief = {k: v for k, v in brief.items() if k not in ("chapters", "transfer")}
+        chapter_brief = {k: v for k, v in brief.items() if k not in
+                         ("chapters", "transfer", "claims", "stages", "question", "id", "min_ms")}
         chapter_brief.update(chapter)
         chapter_brief["episode_continuity"] = {
             "previous": brief["chapters"][i - 2]["question"] if i > 1 else None,
@@ -218,7 +224,7 @@ def run(args):
                      "voice_profile": args.voice, "script": script, "beats": beats, "max_ms": 44999}
             if full:
                 story.update(chapter_starts=starts, min_ms=brief["min_ms"], max_ms=300000)
-            validate_native(story if full else validate(story))
+            validate_native(story if full else validate(story, max_words=96))
         except ValueError as error:
             save(args.out / "result.json", {"status": "writer_refusal", "reason": str(error)})
             return

@@ -318,7 +318,7 @@ def prediction_panel(story, rule):
                 if "ms" in b["cue"] or order.index(b["cue"]["utterance_id"]) <= question)
 
 
-def validate(story):
+def validate(story, *, max_words=75):
     for name, data in (("Video", story), ("Session", story["visual"])):
         Draft202012Validator(read(ROOT / "schemas" / f"{name}.json")).validate(data)
     panel = Draft202012Validator(read(ROOT / "schemas/Panel.json"))
@@ -326,8 +326,8 @@ def validate(story):
     order = list(script)
     if len(script) != len(story["script"]):
         raise ValueError("duplicate script ID")
-    if sum(len(words(u["text"])) for u in script.values()) > 75:
-        raise ValueError("shorten narration to no more than 75 spoken tokens")
+    if sum(len(words(u["text"])) for u in script.values()) > max_words:
+        raise ValueError(f"shorten narration to no more than {max_words} spoken tokens")
     if story["beats"][0]["cue"] != {"ms": 0}:
         raise ValueError("opening beat must start at ms=0")
     seen = {}
