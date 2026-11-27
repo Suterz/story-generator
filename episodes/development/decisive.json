@@ -1,0 +1,44 @@
+[
+  {
+    "id": "01", "topic": "Why does time slow down when you move faster?",
+    "audience": "Curious adult who recognizes clocks but expects one universal elapsed time", "tone": "Curious, precise, unhurried at discovery",
+    "objective": "Explain why Earth assigns more time to the same half-tick than the ship does.",
+    "takeaway": "Same events, same light speed, longer path in Earth's frame.",
+    "prior": "A clock can be imagined as one light pulse bouncing between two mirrors.",
+    "misconceptions": ["Earth sees the pulse hit the mirror at its OLD position", "The viewpoints measure different light speeds", "The two diagrams depict different pulses", "The half-tick is the proper time of the photon"],
+    "sources": {"A1": "https://openstax.org/books/university-physics-volume-3/pages/5-3-time-dilation"},
+    "claims": ["In the ship frame, E at the lower mirror and R at the upper mirror are vertically separated by 4 diagram units.", "At 0.6c, during the same E to R interval the ship moves sideways 3 units in the Earth frame. The upper mirror is at the new position when R occurs.", "The Earth path is 5 units and the ship path 4 units. Both assign the same speed to the light, so Earth assigns the longer time."],
+    "question": "Why does the same pulse take longer between the same two events in Earth's frame?",
+    "transfer": {"question": "Why is the Earth interval 5/4 of the ship interval in this drawing?", "answer": "Light covers five versus four units at the same speed."},
+    "obligation": "spatial",
+    "stages": [["ship", "Show both labeled frames and trace E to R vertically in Ship; Earth starts at E."], ["shift", "Keep the reference diagram. In Earth show both mirrors' new positions and the horizontal displacement."], ["path", "In Earth connect E to R at the new upper mirror and show 5 versus 4 units. Keep both frames visible."]]
+  },
+  {
+    "id": "02", "topic": "How do banks create money when they lend?",
+    "audience": "Curious account holder who imagines a loan comes straight from another customer's savings", "tone": "Practical, slightly surprising",
+    "objective": "Explain how a seller's deposit appears at Bank B while the borrower's debt stays at Bank A.",
+    "takeaway": "Customer deposits change; central-bank reserves settle the interbank payment; the original loan stays at its lender.",
+    "prior": "The viewer knows a bank balance can be spent but not that it is the bank's liability.",
+    "misconceptions": ["The seller receives central-bank reserves", "The loan moves to Bank B", "Approval alone creates money", "Customer deposits are physically passed between vaults"],
+    "sources": {"B1": "https://www.bankofengland.co.uk/quarterly-bulletin/2014/q1/money-creation-in-the-modern-economy"},
+    "claims": ["Bank A originates a fictional $100,000 loan, recording a matching new borrower deposit and loan asset. Starting reserves: A $120,000; B $20,000.", "After the borrower pays the seller, the new borrower deposit at A falls to zero and the seller's deposit at B is $100,000.", "For simplified gross settlement, $100,000 of central-bank reserves moves A to B: A $20,000, B $120,000. The borrower still owes A $100,000."],
+    "question": "The seller can spend at another bank. Did the loan follow the payment?",
+    "transfer": {"question": "Who is owed the balance now, and what settled between the banks?", "answer": "Bank A is still owed the loan. Central-bank reserves settled between A and B."},
+    "obligation": "worked-example",
+    "stages": [["origination", "Show B beside A. Show the $100,000 loan asset and deposit together in A."], ["settlement", "Update both deposit and reserve rows atomically. Show direction of reserve transfer and retain A's loan."], ["outstanding", "Keep the settled figures visible and highlight the unchanged loan at A."]]
+  },
+  {
+    "id": "03", "topic": "Why does AI sometimes confidently invent facts?",
+    "audience": "Curious chatbot user who recognizes citations and may equate a real link with proof", "tone": "Investigative, accessible and fair",
+    "objective": "Show that a relevant passage from a real paper can fail to support a precisely scoped answer.",
+    "takeaway": "Open the source, locate the passage, compare the exact claim and group.",
+    "prior": "The viewer knows paper titles and model names but may not notice that neighboring paragraphs refer to different groups.",
+    "misconceptions": ["A real link proves the claim", "The cited study measures a universal hallucination rate", "Searching without a hit establishes nonexistence"],
+    "sources": {"C2": "https://doi.org/10.1038/s41598-023-41032-5"},
+    "claims": ["Walters and Wilder (2023), Results / Extent of fabrication, is the real source.", "The exact question asks about the share of works cited by GPT-4 in this study's sample that were fabricated.", "The real nearby result says: Of the 222 works cited in the GPT-3.5 papers, 55% are fabricated. This cannot establish a GPT-4 rate.", "The GPT-4 paragraph says: Only 18% are fabricated. Report 18% in this study's sample, not for all chatbot responses."],
+    "question": "The paper opens. Does the highlighted passage actually answer the GPT-4 question?",
+    "transfer": {"question": "A paper is real and the link works. What still needs checking?", "answer": "Whether the passage supports the particular claim, group, and scope."},
+    "obligation": "source-verification",
+    "stages": [["source", "Open the real paper; retain the exact GPT-4 question."], ["mismatch", "Highlight GPT-3.5 and its 55% result next to the question, retain source locator. Withhold verdict until viewer can inspect."], ["support", "Show GPT-4 in the correct neighboring paragraph with 18% scoped to this sample."]]
+  }
+]

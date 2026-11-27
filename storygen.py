@@ -860,6 +860,8 @@ def main():
     p.add_argument("--voice", choices=("heart", "ryan"), default="ryan")
     p.add_argument("--raw-text", action="store_true", help="read a rough brief from a text file or stdin (-)")
     p.add_argument("--communication-skill", help="version of the shared communication skill to test")
+    p.add_argument("--episode-skill", choices=("routed", "baseline", "entities", "purpose", "continuity",
+                                               "visual-first", "verification"), default="routed")
     p.add_argument("--validator-python", type=Path, help="Python with the renderer dependencies")
     p.add_argument("--frames-repo", type=Path, help="frames-renderer checkout matching the server")
     p.add_argument("--video-repo", type=Path, help="video-renderer checkout matching the server")
@@ -879,6 +881,11 @@ def main():
     with (args.out / ".run.lock").open("a") as lock:
         fcntl.flock(lock, fcntl.LOCK_EX | fcntl.LOCK_NB)
         try:
+            if (not args.raw_text and args.command in ("write", "run") and args.input.is_file()
+                    and read(args.input).get("schema_version") == "episode/1"):
+                from episode import run
+                run(args)
+                return
             if args.command == "normalize":
                 config = read(ROOT / "models.json")[args.model]
                 brief, generic = load_brief(args, args.models / config["file"], config)
