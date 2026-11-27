@@ -9,7 +9,7 @@ from pydantic import ValidationError
 from storyboard_renderer.compose import approved_text, compose, font_for
 from storyboard_renderer.frame_api import Panel, Session
 from storyboard_renderer.grounding import NeedsReview
-from video_renderer.api import Video
+from video_renderer import api
 
 
 def check_label_spacing(panel, session, temp):
@@ -45,7 +45,8 @@ def check_label_spacing(panel, session, temp):
 def main():
     raw = json.load(sys.stdin)
     try:
-        video = Video.model_validate(raw)
+        model = api.EpisodeVideo if "chapter_starts" in raw else api.Video
+        video = model.model_validate(raw)
         session = Session.model_validate(video.visual)
         with TemporaryDirectory(prefix="storygen-preflight-") as folder:
             for beat in video.beats:

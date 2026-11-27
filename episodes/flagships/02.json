@@ -1,0 +1,154 @@
+{
+  "id": "02",
+  "topic": "How do banks create money when they lend?",
+  "audience": "Curious account holder who imagines a loan comes straight from another customer's savings",
+  "tone": "Practical, slightly surprising",
+  "objective": "Explain how a seller's deposit appears at Bank B while the borrower's debt stays at Bank A.",
+  "takeaway": "Customer deposits change; central-bank reserves settle the interbank payment; the original loan stays at its lender.",
+  "prior": "The viewer knows a bank balance can be spent but not that it is the bank's liability.",
+  "misconceptions": [
+    "The seller receives central-bank reserves",
+    "The loan moves to Bank B",
+    "Approval alone creates money",
+    "Customer deposits are physically passed between vaults"
+  ],
+  "sources": {
+    "B1": "https://www.bankofengland.co.uk/quarterly-bulletin/2014/q1/money-creation-in-the-modern-economy",
+    "B2": "https://www.bankofengland.co.uk/explainers/how-is-money-created"
+  },
+  "claims": [
+    "Bank A originates a fictional $100,000 loan, recording a matching new borrower deposit and loan asset. Starting reserves: A $120,000; B $20,000.",
+    "After the borrower pays the seller, the new borrower deposit at A falls to zero and the seller's deposit at B is $100,000.",
+    "For simplified gross settlement, $100,000 of central-bank reserves moves A to B: A $20,000, B $120,000. The borrower still owes A $100,000."
+  ],
+  "question": "The seller can spend at another bank. Did the loan follow the payment?",
+  "transfer": {
+    "question": "Who is owed the balance now, and what settled between the banks?",
+    "answer": "Bank A is still owed the loan. Central-bank reserves settled between A and B."
+  },
+  "obligation": "worked-example",
+  "stages": [
+    [
+      "origination",
+      "Show B beside A. Show the $100,000 loan asset and deposit together in A."
+    ],
+    [
+      "settlement",
+      "Update both deposit and reserve rows atomically. Show direction of reserve transfer and retain A's loan."
+    ],
+    [
+      "outstanding",
+      "Keep the settled figures visible and highlight the unchanged loan at A."
+    ]
+  ],
+  "schema_version": "episode/1",
+  "min_ms": 180000,
+  "editorial_direction": "Open just before a fictional $100,000 loan is booked. Follow the same borrower and seller. Never imply saved cash is passed to the borrower; dollars are illustrative, not a national regulation claim.",
+  "chapters": [
+    {
+      "question": "When a bank credits the account, what else does it write?",
+      "chapter_claims": [
+        "Approval is not origination. At origination Bank A creates a matching loan asset and new deposit liability.",
+        "Explain who owes whom and that no other customer's deposit falls."
+      ],
+      "stages": [
+        [
+          "before",
+          "Show before the transaction."
+        ],
+        [
+          "origination",
+          "Post the two entries together."
+        ],
+        [
+          "wealth",
+          "See the borrower’s side."
+        ]
+      ],
+      "words": "115–140 (around 40 per visual state)"
+    },
+    {
+      "question": "Is the borrower a hundred thousand dollars richer?",
+      "chapter_claims": [
+        "The spendable deposit and debt offset at origination without fees. Money and wealth are not the same.",
+        "The deposit is an asset of the borrower and a liability of Bank A."
+      ],
+      "stages": [
+        [
+          "origination",
+          "Show Bank A’s two entries."
+        ],
+        [
+          "wealth",
+          "Show matching borrower asset and debt."
+        ]
+      ],
+      "words": "115–140 (around 40 per visual state)"
+    },
+    {
+      "question": "Does the loan follow the payment?",
+      "chapter_claims": [
+        "Bank A originates a fictional $100,000 loan, recording a matching new borrower deposit and loan asset. Starting reserves: A $120,000; B $20,000.",
+        "After the borrower pays the seller, the new borrower deposit at A falls to zero and the seller's deposit at B is $100,000.",
+        "For simplified gross settlement, $100,000 of central-bank reserves moves A to B: A $20,000, B $120,000. The borrower still owes A $100,000."
+      ],
+      "stages": [
+        [
+          "origination",
+          "Show B beside A. Show the $100,000 loan asset and deposit together in A."
+        ],
+        [
+          "settlement",
+          "Update both deposit and reserve rows atomically. Show direction of reserve transfer and retain A's loan."
+        ],
+        [
+          "outstanding",
+          "Keep the settled figures visible and highlight the unchanged loan at A."
+        ]
+      ],
+      "words": "115–140 (around 40 per visual state)"
+    },
+    {
+      "question": "Why can't the bank do this without limit?",
+      "chapter_claims": [
+        "Interbank settlement uses reserves, which the bank must obtain and manage.",
+        "Capital absorbs losses. Creditworthiness, profitability and demand constrain lending.",
+        "Policy interest rates influence costs and demand without a fixed loan result."
+      ],
+      "stages": [
+        [
+          "settlement",
+          "Make the reduced A reserves inspectable."
+        ],
+        [
+          "limits",
+          "Hold the bank figures while distinguishing liquidity and other limits."
+        ],
+        [
+          "outstanding",
+          "Return to why the lender cares about the existing loan."
+        ]
+      ],
+      "words": "115–140 (around 40 per visual state)"
+    },
+    {
+      "question": "What disappears when the borrower repays principal?",
+      "chapter_claims": [
+        "Use separate, pre-existing $1,000 savings at Bank A. These savings were not the spent deposit.",
+        "Pay down principal only: savings fall by $1,000 and Bank A loan falls from $100,000 to $99,000; B's seller deposit and reserves unchanged.",
+        "Interest is a distinct charge/income flow, not principal reduction. End by returning to the original two entries."
+      ],
+      "stages": [
+        [
+          "outstanding",
+          "Before repayment, locate the original loan."
+        ],
+        [
+          "repayment",
+          "Show the $99,000 result and savings source."
+        ]
+      ],
+      "words": "115–140 (around 40 per visual state)"
+    }
+  ]
+}

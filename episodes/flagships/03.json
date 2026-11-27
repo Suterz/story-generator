@@ -1,0 +1,157 @@
+{
+  "id": "03",
+  "topic": "Why does AI sometimes confidently invent facts?",
+  "audience": "Curious chatbot user who recognizes citations and may equate a real link with proof",
+  "tone": "Investigative, accessible and fair",
+  "objective": "Show that a relevant passage from a real paper can fail to support a precisely scoped answer.",
+  "takeaway": "Open the source, locate the passage, compare the exact claim and group.",
+  "prior": "The viewer knows paper titles and model names but may not notice that neighboring paragraphs refer to different groups.",
+  "misconceptions": [
+    "A real link proves the claim",
+    "The cited study measures a universal hallucination rate",
+    "Searching without a hit establishes nonexistence"
+  ],
+  "sources": {
+    "C2": "https://doi.org/10.1038/s41598-023-41032-5",
+    "C1": "https://arxiv.org/abs/2509.04664"
+  },
+  "claims": [
+    "Walters and Wilder (2023), Results / Extent of fabrication, is the real source.",
+    "The exact question asks about the share of works cited by GPT-4 in this study's sample that were fabricated.",
+    "The real nearby result says: Of the 222 works cited in the GPT-3.5 papers, 55% are fabricated. This cannot establish a GPT-4 rate.",
+    "The GPT-4 paragraph says: Only 18% are fabricated. Report 18% in this study's sample, not for all chatbot responses."
+  ],
+  "question": "The paper opens. Does the highlighted passage actually answer the GPT-4 question?",
+  "transfer": {
+    "question": "A paper is real and the link works. What still needs checking?",
+    "answer": "Whether the passage supports the particular claim, group, and scope."
+  },
+  "obligation": "source-verification",
+  "stages": [
+    [
+      "source",
+      "Open the real paper; retain the exact GPT-4 question."
+    ],
+    [
+      "mismatch",
+      "Highlight GPT-3.5 and its 55% result next to the question, retain source locator. Withhold verdict until viewer can inspect."
+    ],
+    [
+      "support",
+      "Show GPT-4 in the correct neighboring paragraph with 18% scoped to this sample."
+    ]
+  ],
+  "schema_version": "episode/1",
+  "min_ms": 180000,
+  "editorial_direction": "Investigate rather than scold. Keep the fictional reference visibly fictional from the first frame. When using the real document, distinguish the question, passage and generated answer.",
+  "chapters": [
+    {
+      "question": "Which part of a convincing-looking reference shows anyone checked the paper?",
+      "chapter_claims": [
+        "Illustrative fictional citation M. Vale and R. Tern, The Shape of a Convincing Footnote, Example Journal, 2024. No fake DOI.",
+        "A predictable format is not proof of a source being verified."
+      ],
+      "stages": [
+        [
+          "fiction",
+          "Open on the fictional card."
+        ],
+        [
+          "prompt",
+          "Offer a familiar completion."
+        ],
+        [
+          "tokens",
+          "Name ordinary pieces of text."
+        ]
+      ],
+      "words": "115–140 (around 40 per visual state)"
+    },
+    {
+      "question": "What does predicting likely wording tell us about truth?",
+      "chapter_claims": [
+        "A token is a piece of text; next-token pretraining learns patterns.",
+        "Fluent wording is not calibrated certainty; later training and tools affect behavior.",
+        "No made-up measured probabilities or universal error rates."
+      ],
+      "stages": [
+        [
+          "prompt",
+          "Return to a familiar completion."
+        ],
+        [
+          "pattern",
+          "Separate likely wording from factual evidence."
+        ],
+        [
+          "fiction",
+          "Return to the plausible pattern of the fictional citation."
+        ]
+      ],
+      "words": "115–140 (around 40 per visual state)"
+    },
+    {
+      "question": "What can we learn from the actual GPT-4 passage?",
+      "chapter_claims": [
+        "Walters and Wilder (2023), Results / Extent of fabrication, is the real source.",
+        "The exact question asks about the share of works cited by GPT-4 in this study's sample that were fabricated.",
+        "The real nearby result says: Of the 222 works cited in the GPT-3.5 papers, 55% are fabricated. This cannot establish a GPT-4 rate.",
+        "The GPT-4 paragraph says: Only 18% are fabricated. Report 18% in this study's sample, not for all chatbot responses."
+      ],
+      "stages": [
+        [
+          "source",
+          "Open Walters and Wilder's real document."
+        ],
+        [
+          "support",
+          "Read the scoped GPT-4 result: 18 percent among its cited works in this study."
+        ]
+      ],
+      "words": "115–140 (around 40 per visual state)"
+    },
+    {
+      "question": "Can the right paper still be the wrong evidence?",
+      "chapter_claims": [
+        "Walters and Wilder (2023), Results / Extent of fabrication, is the real source.",
+        "The exact question asks about the share of works cited by GPT-4 in this study's sample that were fabricated.",
+        "The real nearby result says: Of the 222 works cited in the GPT-3.5 papers, 55% are fabricated. This cannot establish a GPT-4 rate.",
+        "The GPT-4 paragraph says: Only 18% are fabricated. Report 18% in this study's sample, not for all chatbot responses."
+      ],
+      "stages": [
+        [
+          "source",
+          "Keep the exact GPT-4 question."
+        ],
+        [
+          "mismatch",
+          "Expose the GPT-3.5 passage without moving the question."
+        ],
+        [
+          "reject",
+          "Explain why the group mismatch defeats the claim."
+        ]
+      ],
+      "words": "115–140 (around 40 per visual state)"
+    },
+    {
+      "question": "What should a viewer actually do next time?",
+      "chapter_claims": [
+        "Open source, locate passage, compare meaning with particular claim.",
+        "Search locates candidates; a calculator checks inputs and arithmetic, not source meaning.",
+        "A search failure does not establish a work never existed. Refer back to the fictional card."
+      ],
+      "stages": [
+        [
+          "fiction",
+          "Recall the opening question."
+        ],
+        [
+          "habit",
+          "Give the three-step action."
+        ]
+      ],
+      "words": "115–140 (around 40 per visual state)"
+    }
+  ]
+}

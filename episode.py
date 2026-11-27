@@ -8,13 +8,14 @@ from jsonschema import Draft202012Validator
 from episode_graphics import RENDER
 
 
-def chapter_schema(ids):
+def chapter_schema(ids, compact=False):
+    text = {"type": "string", "minLength": 1, **({"maxLength": 143} if compact else {})}
     return {
         "type": "object", "additionalProperties": False, "required": ["sections"],
         "properties": {"sections": {"type": "array", "minItems": len(ids), "maxItems": len(ids),
             "items": {"type": "object", "additionalProperties": False,
                       "required": ["stage", "text", "caption", "cue"],
-                      "properties": {"stage": {"enum": ids}, "text": {"type": "string", "minLength": 1},
+                      "properties": {"stage": {"enum": list(dict.fromkeys(ids))}, "text": text,
                                      "caption": {"type": "string"}, "cue": {"type": "string"}}}}},
     }
 
@@ -63,7 +64,9 @@ def compile_chapter(brief, draft, prefix, *, short=True):
     from storygen import words
 
     ids = [s[0] for s in brief["stages"]]
-    Draft202012Validator(chapter_schema(ids)).validate(draft)
+    errors = list(Draft202012Validator(chapter_schema(ids)).iter_errors(draft))
+    if errors:
+        raise ValueError(errors[0].message)
     sections = draft["sections"]
     if [s["stage"] for s in sections] != ids:
         raise ValueError("required evidence states must be shown once in order")
@@ -73,13 +76,15 @@ def compile_chapter(brief, draft, prefix, *, short=True):
     script, beats = [], []
     for i, section in enumerate(sections):
         stage = section["stage"]
-        ident = f"{prefix}-{stage}"
+        ident = f"{prefix}-{i + 1}-{stage}"
         spoken = section["text"].strip()
         caption = section["caption"].strip()
         if not spoken or not caption or len(caption) > 84:
             raise ValueError(f"{stage}: give narration and a faithful caption of at most 84 characters")
         cue = {"ms": 0}
-        if i:
+        if i or not short:
+            if not i and not section["cue"].strip():
+                section = {**section, "cue": " ".join(spoken.split()[:3])}
             candidate = words(section["cue"])
             spoken_words = words(spoken)
             matches = [j for j in range(len(spoken_words))
@@ -93,20 +98,43 @@ def compile_chapter(brief, draft, prefix, *, short=True):
                  "overlays": overlays, "retry_budget": 0}
         if not i:
             panel["paper_scene"] = True
-        script.append({"id": ident, "text": spoken, "caption": caption})
+        if short:
+            script.append({"id": ident, "text": spoken, "caption": caption})
+        else:
+            import textwrap
+
+            fragments = textwrap.wrap(spoken, width=82, break_long_words=False, break_on_hyphens=False)
+            # Preserve authorship: captions use the actual narrated words. A
+            # cue crossing a wrapping boundary stays in one utterance.
+            if candidate and not any(_has_phrase(words(chunk), candidate) for chunk in fragments):
+                fragments = [" ".join(fragments[:2]), *fragments[2:]]
+            for j, fragment in enumerate(fragments):
+                utterance_id = f"{ident}-{j + 1}"
+                script.append({"id": utterance_id, "text": fragment, "caption": fragment})
+                if _has_phrase(words(fragment), candidate):
+                    cue["utterance_id"] = utterance_id
+            if cue["utterance_id"] == ident:
+                raise ValueError(f"{stage}: cue crosses an unsupported caption boundary")
         beats.append({"id": ident, "cue": cue, "panel": panel,
                       **({"parent": beats[-1]["id"]} if i else {})})
     return script, beats
+
+
+def _has_phrase(tokens, phrase):
+    return bool(phrase) and any(tokens[j:j + len(phrase)] == phrase for j in range(len(tokens)))
 
 
 def write_chapter(args, brief, folder, endpoint, *, short=True, prefix="chapter"):
     from storygen import read, request, save
 
     folder.mkdir(parents=True, exist_ok=True)
-    schema = chapter_schema([s[0] for s in brief["stages"]])
+    schema = chapter_schema([s[0] for s in brief["stages"]], compact=short)
     reason = None
     for attempt in range(2):
         prompt, selected = prompt_for(brief, args.episode_skill, reason, episode=not short)
+        if short:
+            prompt += ("\nHard limit: each of the three text fields is one short sentence, roughly twenty words, "
+                       "and no more than 143 characters. The final text must be short enough to speak in thirty seconds.")
         payload = {"messages": [{"role": "user", "content": prompt}],
                    "temperature": .3, "top_p": .95, "seed": 437, "max_tokens": 1800,
                    "response_format": {"type": "json_schema", "json_schema": {"name": "chapter", "schema": schema}}}
@@ -127,10 +155,38 @@ def write_chapter(args, brief, folder, endpoint, *, short=True, prefix="chapter"
             save(response_file, response)
         try:
             draft = json.loads(response["choices"][0]["message"]["content"])
+            if short:
+                errors = list(Draft202012Validator(schema).iter_errors(draft))
+                if errors:
+                    raise ValueError(errors[0].message)
             return compile_chapter(brief, draft, prefix, short=short)
         except (ValueError, KeyError, IndexError) as error:
             reason = str(error).splitlines()[0]
     raise ValueError(reason)
+
+
+def write_episode(args, brief, out, endpoint):
+    script, beats, starts = [], [], []
+    for i, chapter in enumerate(brief["chapters"], 1):
+        label = f"c{i:02d}"
+        chapter_brief = {k: v for k, v in brief.items() if k not in ("chapters", "transfer")}
+        chapter_brief.update(chapter)
+        chapter_brief["episode_continuity"] = {
+            "previous": brief["chapters"][i - 2]["question"] if i > 1 else None,
+            "next": brief["chapters"][i]["question"] if i < len(brief["chapters"]) else None,
+            "position": f"{i} of {len(brief['chapters'])}",
+        }
+        part, visuals = write_chapter(args, chapter_brief, out / "chapters" / label, endpoint,
+                                      short=False, prefix=label)
+        starts.append(part[0]["id"])
+        script.extend(part)
+        beats.extend(visuals)
+    beats[0]["cue"] = {"ms": 0}
+    count = sum(len(u["text"].split()) for u in script)
+    minimum = 520 if brief["min_ms"] == 180000 else 350
+    if not minimum <= count <= 820:
+        raise ValueError(f"episode authored {count} words, outside {minimum}–820")
+    return script, beats, starts
 
 
 def run(args):
@@ -149,14 +205,20 @@ def run(args):
     save(metadata, config)
     file = args.out / "story.json"
     if not file.exists():
+        full = "chapters" in brief
         try:
             with writer(args, args.models / model["file"], args.out / "llama.log") as endpoint:
-                script, beats = write_chapter(args, brief, args.out, endpoint)
+                if full:
+                    script, beats, starts = write_episode(args, brief, args.out, endpoint)
+                else:
+                    script, beats = write_chapter(args, brief, args.out, endpoint)
             story = {"title": brief["topic"],
                      "visual": {"story_context": brief["objective"], "visual_signature": SIGNATURES["paper"],
                                 "graphic_theme": "paper"},
                      "voice_profile": args.voice, "script": script, "beats": beats, "max_ms": 44999}
-            validate_native(validate(story))
+            if full:
+                story.update(chapter_starts=starts, min_ms=brief["min_ms"], max_ms=300000)
+            validate_native(story if full else validate(story))
         except ValueError as error:
             save(args.out / "result.json", {"status": "writer_refusal", "reason": str(error)})
             return

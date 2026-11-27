@@ -27,6 +27,16 @@ def light_events(origin, horizontal, separation=4, unit=.105):
 
 
 def clock(stage):
+    if stage in ("reunion", "depart", "paths", "gps"):
+        return twins(stage)
+    if stage in ("speed", "one-year", "compare-years"):
+        values = [text("CONSTANT SPEED: 0.99c", .19, role="value"),
+                  *metric("Ship clock", "1 year", .34)]
+        if stage != "speed":
+            values += metric("Earth-frame time", "About 7.09 years", .55)
+        if stage == "compare-years":
+            values += [text("Both clocks work normally.", .77)]
+        return values
     ship_e, ship_r = light_events((.39, .42), 0)
     earth_e, earth_r = light_events((.39, .76), 3)
     earth_start_upper = light_events(earth_e, 0)[1]
@@ -48,6 +58,33 @@ def clock(stage):
                   arrow([.41, .792], [.685, .792]), text("3 sideways", .815)]
     if stage == "path":
         marks += [line(earth_e, earth_r, "accent"), text("5 units", .66, .68)]
+    return marks
+
+
+def metric(label, value, y):
+    return [rect(.5, y + .028, .83, .145), text(label, y),
+            text(value, y + .057, role="value")]
+
+
+def twins(stage):
+    if stage == "gps":
+        return [text("GPS CLOCKS", .16, role="value"),
+                rect(.5, .47, .85, .43), dot([.50, .53]), dot([.21, .34]),
+                line([.21,.34],[.50,.53]),
+                text("Satellite", .30, .23), text("Earth", .60),
+                text("Motion and gravity both matter", .75, role="value")]
+    marks = [text("TWO TWINS", .14, role="value"), text("Earth twin", .23, .26),
+             text("Traveling twin", .23, .74)]
+    if stage == "paths":
+        marks += [line([.38,.70],[.38,.34]), line([.38,.70],[.74,.51],"accent"),
+                  line([.74,.51],[.38,.34],"accent"), dot([.38,.70]), dot([.38,.34]),
+                  text("Turnaround", .46, .74),
+                  text("Depart", .73, .38), text("Reunite", .30, .38)]
+    else:
+        for x, name in ((.26,"Stays"),(.74,"Travels")):
+            marks += [rect(x,.45,.31,.31), dot([x,.38]),
+                      text(name,.50,x), text("Working clock",.56,x)]
+        marks += [text("Readings disagree" if stage == "reunion" else "Clocks start together", .71, role="value")]
     return marks
 
 
@@ -117,6 +154,20 @@ PASSAGES = {
 
 
 def citation(stage):
+    if stage == "fiction":
+        return [text("ILLUSTRATIVE FICTION", .19, role="question"), rect(.5,.45,.87,.35),
+                text("M. Vale & R. Tern (2024)", .35, role="value"),
+                text("The Shape of a Convincing", .43), text("Footnote", .47),
+                text("Example Journal", .55), text("NOT A SOURCE", .72, role="question")]
+    if stage in ("prompt", "tokens", "pattern"):
+        marks = [text("Please pass the …", .29, role="value"), rect(.32,.54,.31,.14),
+                 rect(.68,.54,.31,.14), text("salt",.54,.32), text("pepper",.54,.68)]
+        return marks + [text({"prompt":"What comes next?", "tokens":"Pieces of text",
+                              "pattern":"Likely wording is not evidence"}[stage], .71, role="question")]
+    if stage == "habit":
+        return [text("Check the particular claim", .19, role="value"),
+                *metric("1", "Open the source", .32), *metric("2", "Find the passage", .51),
+                *metric("3", "Compare its meaning", .70)]
     marks = [text("QUESTION", .13, role="question")]
     marks += [text(s, .18 + i * .045) for i, s in enumerate(QUERY.splitlines())]
     marks += [rect(.5, .475, .88, .39), text(PAPER, .315, role="value"),

@@ -1,0 +1,158 @@
+{
+  "id": "01",
+  "topic": "Why does time slow down when you move faster?",
+  "audience": "Curious adult who recognizes clocks but expects one universal elapsed time",
+  "tone": "Curious, precise, unhurried at discovery",
+  "objective": "Explain why Earth assigns more time to the same half-tick than the ship does.",
+  "takeaway": "Same events, same light speed, longer path in Earth's frame.",
+  "prior": "A clock can be imagined as one light pulse bouncing between two mirrors.",
+  "misconceptions": [
+    "Earth sees the pulse hit the mirror at its OLD position",
+    "The viewpoints measure different light speeds",
+    "The two diagrams depict different pulses",
+    "The half-tick is the proper time of the photon"
+  ],
+  "sources": {
+    "A1": "https://openstax.org/books/university-physics-volume-3/pages/5-3-time-dilation",
+    "A2": "https://doi.org/10.12942/lrr-2003-1"
+  },
+  "claims": [
+    "In the ship frame, E at the lower mirror and R at the upper mirror are vertically separated by 4 diagram units.",
+    "At 0.6c, during the same E to R interval the ship moves sideways 3 units in the Earth frame. The upper mirror is at the new position when R occurs.",
+    "The Earth path is 5 units and the ship path 4 units. Both assign the same speed to the light, so Earth assigns the longer time."
+  ],
+  "question": "Why does the same pulse take longer between the same two events in Earth's frame?",
+  "transfer": {
+    "question": "Why is the Earth interval 5/4 of the ship interval in this drawing?",
+    "answer": "Light covers five versus four units at the same speed."
+  },
+  "obligation": "spatial",
+  "stages": [
+    [
+      "ship",
+      "Show both labeled frames and trace E to R vertically in Ship; Earth starts at E."
+    ],
+    [
+      "shift",
+      "Keep the reference diagram. In Earth show both mirrors' new positions and the horizontal displacement."
+    ],
+    [
+      "path",
+      "In Earth connect E to R at the new upper mirror and show 5 versus 4 units. Keep both frames visible."
+    ]
+  ],
+  "schema_version": "episode/1",
+  "min_ms": 180000,
+  "editorial_direction": "Open on two reunited twins with disagreeing working clocks. Both started together. Return to this exact mystery at the end. Earth times are synchronized coordinate measurements, not the light delay to one eye.",
+  "chapters": [
+    {
+      "question": "How can two good clocks disagree?",
+      "chapter_claims": [
+        "Fictional reunion; both clocks ran normally and were together at departure and return.",
+        "Compare elapsed time, not a clock fault or light-travel delay."
+      ],
+      "stages": [
+        [
+          "reunion",
+          "Show both working clocks."
+        ],
+        [
+          "depart",
+          "Return to synchronized departure."
+        ],
+        [
+          "reunion",
+          "Return to the disagreement."
+        ]
+      ],
+      "words": "115–140 (around 40 per visual state)"
+    },
+    {
+      "question": "What makes a tick?",
+      "chapter_claims": [
+        "A full tick is lower mirror to upper mirror and back.",
+        "Follow only emission E to reflection R, a half-tick; not the proper time of a photon."
+      ],
+      "stages": [
+        [
+          "ship",
+          "Use the straight four-unit path in the labeled ship frame."
+        ],
+        [
+          "shift",
+          "Treat the moving mirror as a question before drawing the pulse."
+        ]
+      ],
+      "words": "115–140 (around 40 per visual state)"
+    },
+    {
+      "question": "Where does the upper mirror actually meet that pulse?",
+      "chapter_claims": [
+        "In the ship frame, E at the lower mirror and R at the upper mirror are vertically separated by 4 diagram units.",
+        "At 0.6c, during the same E to R interval the ship moves sideways 3 units in the Earth frame. The upper mirror is at the new position when R occurs.",
+        "The Earth path is 5 units and the ship path 4 units. Both assign the same speed to the light, so Earth assigns the longer time."
+      ],
+      "stages": [
+        [
+          "ship",
+          "Show both labeled frames and trace E to R vertically in Ship; Earth starts at E."
+        ],
+        [
+          "shift",
+          "Keep the reference diagram. In Earth show both mirrors' new positions and the horizontal displacement."
+        ],
+        [
+          "path",
+          "In Earth connect E to R at the new upper mirror and show 5 versus 4 units. Keep both frames visible."
+        ]
+      ],
+      "words": "115–140 (around 40 per visual state)"
+    },
+    {
+      "question": "How large can that difference be?",
+      "chapter_claims": [
+        "Switch from the diagram's 0.6c to a different constant-speed leg at 0.99c.",
+        "At 0.99c one ship year corresponds to about 7.09 Earth-frame years, not a whole round trip.",
+        "The traveler feels normal. Say the decimal in words."
+      ],
+      "stages": [
+        [
+          "speed",
+          "Show the ship year and new speed."
+        ],
+        [
+          "one-year",
+          "Compare with the Earth-frame years."
+        ],
+        [
+          "compare-years",
+          "Emphasize that both clocks behave normally."
+        ]
+      ],
+      "words": "115–140 (around 40 per visual state)"
+    },
+    {
+      "question": "Why does the result not cancel at reunion?",
+      "chapter_claims": [
+        "At turnaround the traveling twin changes inertial frames; the two worldlines between the same endpoint events differ.",
+        "The travelers' clocks record their own elapsed time. GPS accounts for motion and gravity; no numeric GPS claim.",
+        "Return to the meaning of the reunited clocks after GPS."
+      ],
+      "stages": [
+        [
+          "paths",
+          "Trace the two paths and common endpoints."
+        ],
+        [
+          "gps",
+          "Brief application to satellite clock rates."
+        ],
+        [
+          "reunion",
+          "Pay off the question of the two clocks."
+        ]
+      ],
+      "words": "115–140 (around 40 per visual state)"
+    }
+  ]
+}

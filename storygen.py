@@ -830,7 +830,8 @@ def render(args, story):
         status = json.loads(request(f"{base}/v2/submissions/{key}"))
     else:
         save(receipt, info)
-        status = json.loads(request(base + "/v2/renders", story, {"Idempotency-Key": key}))
+        route = "/v2/episodes" if "chapter_starts" in story else "/v2/renders"
+        status = json.loads(request(base + route, story, {"Idempotency-Key": key}))
     deadline = time.monotonic() + 1800
     while status["state"] in {"queued", "running"} and time.monotonic() < deadline:
         time.sleep(2)
