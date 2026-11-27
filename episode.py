@@ -194,6 +194,12 @@ def check_transfer_explanation(fixture, stage, narration):
         raise ValueError("Earth's axis tilts; each bar is one rotation. Compare equal distance across hemispheres on the same day")
     if (fixture, stage) == ("percent", "restore") and not re.search(r"\b(?:twenty[ -]five percent|25\s*(?:%|percent))", narration, re.I):
         raise ValueError("say the result: twenty-five percent of eighty dollars is the twenty dollars needed")
+    if fixture == "percent" and re.search(
+            r"\b(?:twenty percent|20\s*%) of (?:eighty(?: dollars)?|\$?80) (?:is|equals) (?:twenty[ -]five|\$?25)\b",
+            narration, re.I):
+        raise ValueError("twenty percent of eighty dollars is sixteen dollars; reserve twenty-five percent for the recovery")
+    if (fixture, stage) == ("percent", "base") and re.search(r"\b(?:new|lower) (?:amount|price|base)\b", narration, re.I):
+        raise ValueError("the first discount is taken from the original price of one hundred dollars")
     if (fixture, stage) == ("study", "question") and re.search(r"\b(?:look|point) at the (?:title|document)\b", narration, re.I):
         raise ValueError("the current card shows only the question; save discussion of the documents for later")
     if fixture == "salary" and re.search(
@@ -294,7 +300,8 @@ def author_state(args, context, work, endpoint, prior, prior_opening, index, sta
     if context.get("visual_fixture") == "queue" and stage_id == "drain":
         instruction += " Stay with the final service and departure; do not recap when D arrived."
     if context.get("visual_fixture") == "salary":
-        instruction += (" Do not reuse numbers from the previous narration. "
+        instruction += (" Open every panel with a short plain clause of at least three words, without employee initials. "
+                        "Do not reuse numbers from the previous narration. "
                         "Employee A is the $40,000 salary removed; B and C never change salary. "
                         "Do not state a total or mean that is not visible on this panel.")
     defect = ""
@@ -319,6 +326,9 @@ def author_state(args, context, work, endpoint, prior, prior_opening, index, sta
             narration = plain_narration(value["text"])
             check_transfer_explanation(context.get("visual_fixture"), stage_id, narration)
             cue = value["cue"].strip()
+            if context.get("visual_fixture") == "salary" and re.search(
+                    r"\b[ABC]\b", cue or " ".join(narration.split()[:3])):
+                raise ValueError("choose a spoken sync cue without standalone employee initials")
             count = len(words(narration))
             if not low - 14 <= count <= high + 42:
                 raise ValueError(f"{count} words; aim for {low}–{high} to fit the episode")

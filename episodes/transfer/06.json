@@ -36,7 +36,7 @@
       "words": "115–140 (around 40 per visual state)",
       "stage_claims": {
         "base": [
-          "The starting price is $100. Explain what it means for that price to be a percentage base; ask what a 20 percent discount removes."
+          "The first discount is based on the original price of $100. Ask how much twenty percent of the original hundred removes."
         ],
         "down": [
           "A 20 percent drop takes $20 off the $100 starting price. The new price and new base are $80."
@@ -61,7 +61,7 @@
       "words": "115–140 (around 40 per visual state)",
       "stage_claims": {
         "down": [
-          "On the current card the $80 price is the base for the increase. Ask how many dollars are twenty percent of eighty."
+          "On the current card the $80 price is the base for the increase. Do not give a numeric increase until the next reveal."
         ],
         "up": [
           "Twenty percent of $80 is $16, making the new price $96. Contrast the $20 removed with the $16 added."
@@ -89,7 +89,7 @@
           "$100 times 0.8 is $80, then $80 times 1.2 is $96. The two percentages act on different bases."
         ],
         "down": [
-          "Return to the $80 base and pose the recovery question: what fraction of eighty is the twenty dollars needed to get back?"
+          "Return to the $80 base and ask what fraction of eighty is the twenty dollars needed to get back. Do not give the fraction yet."
         ]
       }
     },
