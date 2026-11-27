@@ -13,6 +13,8 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("output", type=Path)
     parser.add_argument("attempts", nargs="+", type=Path)
+    parser.add_argument("--previous", choices=tuple(REVIEWERS), default="focus-is-relation-v5")
+    parser.add_argument("--candidate", choices=tuple(REVIEWERS), default="promise-by-question-v6")
     home = Path.home()
     base = home / "ai/storyboard-rehearsal/writer"
     parser.add_argument("--models", type=Path, default=base / "models")
@@ -32,7 +34,7 @@ def main():
             if clip != packet["mp4_sha256"]:
                 raise ValueError(f"{label}: immutable review packet does not match the MP4")
             row = {"mp4_sha256": clip, "packet_sha256": digest(packet)}
-            for version in ("focus-is-relation-v5", "promise-by-question-v6"):
+            for version in (args.previous, args.candidate):
                 row[version] = ask(endpoint, REVIEWERS[version], packet, VERDICT, 620,
                                    args.output / f"{label}-{version}-response.json")
             results[label] = row
