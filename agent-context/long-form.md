@@ -1,5 +1,12 @@
 # Long-form development
 
+## 2026-11-27 — Blind full-episode review and next freeze
+
+- Full clocks in candidates 04 and 05 kept the exact mirror endpoints and corrected the GPS signs. Both still said the ship clock ticks like Earth-frame time near 2:29.87, and the turnaround omitted the switch from outbound to inbound frame. Both were rejected; the clock brief now separates local normality from the comparison rate and keeps the early setup to two views.
+- The bank render in candidate 03 showed the settlement at 1:29.63. It still overgeneralized loan ownership, omitted policy rates and loan demand, and described the savings as replaced by a loan. The newest candidate makes policy rates and demand a visible state and keeps repayment as two reductions. Reviewed negatives remain hash-bound to their own original MP4 receipts.
+- A citation draft also confused the fictional card with the real study and mistook the journal name for the article title. The new draft distinguishes the article, journal, imagined card and passage in separate views. The alignment repair was tested on the archived GPT-four cue that failed: the independent ASR split `GPT` and `-4`; the original now corroborates at 0.80 s in its chapter and the substituted `-3.5` fails. This is timing evidence, not an episode pass.
+- Fresh `candidate-07` freezes story `6280d9e`, video `03b117b` on 8939, and frames `050f932`. The trio still gates transfer production. The three existing XPS previews are unchanged.
+
 ## 2026-11-27 — XPS previews and episode qualification
 
 - The three short chapter previews are on the XPS, hash-matched and playback checked: clock 0:09.60, bank 0:09.20, citation 0:11.03. These are development artifacts. Actual MP4 ASR corroborates the essential narration; perceptual voice judgments are pending human listening.
