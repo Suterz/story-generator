@@ -1,5 +1,10 @@
 # Long-form development
 
+## 2026-11-27 — Candidate 12 requalified
+
+- Fresh Candidate 12 flagship exports independently passed on the same freeze: clock 226.77 s, bank 235.90 s, citation 209.10 s. First-render repair counts were 0, 0 and 2 automatic writer revisions. The reviews are tied to each new MP4 hash and freeze receipt and use phone-size decoded frames, cue timing and delivered MP4 ASR; no listening.
+- The same freeze now runs transfer slots 04–10 through `episode_batch.py --include-transfer`, with a separate media audit. Candidate 09 remains the published trio. Preserve both it and the chapter previews until a verified complete replacement is ready.
+
 ## 2026-11-27 — One transfer passed; next requalification started
 
 - A later diagnostic split the original payroll audio into two windows at the measured visual-state boundary. ASR agreement rose from 0.477 for the full chapter to 0.813 and 0.876 for the two windows, using the same PCM and numeric normalization. This points to a possible ASR windowing issue; it does not certify the episode or change the frozen verifier.
