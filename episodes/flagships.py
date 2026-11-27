@@ -50,7 +50,7 @@ def assemble():
                    "The twin feels normal. No claims about seeing tick speeds during the trip in this chapter."],
     }
     a["chapters"][3]["stage_claims"] = {
-        "speed": ["This is a NEW demonstration: ninety-nine percent of the speed of light, not nine tenths.",
+        "speed": ["This is a new demonstration: ninety-nine percent of the speed of light.",
                   "Show a one year reading on the ship for this constant-speed leg. Earth number is still hidden."],
         "one-year": ["Ninety-nine percent of light speed, exactly as shown. One year on ship; about seven point zero nine years of Earth-frame time."],
         "compare-years": ["Both clocks work normally. The traveler does not feel slowed.",
@@ -99,6 +99,27 @@ def assemble():
         "wealth": ["Borrower deposit and borrower debt both increase by one hundred thousand dollars.",
                    "The deposit is the bank's liability; the debt is the borrower's liability."],
     }
+    b["chapters"][1]["stage_claims"] = {
+        "origination": ["Describe which entries are Bank A's asset and liability. Asset: borrower owes Bank A on its loan. Liability: Bank A owes borrower the spendable deposit."],
+        "wealth": ["The borrower can spend the new deposit. Matching debt cancels its initial net-wealth gain. Introduce the question of paying a customer who uses a different bank."],
+    }
+    b["chapters"][2]["stage_claims"] = {
+        "origination": ["Immediately before payment: new borrower deposit at A is $100,000; seller deposit at B is zero. The buyer pays the seller."],
+        "settlement": ["Borrower deposit at Bank A falls to zero; seller gets deposit of $100,000 at B.",
+                       "A transfers $100,000 in central-bank reserves to B to settle. A reserves $20,000; B reserves $120,000."],
+        "outstanding": ["Bank A still owns the unchanged $100,000 loan asset. The borrower still owes A, but their new deposit at A is now zero.",
+                        "The seller can spend a deposit at B, not spend reserves. Contrast the two different kinds of balances."],
+    }
+    b["chapters"][3]["stage_claims"] = {
+        "settlement": ["The reserve outflow shows why the bank needs settlement liquidity and funding. The bank cannot promise to settle an unlimited amount."],
+        "limits": ["Capital absorbs losses. Separate it from reserves used for settlement. Banks evaluate ability to repay, risk, and profitability."],
+        "outstanding": ["Bank A still owns the loan and bears its credit risk. Creditworthy borrowers must want loans; policy rates influence funding costs, rates and demand without a fixed result."],
+    }
+    b["chapters"][4]["stage_claims"] = {
+        "outstanding": ["The borrower owes Bank A the original $100,000. Separately, the borrower has $1,000 of pre-existing savings at Bank A. That's where the repayment funds are held."],
+        "repayment": ["A reduces the borrower's savings deposit by $1,000 and the loan by $1,000 to $99,000. Both at A; no reserves move and B's deposit does not change.",
+                      "This is principal only. Interest is a separate bank income flow, not principal. Return to creation at origination."],
+    }
     c["sources"]["C1"] = "https://arxiv.org/abs/2509.04664"
     c["editorial_direction"] = ("Investigate rather than scold. Keep the fictional reference visibly fictional from the first frame. "
                                 "When using the real document, distinguish the question, passage and generated answer.")
@@ -132,5 +153,19 @@ def assemble():
                     "Formatting does not tell us anyone checked it. Leave the mechanism unanswered."],
         "prompt": ["Use exactly the example shown: ‘Please pass the …’, with salt and pepper as plausible continuations."],
         "tokens": ["A token is a piece of text, often a word or part of a word. This is illustrative, not a measured distribution."],
+    }
+    c["chapters"][1]["stage_claims"] = {
+        "prompt": ["Use the salt and pepper example. Several next pieces of text can fit the same words."],
+        "pattern": ["Next-token pretraining learns patterns of language; it does not itself prove any given fact. Fluency is not a calibrated probability that the claim is true."],
+        "fiction": ["A model can reproduce the pattern of a reference without evidence for this particular paper. Later training and tools affect behavior."],
+    }
+    c["chapters"][2]["stage_claims"] = {
+        "source": ["Open Walters and Wilder's real study. Ask what fraction of GPT-4 citations in that study were fabricated. The link alone does not settle it."],
+        "support": ["The GPT-4 paragraph says only eighteen percent are fabricated. This is about cited works in the study's GPT-4 sample, not all answers or other models."],
+    }
+    c["chapters"][3]["stage_claims"] = {
+        "source": ["Keep the same GPT-4 sample question, but compare a nearby related passage that cites a different population."],
+        "mismatch": ["The displayed paragraph is about GPT-3.5. Of the two hundred and twenty-two works cited in the GPT-3.5 papers, fifty-five percent were fabricated."],
+        "reject": ["The result says nothing about the GPT-4 group's percentage. State what it does support and abstain from giving a GPT-4 number from this paragraph alone."],
     }
     return a, b, c

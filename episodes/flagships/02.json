@@ -97,7 +97,15 @@
           "Show matching borrower asset and debt."
         ]
       ],
-      "words": "115–140 (around 40 per visual state)"
+      "words": "115–140 (around 40 per visual state)",
+      "stage_claims": {
+        "origination": [
+          "Describe which entries are Bank A's asset and liability. Asset: borrower owes Bank A on its loan. Liability: Bank A owes borrower the spendable deposit."
+        ],
+        "wealth": [
+          "The borrower can spend the new deposit. Matching debt cancels its initial net-wealth gain. Introduce the question of paying a customer who uses a different bank."
+        ]
+      }
     },
     {
       "question": "Does the loan follow the payment?",
@@ -120,7 +128,20 @@
           "Keep the settled figures visible and highlight the unchanged loan at A."
         ]
       ],
-      "words": "115–140 (around 40 per visual state)"
+      "words": "115–140 (around 40 per visual state)",
+      "stage_claims": {
+        "origination": [
+          "Immediately before payment: new borrower deposit at A is $100,000; seller deposit at B is zero. The buyer pays the seller."
+        ],
+        "settlement": [
+          "Borrower deposit at Bank A falls to zero; seller gets deposit of $100,000 at B.",
+          "A transfers $100,000 in central-bank reserves to B to settle. A reserves $20,000; B reserves $120,000."
+        ],
+        "outstanding": [
+          "Bank A still owns the unchanged $100,000 loan asset. The borrower still owes A, but their new deposit at A is now zero.",
+          "The seller can spend a deposit at B, not spend reserves. Contrast the two different kinds of balances."
+        ]
+      }
     },
     {
       "question": "Why can't the bank do this without limit?",
@@ -143,7 +164,18 @@
           "Return to why the lender cares about the existing loan."
         ]
       ],
-      "words": "115–140 (around 40 per visual state)"
+      "words": "115–140 (around 40 per visual state)",
+      "stage_claims": {
+        "settlement": [
+          "The reserve outflow shows why the bank needs settlement liquidity and funding. The bank cannot promise to settle an unlimited amount."
+        ],
+        "limits": [
+          "Capital absorbs losses. Separate it from reserves used for settlement. Banks evaluate ability to repay, risk, and profitability."
+        ],
+        "outstanding": [
+          "Bank A still owns the loan and bears its credit risk. Creditworthy borrowers must want loans; policy rates influence funding costs, rates and demand without a fixed result."
+        ]
+      }
     },
     {
       "question": "What disappears when the borrower repays principal?",
@@ -162,7 +194,16 @@
           "Show the $99,000 result and savings source."
         ]
       ],
-      "words": "115–140 (around 40 per visual state)"
+      "words": "115–140 (around 40 per visual state)",
+      "stage_claims": {
+        "outstanding": [
+          "The borrower owes Bank A the original $100,000. Separately, the borrower has $1,000 of pre-existing savings at Bank A. That's where the repayment funds are held."
+        ],
+        "repayment": [
+          "A reduces the borrower's savings deposit by $1,000 and the loan by $1,000 to $99,000. Both at A; no reserves move and B's deposit does not change.",
+          "This is principal only. Interest is a separate bank income flow, not principal. Return to creation at origination."
+        ]
+      }
     }
   ]
 }

@@ -100,7 +100,18 @@
           "Return to the plausible pattern of the fictional citation."
         ]
       ],
-      "words": "115–140 (around 40 per visual state)"
+      "words": "115–140 (around 40 per visual state)",
+      "stage_claims": {
+        "prompt": [
+          "Use the salt and pepper example. Several next pieces of text can fit the same words."
+        ],
+        "pattern": [
+          "Next-token pretraining learns patterns of language; it does not itself prove any given fact. Fluency is not a calibrated probability that the claim is true."
+        ],
+        "fiction": [
+          "A model can reproduce the pattern of a reference without evidence for this particular paper. Later training and tools affect behavior."
+        ]
+      }
     },
     {
       "question": "What can we learn from the actual GPT-4 passage?",
@@ -120,7 +131,15 @@
           "Read the scoped GPT-4 result: 18 percent among its cited works in this study."
         ]
       ],
-      "words": "115–140 (around 40 per visual state)"
+      "words": "115–140 (around 40 per visual state)",
+      "stage_claims": {
+        "source": [
+          "Open Walters and Wilder's real study. Ask what fraction of GPT-4 citations in that study were fabricated. The link alone does not settle it."
+        ],
+        "support": [
+          "The GPT-4 paragraph says only eighteen percent are fabricated. This is about cited works in the study's GPT-4 sample, not all answers or other models."
+        ]
+      }
     },
     {
       "question": "Can the right paper still be the wrong evidence?",
@@ -144,7 +163,18 @@
           "Explain why the group mismatch defeats the claim."
         ]
       ],
-      "words": "115–140 (around 40 per visual state)"
+      "words": "115–140 (around 40 per visual state)",
+      "stage_claims": {
+        "source": [
+          "Keep the same GPT-4 sample question, but compare a nearby related passage that cites a different population."
+        ],
+        "mismatch": [
+          "The displayed paragraph is about GPT-3.5. Of the two hundred and twenty-two works cited in the GPT-3.5 papers, fifty-five percent were fabricated."
+        ],
+        "reject": [
+          "The result says nothing about the GPT-4 group's percentage. State what it does support and abstain from giving a GPT-4 number from this paragraph alone."
+        ]
+      }
     },
     {
       "question": "What should a viewer actually do next time?",
