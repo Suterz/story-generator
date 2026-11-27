@@ -5,7 +5,7 @@ import unittest
 from daily_evidence import persist
 from opening_score import score, sha
 from opening_review import early_quantity, heard_numbers
-from opening_trial import compile_preview, guard_promise, repair_focus
+from opening_trial import check_embargo, compile_preview, guard_promise, repair_focus
 
 
 class OpeningTests(unittest.TestCase):
@@ -31,6 +31,11 @@ class OpeningTests(unittest.TestCase):
         plan["states"][0]["narration"] = "Today, battery efficiency."
         with self.assertRaisesRegex(ValueError, "omitted"):
             guard_promise(plan, objective)
+
+    def test_embargo_must_use_literal_source_values(self):
+        check_embargo({"withheld": [100, 60]}, ["A receives 100 kWh; B receives 60 kWh."])
+        with self.assertRaisesRegex(ValueError, "not present"):
+            check_embargo({"withheld": [1, 2]}, ["A receives 100 kWh; B receives 60 kWh."])
 
     def test_focus_repair_keeps_reading_values_and_speech(self):
         meters = [{"object": key, "readings": [{"label": "return", "display": str(value),

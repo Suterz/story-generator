@@ -47,6 +47,13 @@ PROMISE_SPEC = (
 )
 LOCKED_PROMISE = (" Use the locked promise verbatim in a spoken line. All states occur before the answer. "
                   "Do not put the withheld evidence into narration, captions, titles or drawings.")
+LITERAL_EMBARGO = (" The withheld array contains actual numeric magnitudes from supplied facts, not IDs, sequence "
+                   "numbers, placeholder numbers or counters. For example, if you need a value of 120 to answer "
+                   "the question, put 120 there and describe its field as hidden in visible_now. Leave the array "
+                   "empty if the reveal has no supplied numeric magnitude.")
+VISIBLE_SPLIT = (" Describe visible_now using only the immediate evidence. Include at least one useful observation "
+                 "rather than hiding everything. Any unknown reading named there must be shown as a question mark, "
+                 "not its value. A value cannot be both visible and withheld.")
 EXECUTE = ("Write one short opening chapter, three or four visual states, roughly 30–40 spoken words in total. "
            "Write spoken numbers as words and use digits in labels. "
            'visual_data for exact is {"operation":"meters","meters":[{"object":"name","readings":'
@@ -80,6 +87,19 @@ def guard_promise(plan, lock):
         numbers = {float(n) for n in re.findall(r"\d+(?:\.\d+)?", " ".join(visible))}
         if embargoed & numbers:
             raise ValueError("opening image includes an embargoed quantity")
+
+
+def check_embargo(spec, facts, *, check_visible=False):
+    import re
+
+    def numbers(text):
+        return {float(n) for n in re.findall(r"\d+(?:\.\d+)?", text)}
+
+    reported = numbers(" ".join(facts))
+    if set(spec["withheld"]) - reported:
+        raise ValueError("opening embargo uses values not present in supplied facts")
+    if check_visible and set(spec["withheld"]) & numbers(spec.get("visible_now", "")):
+        raise ValueError("opening promise both displays and withholds the same quantity")
 
 
 def compile_preview(brief, plan, approved, voice):
@@ -164,7 +184,11 @@ def run_opening(args):
                            {"baseline-v1": BASELINE + EXECUTE, "visible-question-v2": VISIBLE_QUESTION + EXECUTE,
                             "question-before-answer-v3": QUESTION_BEFORE_ANSWER + EXECUTE,
                             "short-question-v4": QUESTION_BEFORE_ANSWER + SHORT_LINES + EXECUTE,
-                            "locked-promise-v5": PROMISE_SPEC + QUESTION_BEFORE_ANSWER + SHORT_LINES + LOCKED_PROMISE + EXECUTE}
+                            "locked-promise-v5": PROMISE_SPEC + QUESTION_BEFORE_ANSWER + SHORT_LINES + LOCKED_PROMISE + EXECUTE,
+                            "literal-embargo-v6": PROMISE_SPEC + LITERAL_EMBARGO + QUESTION_BEFORE_ANSWER
+                            + SHORT_LINES + LOCKED_PROMISE + EXECUTE,
+                            "visible-split-v7": PROMISE_SPEC + LITERAL_EMBARGO + VISIBLE_SPLIT + QUESTION_BEFORE_ANSWER
+                            + SHORT_LINES + LOCKED_PROMISE + EXECUTE}
                            [args.opening_preview].encode()).hexdigest()}
     if args.voice.startswith("drama3-") and args.video_repo:
         registry = args.video_repo / "voices/drama3/narrators.json"
@@ -228,13 +252,21 @@ def run_opening(args):
                         instruction = "Follow the proposed opening. " + EXECUTE
                     else:
                         selected = VISIBLE_QUESTION if args.opening_preview == "visible-question-v2" else QUESTION_BEFORE_ANSWER
-                        if args.opening_preview in ("short-question-v4", "locked-promise-v5"):
+                        if args.opening_preview not in ("baseline-v1", "visible-question-v2", "question-before-answer-v3"):
                             selected += SHORT_LINES
-                        if args.opening_preview == "locked-promise-v5":
+                        if args.opening_preview in ("locked-promise-v5", "literal-embargo-v6", "visible-split-v7"):
                             spec = root / "promise.json"
                             if not spec.exists():
-                                persist(spec, ask(endpoint, PROMISE_SPEC, packet, PROMISE, 450,
-                                                  root / "promise-response.json"))
+                                instructions = PROMISE_SPEC
+                                if args.opening_preview != "locked-promise-v5":
+                                    instructions += LITERAL_EMBARGO
+                                if args.opening_preview == "visible-split-v7":
+                                    instructions += VISIBLE_SPLIT
+                                candidate = ask(endpoint, instructions, packet, PROMISE, 450, root / "promise-response.json")
+                                if args.opening_preview != "locked-promise-v5":
+                                    source_passages = [passage for row in approved.values() for passage in row["passages"]]
+                                    check_embargo(candidate, source_passages, check_visible=args.opening_preview == "visible-split-v7")
+                                persist(spec, candidate)
                             packet["locked_promise"] = read(spec)
                             selected += LOCKED_PROMISE
                         instruction = selected + " " + EXECUTE
@@ -242,7 +274,7 @@ def run_opening(args):
                         instruction += " Repair only the specific observed defect and preserve the supported facts."
                     plan = ask(endpoint, instruction, packet, OPEN, 2000, out / "plan-response.json")
                 persist(out / "plan.json", plan)
-                if args.opening_preview == "locked-promise-v5":
+                if args.opening_preview in ("locked-promise-v5", "literal-embargo-v6", "visible-split-v7"):
                     try:
                         guard_promise(plan, packet["locked_promise"])
                     except ValueError as error:
