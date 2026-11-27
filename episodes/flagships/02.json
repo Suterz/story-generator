@@ -174,7 +174,7 @@
         ],
         "policy": [
           "Policy interest rates can influence funding costs and loan rates, which can affect how much borrowers want to borrow.",
-          "Bank A retains the credit risk in this example. Loans can be sold in separate transactions; the seller payment in this example did not move this loan."
+          "Distinguish influence from a fixed result: a policy rate does not tell you the exact number of future loans."
         ]
       }
     },

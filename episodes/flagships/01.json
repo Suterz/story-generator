@@ -96,8 +96,8 @@
           "The highlighted four-unit upward path is only the first half-tick, from emission E to reflection R."
         ],
         "shift": [
-          "In the Earth frame the ship moves only sideways between those same two events.",
-          "The upper mirror is no longer over E when light arrives. Do not describe the length of the diagonal before showing it."
+          "At emission E the upper mirror is still directly above the lower mirror. During the flight of the light pulse the ship moves horizontally.",
+          "Only at reflection R is the upper mirror at the displaced position. Leave the diagonal path length for the next chapter."
         ]
       }
     },
@@ -198,8 +198,8 @@
       "words": "115–140 (around 40 per visual state)",
       "stage_claims": {
         "paths": [
-          "Both paths start and end together. The traveler changes from an outbound inertial frame to an inbound inertial frame at turnaround.",
-          "Earth stays approximately in one frame. The elapsed proper time differs along the two paths."
+          "Both paths start and end together. At turnaround, the outbound frame and inbound frame are different.",
+          "The traveler switches between those frames; Earth stays approximately in one frame. The two clocks accumulate different elapsed times."
         ],
         "gps": [
           "Relative to the comparison clock on Earth, the effect of satellite motion is to slow its clock.",

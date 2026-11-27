@@ -60,8 +60,8 @@ def assemble():
     a["chapters"][1]["stage_claims"] = {
         "ship": ["One full tick is the pulse from the lower mirror to the upper mirror and back to the lower mirror.",
                  "The highlighted four-unit upward path is only the first half-tick, from emission E to reflection R."],
-        "shift": ["In the Earth frame the ship moves only sideways between those same two events.",
-                  "The upper mirror is no longer over E when light arrives. Do not describe the length of the diagonal before showing it."],
+        "shift": ["At emission E the upper mirror is still directly above the lower mirror. During the flight of the light pulse the ship moves horizontally.",
+                  "Only at reflection R is the upper mirror at the displaced position. Leave the diagonal path length for the next chapter."],
     }
     a["chapters"][2]["stage_claims"] = {
         "ship": ["The same pulse travels upward from emission E at the lower mirror to reflection R at the upper mirror in the ship frame. Four units."],
@@ -71,8 +71,8 @@ def assemble():
                  "Both frames measure the same light speed. Earth therefore assigns more time to this same half-tick, emission to reflection."],
     }
     a["chapters"][4]["stage_claims"] = {
-        "paths": ["Both paths start and end together. The traveler changes from an outbound inertial frame to an inbound inertial frame at turnaround.",
-                  "Earth stays approximately in one frame. The elapsed proper time differs along the two paths."],
+        "paths": ["Both paths start and end together. At turnaround, the outbound frame and inbound frame are different.",
+                  "The traveler switches between those frames; Earth stays approximately in one frame. The two clocks accumulate different elapsed times."],
         "gps": ["Relative to the comparison clock on Earth, the effect of satellite motion is to slow its clock.",
                 "The weaker gravity at GPS orbital altitude makes the satellite clock run faster.",
                 "These effects do not exactly cancel. GPS accounts for both. No drift numbers are needed."],
@@ -129,7 +129,7 @@ def assemble():
         "settlement": ["The reserve outflow shows why the bank needs settlement liquidity and funding. The bank cannot promise to settle an unlimited amount."],
         "limits": ["Capital absorbs losses. Separate it from reserves used for settlement. Banks evaluate ability to repay, risk, and profitability."],
         "policy": ["Policy interest rates can influence funding costs and loan rates, which can affect how much borrowers want to borrow.",
-                   "Bank A retains the credit risk in this example. Loans can be sold in separate transactions; the seller payment in this example did not move this loan."],
+                   "Distinguish influence from a fixed result: a policy rate does not tell you the exact number of future loans."],
     }
     b["chapters"][4]["stage_claims"] = {
         "savings": ["The borrower owes Bank A the original $100,000. Separately, the borrower has $1,000 of pre-existing savings at Bank A. That's where the repayment funds are held."],
@@ -152,7 +152,7 @@ def assemble():
                 ("prompt","Return to a familiar completion."), ("pattern","Separate likely wording from factual evidence."),
                 ("fiction","Return to the plausible pattern of the fictional citation.")),
         chapter("What can we learn from the actual GPT-4 passage?", c["claims"],
-                 ("source","Open Walters and Wilder's real document. Scientific Reports is the journal, not the title."),
+                 ("source","Show the title of Walters and Wilder's real article and name the journal it appears in."),
                 ("support","Read the scoped GPT-4 result: 18 percent among its cited works in this study.")),
         chapter("Can the right paper still be the wrong evidence?", c["claims"],
                 ("source","Keep the exact GPT-4 question."),

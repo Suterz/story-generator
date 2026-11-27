@@ -124,7 +124,7 @@
       "stages": [
         [
           "source",
-          "Open Walters and Wilder's real document. Scientific Reports is the journal, not the title."
+          "Show the title of Walters and Wilder's real article and name the journal it appears in."
         ],
         [
           "support",

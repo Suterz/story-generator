@@ -259,13 +259,15 @@ def author_state(args, context, work, endpoint, prior, prior_opening, index, sta
             if context["obligation"] == "spatial" and not context.get("visual_fixture"):
                 if stage_id in {"ship","shift","path"} and re.search(
                         r"\b(?:four|five|[45])[- ]+units? of time\b|"
-                        r"\b(?:not|does not) (?:travel(?:s|ing)? )?sideways\b", narration, re.I):
-                    raise ValueError("four and five are distances; the Earth ray has a sideways component")
+                        r"\b(?:not|does not) (?:travel(?:s|ing)? )?sideways\b|"
+                        r"\bmirror has already shifted\b|\bship.{0,28}\bgoing up and down\b", narration, re.I):
+                    raise ValueError("the ship moves sideways from emission to reflection; four and five are light path distances")
                 if stage_id in {"one-year", "compare-years"} and re.search(
                         r"\bsame time\b|\bticks? (?:just )?like (?:the )?earth\b", narration, re.I):
                     raise ValueError("same leg, different elapsed times; don't equate the two clocks' rates")
-                if stage_id == "paths" and not re.search(r"\bframes?\b", narration, re.I):
-                    raise ValueError("name the outbound and inbound frames so the turnaround asymmetry is clear")
+                if stage_id == "paths" and not all(re.search(pattern, narration, re.I) for pattern in
+                                                  (r"\b(?:outbound|outgoing)\b", r"\b(?:inbound|return)\b", r"\bframes?\b")):
+                    raise ValueError("explicitly distinguish the outbound and inbound frames at turnaround")
                 if stage_id == "gps" and re.search(
                         r"\bmotion (?:makes .{1,35} faster|speeds)|"
                         r"\bweaker gravity (?:makes .{1,35} slower|slows)|"
@@ -278,7 +280,7 @@ def author_state(args, context, work, endpoint, prior, prior_opening, index, sta
                 if re.search(r"\bloan is (?:their|the bank['’]s|bank a['’]s) liability\b", narration, re.I):
                     raise ValueError("the loan is a bank asset and a borrower liability")
                 if re.search(r"\bloans? (?:always |never move.{0,25})?(?:stay|remain)"
-                             r" (?:right )?where (?:they(?:['’]re| were) )?(?:start|beg[a-z]+|made|created)", narration, re.I):
+                             r" (?:right )?where (?:they(?:['’]re| were) )?(?:start|beg[a-z]+|made|created|originated)", narration, re.I):
                     raise ValueError("limit the claim to this payment: a separate sale can transfer a loan")
                 if stage_id == "policy" and not (re.search(r"\brates?\b", narration, re.I) and
                                                   re.search(r"\bdemand\b|\bwant to borrow\b", narration, re.I)):
@@ -294,7 +296,7 @@ def author_state(args, context, work, endpoint, prior, prior_opening, index, sta
                     raise ValueError("this opening view shows the title and question, not a results paragraph yet")
                 if re.search(r"\b(?:learns?|learning) patterns,? not facts\b", narration, re.I):
                     raise ValueError("a model can learn facts; fluent output does not establish this particular claim")
-                if re.search(r"\btitle.{0,15}scientific reports\b", narration, re.I):
+                if re.search(r"\btitle.{0,15}scientific reports\b|\bscientific reports.{0,8}\bnot the title\b", narration, re.I):
                     raise ValueError("Scientific Reports is the journal; use the article title from the brief")
             focus = value.get("focus", "")
             if focus and focus not in labels:
