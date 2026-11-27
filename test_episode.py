@@ -17,6 +17,8 @@ class EvidenceTests(unittest.TestCase):
             ("shutter", "short", "The short exposure shows forty pixels."),
             ("study", "mismatch", "Guo and colleagues wrote about viewing time."),
             ("seasons", "angle", "The sunlight scatters at this angle."),
+            ("map", "globe", "They’re the same size in reality."),
+            ("salary", "transfer", "The remaining two now average eighty thousand dollars."),
         ):
             with self.subTest(fixture=fixture), self.assertRaises(ValueError):
                 check_transfer_explanation(fixture, stage, sentence)

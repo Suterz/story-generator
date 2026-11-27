@@ -172,6 +172,15 @@ def check_transfer_explanation(fixture, stage, narration):
         raise ValueError(forbidden[1])
     if fixture == "queue" and re.search(r"\bD arrived.{0,20}\b(?:after|when) B (?:left|departed)\b", narration, re.I):
         raise ValueError("D arrives at minute two; A leaves at minute two and B leaves at minute four")
+    if fixture == "map" and re.search(
+            r"\b(?:they(?:['’]re| are)|regions are|continents are)\s+(?:actually )?(?:the )?same size\b|"
+            r"\b(?:both|they(?:['’]re| are))\s+(?:both\s+)?near the equator\b|"
+            r"\b(?:their )?actual sizes match\b", narration, re.I):
+        raise ValueError("South America is larger than Greenland; only the two example patches have equal area")
+    if fixture == "salary" and re.search(
+            r"\b(?:averages?|mean(?: salary)? (?:is|was|of))\s+(?:eighty thousand|\$80[,.]?000)\b|"
+            r"\btotal pay.{0,65}\bto (?:sixty thousand|\$60[,.]?000)\b", narration, re.I):
+        raise ValueError("the revised payroll is $140,000 and its mean is $70,000; $80,000 is C's individual salary")
     if fixture and re.search(r"^(?:what it shows|hold minute|show the|isolate the)\b", narration, re.I):
         raise ValueError("speak to the audience, without repeating the stage direction")
 

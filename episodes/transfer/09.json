@@ -35,7 +35,15 @@
           "Trace the same geographic vertices on a globe."
         ]
       ],
-      "words": "115–140 (around 40 per visual state)"
+      "words": "115–140 (around 40 per visual state)",
+      "stage_claims": {
+        "mercator": [
+          "Mercator exaggerates Greenland's size relative to South America. The two land masses do not have the same real area; South America is larger."
+        ],
+        "globe": [
+          "This is a globe view of the same underlying geographic outlines. South America covers a larger area on Earth. The view from one angle is not itself an area measurement."
+        ]
+      }
     },
     {
       "question": "What does flattening do at high latitude?",
@@ -52,7 +60,15 @@
           "Show high-latitude expansion."
         ]
       ],
-      "words": "115–140 (around 40 per visual state)"
+      "words": "115–140 (around 40 per visual state)",
+      "stage_claims": {
+        "globe": [
+          "Meridians meet at the poles on the globe. Greenland is at high northern latitude; South America straddles the equator."
+        ],
+        "mercator": [
+          "Mercator plots meridians as parallel vertical lines and enlarges the scale farther from the equator. It preserves local angles, not areas."
+        ]
+      }
     },
     {
       "question": "Can we isolate the scale change?",
@@ -69,7 +85,15 @@
           "Show both equal-on-Earth patches in Mercator."
         ]
       ],
-      "words": "115–140 (around 40 per visual state)"
+      "words": "115–140 (around 40 per visual state)",
+      "stage_claims": {
+        "mercator": [
+          "In the Mercator map Greenland looks disproportionately large. Ask how to separate latitude distortion from different land sizes."
+        ],
+        "patches": [
+          "The two highlighted patches, one near sixty degrees north and one on the equator, have equal area on Earth. The northern patch looks larger on Mercator. The comparison is about patches, not equal-size continents."
+        ]
+      }
     },
     {
       "question": "What if the comparison is specifically about area?",
@@ -86,7 +110,15 @@
           "Answer with an equal-area comparison."
         ]
       ],
-      "words": "115–140 (around 40 per visual state)"
+      "words": "115–140 (around 40 per visual state)",
+      "stage_claims": {
+        "mercator": [
+          "Recall Mercator's distortion toward the poles. Two places need not look proportional to their underlying areas."
+        ],
+        "equal-area": [
+          "The equal-area projection preserves relative area. Greenland and South America remain different sizes, with South America larger. Shapes can still look distorted."
+        ]
+      }
     }
   ],
   "transfer": {

@@ -43,6 +43,26 @@ STATE_CLAIMS = {
         (["This is Brame's review, not Guo's methods. This excerpt supports a claim about viewing time only."],
          ["This is Guo and colleagues' methods section. The thirty-minute limit is explicit here and answers the original question. An attempt is not proof of learning."]),
     ],
+    "map": [
+        (["Mercator exaggerates Greenland's size relative to South America. The two land masses do not have the same real area; South America is larger."],
+         ["This is a globe view of the same underlying geographic outlines. South America covers a larger area on Earth. The view from one angle is not itself an area measurement."]),
+        (["Meridians meet at the poles on the globe. Greenland is at high northern latitude; South America straddles the equator."],
+         ["Mercator plots meridians as parallel vertical lines and enlarges the scale farther from the equator. It preserves local angles, not areas."]),
+        (["In the Mercator map Greenland looks disproportionately large. Ask how to separate latitude distortion from different land sizes."],
+         ["The two highlighted patches, one near sixty degrees north and one on the equator, have equal area on Earth. The northern patch looks larger on Mercator. The comparison is about patches, not equal-size continents."]),
+        (["Recall Mercator's distortion toward the poles. Two places need not look proportional to their underlying areas."],
+         ["The equal-area projection preserves relative area. Greenland and South America remain different sizes, with South America larger. Shapes can still look distorted."]),
+    ],
+    "salary": [
+        (["Employee A earns $40,000, B $60,000 and C $80,000 annually. These are fictional records."],
+         ["The original total is $180,000 for three employees, so the mean is $60,000."]),
+        (["This is still the before roster: A, B and C are all present. The mean is $60,000."],
+         ["A leaves. B stays at $60,000 and C stays at $80,000. Neither continuing worker got a raise."]),
+        (["Original total and mean: $180,000 divided by three gives $60,000."],
+         ["New total and mean: $140,000 divided by two gives $70,000. Total payroll fell but the mean rose."]),
+        (["B and C each earn exactly what they earned in the first group: $60,000 and $80,000."],
+         ["The roster changed, not the continuing employees' wages. A headline reporting only the mean cannot establish that a particular person got a raise."]),
+    ],
 }
 
 

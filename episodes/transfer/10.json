@@ -33,7 +33,15 @@
           "Show total over count."
         ]
       ],
-      "words": "115–140 (around 40 per visual state)"
+      "words": "115–140 (around 40 per visual state)",
+      "stage_claims": {
+        "roster": [
+          "Employee A earns $40,000, B $60,000 and C $80,000 annually. These are fictional records."
+        ],
+        "before": [
+          "The original total is $180,000 for three employees, so the mean is $60,000."
+        ]
+      }
     },
     {
       "question": "What changed in the second snapshot?",
@@ -50,7 +58,15 @@
           "Remove only A; show the remaining total and count."
         ]
       ],
-      "words": "115–140 (around 40 per visual state)"
+      "words": "115–140 (around 40 per visual state)",
+      "stage_claims": {
+        "before": [
+          "This is still the before roster: A, B and C are all present. The mean is $60,000."
+        ],
+        "leave": [
+          "A leaves. B stays at $60,000 and C stays at $80,000. Neither continuing worker got a raise."
+        ]
+      }
     },
     {
       "question": "How does the mean go up while total pay goes down?",
@@ -67,7 +83,15 @@
           "Show both changes in the second snapshot."
         ]
       ],
-      "words": "115–140 (around 40 per visual state)"
+      "words": "115–140 (around 40 per visual state)",
+      "stage_claims": {
+        "before": [
+          "Original total and mean: $180,000 divided by three gives $60,000."
+        ],
+        "after": [
+          "New total and mean: $140,000 divided by two gives $70,000. Total payroll fell but the mean rose."
+        ]
+      }
     },
     {
       "question": "What would an average headline tell us on its own?",
@@ -84,7 +108,15 @@
           "Return to what the headline could and could not show."
         ]
       ],
-      "words": "115–140 (around 40 per visual state)"
+      "words": "115–140 (around 40 per visual state)",
+      "stage_claims": {
+        "after": [
+          "B and C each earn exactly what they earned in the first group: $60,000 and $80,000."
+        ],
+        "transfer": [
+          "The roster changed, not the continuing employees' wages. A headline reporting only the mean cannot establish that a particular person got a raise."
+        ]
+      }
     }
   ],
   "transfer": {
