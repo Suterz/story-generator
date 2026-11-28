@@ -195,6 +195,41 @@ def observe_ratio_panel(args, decoded, brief):
     return {"observed": observed, "frame": proof_frame, "both_equations_transcribed": all(confirmed)}
 
 
+def verify_lesson_checkout(args, pin):
+    """Reject stale direct-run pins before the renderer receives the script."""
+    import os
+    from pathlib import Path
+
+    from daily_batch import verify_freeze
+    from storygen import ROOT, read
+
+    repositories = {"story": ROOT, "frames": args.frames_repo, "video": args.video_repo}
+    for name in ("frames", "video"):
+        path = repositories[name] or os.getenv(f"DAILY_{name.upper()}_REPO")
+        if not path:
+            raise ValueError(f"cannot verify the {name} checkout for this lesson")
+        repositories[name] = Path(path).resolve()
+
+    freeze = read(pin)
+    if "repositories" in freeze:
+        verify_freeze(pin)
+        for name, path in repositories.items():
+            if Path(freeze["repositories"][name]["path"]).resolve() != path:
+                raise ValueError(f"configured {name} checkout does not match the frozen checkout")
+        if freeze["runtime"]["video_url"].rstrip("/") != args.video_url.rstrip("/"):
+            raise ValueError("configured renderer endpoint does not match the freeze")
+        voice = freeze["runtime"].get("voice", "heart")
+    else:
+        for name, path in repositories.items():
+            head = subprocess.check_output(["git", "-C", path, "rev-parse", "HEAD"], text=True).strip()
+            changed = subprocess.check_output(["git", "-C", path, "status", "--porcelain"], text=True)
+            if head != freeze.get(name) or changed:
+                raise ValueError(f"{name} checkout does not match the clean development pin")
+        voice = freeze.get("voice")
+    if voice != args.voice:
+        raise ValueError("configured narrator does not match the freeze")
+
+
 def run(args):
     from pathlib import Path
     import os
@@ -228,6 +263,7 @@ def run(args):
             outcome.update(status="withhold", reason="production brief needs native renderer preflight")
         else:
             try:
+                verify_lesson_checkout(args, Path(pin))
                 story, plan = compile_lesson(brief, args.voice)
                 validate_native(story)
                 persist(out / "story.json", story)

@@ -41,6 +41,12 @@ whole-percent comparison; it records a specific withhold for other patterns.
 No guessed alternative or permissive render fallback is used. An exact-check
 success is a reviewable draft, not an independent editorial verdict.
 
+Exact direct runs check the three local checkouts and the narrator against
+`DAILY_FREEZE` before submission. Staged development pins name clean `story`,
+`frames`, and `video` commit hashes and `voice`. Full batch freezes also
+check the pinned artifacts and endpoint. Run against the service started
+from those checkouts.
+
 The reusable boundary is `readiness.py`; `lesson.py` is deliberately the
 storyteller/video integration. The topic list checker requires neither a
 storyteller server nor access to local inference models.
