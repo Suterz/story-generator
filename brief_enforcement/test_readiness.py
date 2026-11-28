@@ -3,7 +3,7 @@ import json
 from pathlib import Path
 import unittest
 
-from brief_enforcement.lesson import compile_lesson, verify_order
+from brief_enforcement.lesson import compile_lesson, verify_order, verify_transfer
 from brief_enforcement.readiness import inspect, plan_errors
 
 
@@ -89,3 +89,20 @@ class Readiness(unittest.TestCase):
                                 {"panels": panels})
         self.assertFalse(check("Which made better use of its input?"))
         self.assertEqual(len(check("Battery B made better use of its input.")), 1)
+
+    def test_delivered_transfer_requires_grounded_operands_percent_and_division(self):
+        decoded = {"duration": 60, "cues": [{"id": "lesson-6", "seconds": 40},
+                                           {"id": "lesson-7", "seconds": 50}]}
+        question = "A third battery takes in 50 and returns 40kWh. What share is that?"
+
+        def check(answer, prompt=question):
+            words = [{"word": prompt, "start": 40, "end": 49},
+                     {"word": answer, "start": 50, "end": 58}]
+            return verify_transfer(self.brief, decoded, words)
+
+        self.assertFalse(check("80 %. Divide forty by fifty."))
+        self.assertFalse(check("Eighty percent. 40 divided by 50 is four fifths."))
+        for wrong in ("81%. Divide forty by fifty.", "80.5%. Divide forty by fifty.",
+                      "80. Divide forty by fifty.", "80%. Divide fifty by forty."):
+            self.assertEqual(check(wrong)[0]["start_seconds"], 50)
+        self.assertEqual(check("80%. Divide forty by fifty.", question.replace("50", "60"))[0]["start_seconds"], 40)

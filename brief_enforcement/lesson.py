@@ -135,6 +135,35 @@ def verify_order(brief, decoded, audio, manifest):
     return faults
 
 
+def verify_transfer(brief, decoded, audio):
+    """Corroborate the changed operands and answer using the exported speech."""
+    transfer = brief["transfer"]
+    cues = {cue["id"]: cue["seconds"] for cue in decoded["cues"]}
+    question, answer = cues["lesson-6"], cues["lesson-7"]
+
+    def amount(key):
+        value = int(transfer[key])
+        words = re.escape(spoken_integer(value)).replace(r"\-", r"[- ]").replace(r"\ ", r"[\s-]+")
+        return rf"\b(?:{value}|{words})(?!\d|\.\d)"
+
+    def spoken_between(start, end):
+        return " ".join(row["word"].strip().casefold() for row in audio
+                        if start <= (row["start"] + row["end"]) / 2 < end)
+
+    input_, returned, rate = map(amount, ("input", "returned", "percent"))
+    question_text = spoken_between(question - .65, answer)
+    answer_text = spoken_between(answer - .65, decoded["duration"])
+    faults = []
+    if not re.search(rf"\btakes in {input_}\W+and returns {returned}\s*(?:kwh|kilowatt[- ]hours?)\b",
+                     question_text):
+        faults.append({"start_seconds": question, "detail": "Changed input and return were not corroborated in the delivered question"})
+    percent = rf"{rate}\s*(?:%|percent\b)"
+    division = rf"(?:\bdivide {returned} by {input_}|{returned} divided by {input_})\b"
+    if not re.search(rf"{percent}[\s.,:]+{division}", answer_text):
+        faults.append({"start_seconds": answer, "detail": "Expected percentage and division were not corroborated in the delivered answer"})
+    return faults
+
+
 def observe_ratio_panel(args, decoded, brief):
     """Ask the pinned vision model to read the actual proof frame, without the answers."""
     import os
@@ -211,7 +240,9 @@ def run(args):
                     manifest = read(out / "manifest.json")
                     decoded, audio, _ = inspect_media(args, story, manifest)
                     marks = {}
-                    faults = meter_faults(out, decoded, manifest, audio, marks) + verify_order(brief, decoded, audio, manifest)
+                    faults = (meter_faults(out, decoded, manifest, audio, marks)
+                              + verify_order(brief, decoded, audio, manifest)
+                              + verify_transfer(brief, decoded, audio))
                     actual = decoded["duration"]
                     target = brief["duration"]
                     proof = {"faults": faults, "focus": marks, "mp4_sha256": decoded["video_sha256"],
