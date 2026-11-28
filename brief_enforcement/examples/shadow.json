@@ -1,0 +1,45 @@
+{
+  "schema_version": "daily/3",
+  "topic": "Why a larger light makes a softer shadow edge",
+  "audience": "Adults photographing objects with a desk lamp",
+  "prior": "Know that an opaque object blocks direct light; may think brightness controls edge width.",
+  "objective": "Predict how changing the apparent size of a light changes the shadow edge when the object and screen stay fixed.",
+  "takeaway": "The edge is softer where the object blocks only part of the light source.",
+  "tone": "Conversational and curious; avoid camera jargon.",
+  "intro": {
+    "id": "observe", "description": "Ask why the same toy casts shadows with different edge widths.",
+    "must_show": "Two views of the same toy and screen; a small light and a visibly wider light.",
+    "requires": [], "establishes": ["puzzle"], "evidence_ids": ["model"]
+  },
+  "lesson": {
+    "id": "isolate", "description": "Hold the geometry fixed apart from the luminous area.",
+    "must_show": "Lights have the same center and are equally far from the toy; toy and screen do not move.",
+    "requires": ["puzzle"], "establishes": ["source_changed"], "evidence_ids": ["model"]
+  },
+  "mechanism": [
+    {
+      "id": "trace", "description": "Trace rays from opposite edges of the wider source.",
+      "must_show": "A screen location blocked from one edge of the lamp can still receive light from the other edge.",
+      "requires": ["source_changed"], "establishes": ["partial_blocking"], "evidence_ids": ["model"]
+    }
+  ],
+  "result": {
+    "id": "answer", "description": "Connect the wider region of partial blockage to the softer edge.",
+    "must_show": "Side-by-side shadow edge transitions aligned to the same screen coordinates.",
+    "requires": ["partial_blocking"], "establishes": ["edge_explained"], "evidence_ids": ["model"]
+  },
+  "transfer": {
+    "question": "What happens if you cover the edges of the wider lamp and leave just its center lit?",
+    "answer": "The shadow edge becomes sharper, all else equal.",
+    "reasoning": "A smaller apparent source narrows the region where only part of the light can reach the screen."
+  },
+  "facts": [
+    {
+      "id": "model", "kind": "hypothetical",
+      "claim": "Idealized straight-light-ray demonstration with a fixed opaque toy and screen, no extra light and no scattering."
+    }
+  ],
+  "constraints": ["Do not confuse the apparent size of the source with its brightness."],
+  "defaults": "portrait-education-v1",
+  "duration": {"kind": "target", "min_seconds": 35, "max_seconds": 55}
+}
