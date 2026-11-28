@@ -37,3 +37,9 @@ success is a reviewable draft, not an independent editorial verdict.
 The reusable boundary is `readiness.py`; `lesson.py` is deliberately the
 storyteller/video integration. The topic list checker requires neither a
 storyteller server nor access to local inference models.
+
+To extract the intake checker into another project, copy `readiness.py`,
+`requirements.txt` and `examples/`. Run `python readiness.py input.json
+--out readiness.json` from that extracted copy. It does not import the
+storyteller. The integration tests and renderer adapter stay in this
+repository unless their dependencies move with them.
