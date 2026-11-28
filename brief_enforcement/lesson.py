@@ -47,8 +47,8 @@ def plan_comparison(brief):
             f"{a['name']} returns {spoken(values[0])} percent. "
             f"{b['name']} returns {spoken(values[1])} percent.", True, True, None),
         (3, f"Now compare the shares. {outcome}", True, True, None),
-        (3, f"Try one more. {brief['transfer']['question']}", True, True, None),
-        (3, f"Here is the check. {brief['transfer']['answer']} {brief['transfer']['reasoning']}", True, True, None),
+        (3, brief["transfer"]["question"], True, True, None),
+        (3, f"{brief['transfer']['answer']} {brief['transfer']['reasoning']}", True, True, None),
     ]
     return schedule, beats, values
 
