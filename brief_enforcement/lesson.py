@@ -1,6 +1,6 @@
 """Run an explicitly scoped, exact daily/3 lesson through the ordinary renderer."""
-from argparse import Namespace
 from fractions import Fraction
+import fcntl
 import hashlib
 import re
 import subprocess
@@ -111,6 +111,37 @@ def verify_order(brief, decoded, audio, manifest):
     return faults
 
 
+def observe_ratio_panel(args, decoded, brief):
+    """Ask the pinned vision model to read the actual proof frame, without the answers."""
+    import os
+    from pathlib import Path
+
+    from review_daily import worker
+
+    runtime = Path(os.getenv("DAILY_RUNTIME_ROOT", Path.home() / "ai/storyboard-rehearsal/fresh"))
+    frames = Path(os.environ["DAILY_FRAMES_REPO"])
+    proof_frame = decoded["cues"][3]["frame"]
+    index = decoded["frames"].index(proof_frame) + 1
+    image = args.out / f"phone/{index:03d}.png"
+    query = {"images": [[f"Phone frame {proof_frame}", str(image)]],
+             "prompt": "Transcribe the two battery names and each division expression including its percent. "
+                       "Use only text you can actually see in the two cards, above the caption."}
+    with args.lease.open("a") as lock:
+        fcntl.flock(lock, fcntl.LOCK_EX)
+        observed, = worker([runtime / "venvs/storyboard-vision/bin/python",
+                            frames / "src/storyboard_renderer/multi_review.py"], [query], limit=300)
+    normalized = re.sub(r"\s+", "", observed.casefold().replace("÷", "/"))
+    confirmed = []
+    for item in brief["comparison"]["objects"]:
+        value = Fraction(item["returned"], item["input"])*100
+        phrase = f'{item["returned"]}/{item["input"]}={value}%'
+        lines = observed.casefold().replace("÷", "/").splitlines()
+        matches = [line for line in lines if item["name"].casefold() in line and phrase in re.sub(r"\s+", "", line)]
+        confirmed.append(bool(matches))
+    return {"observed": observed, "frame": proof_frame, "both_equations_transcribed": all(confirmed),
+            "normalized": normalized}
+
+
 def run(args):
     from pathlib import Path
     import os
@@ -154,11 +185,20 @@ def run(args):
                     outcome.update(status="withhold", reason=result.get("error", result["state"]))
                 else:
                     manifest = read(out / "manifest.json")
-                    decoded, audio, _ = inspect_media(Namespace(**vars(args)), story, manifest)
+                    decoded, audio, _ = inspect_media(args, story, manifest)
                     marks = {}
                     faults = meter_faults(out, decoded, manifest, audio, marks) + verify_order(brief, decoded, audio, manifest)
+                    actual = decoded["duration"]
+                    target = brief["duration"]
                     proof = {"faults": faults, "focus": marks, "mp4_sha256": decoded["video_sha256"],
-                             "duration_seconds": decoded["duration"]}
+                             "duration_seconds": actual, "configuration_sha256": digest(identity),
+                             "duration_preference_met": target["min_seconds"] <= actual <= target["max_seconds"],
+                             "worked_ratio_cue_seconds": decoded["cues"][3]["seconds"],
+                             "conclusion_cue_seconds": decoded["cues"][4]["seconds"]}
+                    if not faults and os.getenv("DAILY_VERIFY_PROOF_PIXELS") == "1":
+                        proof["decoded_ratio_observation"] = observe_ratio_panel(args, decoded, brief)
+                        if not proof["decoded_ratio_observation"]["both_equations_transcribed"]:
+                            faults.append({"detail": "the actual proof frame could not be verified for both objects"})
                     persist(out / "exact-review.json", proof)
                     outcome.update(status="withhold" if faults else "draft_ready",
                                    reason=faults[0]["detail"] if faults else "exact checks passed; independent editorial quality unqualified",

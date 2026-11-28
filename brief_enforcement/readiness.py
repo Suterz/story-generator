@@ -24,9 +24,10 @@ def digest(brief):
     return hashlib.sha256(json.dumps(brief, sort_keys=True, ensure_ascii=False).encode()).hexdigest()
 
 
-ITEM = obj({"id": TEXT, "description": TEXT, "must_show": TEXT, "requires": array(TEXT),
-            "establishes": array(TEXT, 1), "evidence_ids": array(TEXT, 1)})
-EVIDENCE = obj({"id": TEXT, "claim": TEXT, "kind": {"enum": ["supplied", "hypothetical", "public_gap"]},
+ID = {"type": "string", "pattern": "^[a-z][a-z0-9_-]{0,63}$"}
+ITEM = obj({"id": ID, "description": TEXT, "must_show": TEXT, "requires": array(ID),
+            "establishes": array(ID, 1), "evidence_ids": array(ID, 1)})
+EVIDENCE = obj({"id": ID, "claim": TEXT, "kind": {"enum": ["supplied", "hypothetical", "public_gap"]},
                 "source": TEXT}, ["id", "claim", "kind"])
 BRIEF = obj({"schema_version": {"const": "daily/3"}, **dict.fromkeys(
                 ("topic", "audience", "prior", "objective", "takeaway", "tone"), TEXT),
@@ -40,7 +41,7 @@ BRIEF = obj({"schema_version": {"const": "daily/3"}, **dict.fromkeys(
              "comparison": obj({"unit": TEXT, "objects": array(obj({
                  "name": TEXT, "input": {"type": "integer", "minimum": 1},
                  "returned": {"type": "integer", "minimum": 0}}), 2, 2),
-                 "answer": TEXT, "evidence_id": TEXT})},
+                 "answer": TEXT, "evidence_id": ID})},
             ["schema_version", "topic", "audience", "prior", "objective", "takeaway", "tone",
              "intro", "lesson", "mechanism", "result", "transfer", "facts", "defaults", "duration"])
 
@@ -71,8 +72,10 @@ def inspect(brief):
         if not value or value in {"everyone", "general", "none", "tbd", "whatever", "interesting", "something"}:
             add(f"/{field}", "provide the audience knowledge, teaching decision or explicit preference")
     objective = brief["objective"].strip()
-    if re.fullmatch(r"(?:explain|describe|discuss|understand|learn about|introduce) (?:\S+\s*){1,3}", objective,
-                    flags=re.I):
+    objective_action = re.search(r"\b(compare|predict|calculate|identify|distinguish|describe how|"
+                                 r"explain (?:how|why|when|which)|determine|apply|interpret|evaluate)\b",
+                                 objective, re.I)
+    if not objective_action:
         add("/objective", "state what the viewer will compare, predict, calculate, or explain and under which conditions")
     if brief["duration"]["min_seconds"] > brief["duration"]["max_seconds"]:
         add("/duration", "minimum duration exceeds maximum", "withhold")
@@ -103,6 +106,8 @@ def inspect(brief):
             add(at, "teaching prerequisites are not established yet: " + ", ".join(sorted(missing)), "withhold")
         if not set(stage["establishes"]) - seen:
             add(at, "phase establishes no new inference")
+        elif set(stage["establishes"]) & seen:
+            add(at, "phase claims to establish an inference already established")
         if missing := set(stage["evidence_ids"]) - evidence.keys():
             add(at, "undefined evidence: " + ", ".join(sorted(missing)), "withhold")
         seen.update(stage["establishes"])
