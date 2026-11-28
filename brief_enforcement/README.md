@@ -26,6 +26,13 @@ refer to inference IDs established by earlier phases. See `examples/battery.json
 for a complete brief. Keep source provenance with each measurement. Durations
 are either hard ranges or targets; a target must not be used to pad narration.
 
+For the exact battery route, `transfer` takes `input`, `returned`, and
+`percent` instead of prose. The checker requires a new pair of readings and
+verifies the supplied answer against their exact ratio before authoring the
+question and explanation. Older experimental comparison briefs with prose
+transfers must supply these numbers to enter that route. Other teaching
+patterns retain the `question`, `answer`, and `reasoning` fields.
+
 `storygen.py run` dispatches `daily/3` to the same intake. Use
 `--require-ready-brief` to enforce it explicitly on submitted files. Existing
 production V2 and archived `daily/2` experiments retain their existing routes.

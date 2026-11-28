@@ -21,7 +21,7 @@ def plan_comparison(brief):
         raise ValueError("comparison names need short pronounceable labels")
     if any(max(obj["input"], obj["returned"]) >= 1000 for obj in objects):
         raise ValueError("reading exceeds the supported spoken integer range")
-    ratios = [Fraction(obj["returned"], obj["input"]) * 100 for obj in objects]
+    ratios = [Fraction(int(obj["returned"]), int(obj["input"])) * 100 for obj in objects]
     if any(p.denominator != 1 or not 0 <= p <= 100 for p in ratios):
         raise ValueError("comparison needs whole-percent returns between zero and one hundred")
     values = [int(ratio) for ratio in ratios]
@@ -33,6 +33,10 @@ def plan_comparison(brief):
         raise ValueError("worked ratio must establish ratios_shown, and the lesson must establish inputs_revealed")
     spoken = spoken_integer
     a, b = objects
+    transfer = brief["transfer"]
+    transfer_input = spoken(int(transfer["input"]))
+    transfer_return = spoken(int(transfer["returned"]))
+    transfer_percent = spoken(int(transfer["percent"])).capitalize()
     title = "Which made better use of its input?"
     outcome = ("Both returned the same share of their input." if comparison["answer"] == "tie" else
                f"{comparison['answer']} made better use of its input.")
@@ -47,8 +51,9 @@ def plan_comparison(brief):
             f"{a['name']} returns {spoken(values[0])} percent. "
             f"{b['name']} returns {spoken(values[1])} percent.", True, True, None),
         (3, f"Now compare the shares. {outcome}", True, True, None),
-        (3, brief["transfer"]["question"], True, True, None),
-        (3, f"{brief['transfer']['answer']} {brief['transfer']['reasoning']}", True, True, None),
+        (3, f"A third battery takes in {transfer_input} and returns {transfer_return} kilowatt-hours. "
+            "What share is that?", True, True, None),
+        (3, f"{transfer_percent} percent. Divide {transfer_return} by {transfer_input}.", True, True, None),
     ]
     return schedule, beats, values
 
@@ -99,7 +104,7 @@ def verify_order(brief, decoded, audio, manifest):
     proof = manifest["panels"][3].get("daily_visual", {}).get("proof", {})
     meters = proof.get("meters", [])
     for obj, meter in zip(brief["comparison"]["objects"], meters):
-        percentage = Fraction(obj["returned"], obj["input"]) * 100
+        percentage = Fraction(int(obj["returned"]), int(obj["input"])) * 100
         expected = f'{obj["returned"]}/{obj["input"]} = {percentage}%'
         if meter["object"] != obj["name"] or not any(
                 row["label"] == "Share returned" and row["display"] == expected for row in meter["readings"]):
@@ -153,7 +158,7 @@ def observe_ratio_panel(args, decoded, brief):
                             frames / "src/storyboard_renderer/multi_review.py"], [query], limit=300)
     confirmed = []
     for item in brief["comparison"]["objects"]:
-        value = Fraction(item["returned"], item["input"])*100
+        value = Fraction(int(item["returned"]), int(item["input"])) * 100
         phrase = f'{item["returned"]}/{item["input"]}={value}%'
         lines = observed.casefold().replace("÷", "/").splitlines()
         matches = [line for line in lines if item["name"].casefold() in line and phrase in re.sub(r"\s+", "", line)]

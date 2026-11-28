@@ -63,9 +63,9 @@
     ]
   },
   "transfer": {
-    "question": "A third battery takes in fifty and returns forty kilowatt-hours. What share is that?",
-    "answer": "Eighty percent.",
-    "reasoning": "Forty divided by fifty is four fifths."
+    "input": 50,
+    "returned": 40,
+    "percent": 80
   },
   "facts": [
     {

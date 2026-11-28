@@ -56,10 +56,27 @@ class Readiness(unittest.TestCase):
         self.assertEqual(story["min_ms"], 35000)
 
     def test_a_complete_brief_without_a_supported_route_is_not_queued(self):
-        del self.brief["comparison"]
-        result = inspect(self.brief)
+        brief = json.loads(self.example.with_name("shadow.json").read_text())
+        result = inspect(brief)
         self.assertEqual(result["status"], "ready")
         self.assertFalse(result["queueable"])
+
+    def test_exact_transfer_answer_binds_to_changed_readings(self):
+        baseline = inspect(self.brief)
+        self.assertTrue(baseline["queueable"])
+        wrong = deepcopy(self.brief)
+        wrong["transfer"]["percent"] = 75
+        result = inspect(wrong)
+        self.assertEqual(result["status"], "withhold")
+        self.assertFalse(result["queueable"])
+        self.assertEqual(result["issues"][0]["field"], "/transfer/percent")
+        repeated = deepcopy(self.brief)
+        repeated["transfer"] = {"input": 100, "returned": 75, "percent": 75}
+        self.assertEqual(inspect(repeated)["status"], "needs_input")
+        self.brief["transfer"] = {"input": 40, "returned": 20, "percent": 50}
+        story, _ = compile_lesson(self.brief, "drama3-A")
+        self.assertIn("takes in forty and returns twenty", story["script"][-2]["text"])
+        self.assertEqual(story["script"][-1]["text"], "Fifty percent. Divide twenty by forty.")
 
     def test_question_is_not_an_early_declaration(self):
         story, _ = compile_lesson(self.brief, "drama3-A")
