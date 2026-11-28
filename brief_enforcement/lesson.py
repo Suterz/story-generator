@@ -106,7 +106,12 @@ def verify_order(brief, decoded, audio, manifest):
         faults.append({"detail": "The worked result must precede the conclusion"})
     early = " ".join(word["word"].strip() for word in audio if word["end"] < conclusion_start)
     early = re.sub(r"\s+", " ", early.casefold())
-    if "made better use of its input" in early or "returned the same share" in early:
+    # The hook asks "Which made better use …?" using the same words as the
+    # answer. Only a conclusion with an actual subject is a reveal.
+    winner = brief["comparison"]["answer"]
+    statement = (r"\bboth returned the same share\b" if winner == "tie" else
+                 rf"\b{re.escape(winner.casefold())} made better use of its input\b")
+    if re.search(statement, early):
         faults.append({"detail": "Delivered audio declares the result before the conclusion cue"})
     return faults
 
