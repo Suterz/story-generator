@@ -14,6 +14,7 @@ from daily_evidence import persist
 from jsonschema import Draft202012Validator
 
 from daily import ORDINARY
+from brief_enforcement.readiness import validate_brief_file
 
 
 def sha(path):
@@ -63,7 +64,10 @@ def run(args):
         path = args.briefs / f"{slot}.json"
         if sha(path) != expected:
             raise ValueError(f"brief changed after sealing: {slot}")
-        Draft202012Validator(ORDINARY).validate(read(path))
+        if freeze["runtime"].get("brief_schema") == "daily/3" or read(path).get("schema_version") == "daily/3":
+            validate_brief_file(path)
+        else:
+            Draft202012Validator(ORDINARY).validate(read(path))
     repos = freeze["repositories"]
     runtime = freeze["runtime"]
     if not runtime.get("draft_gallery"):

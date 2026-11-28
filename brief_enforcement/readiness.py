@@ -64,7 +64,12 @@ def inspect(brief):
 
     errors = sorted(Draft202012Validator(BRIEF).iter_errors(brief), key=lambda e: str(list(e.path)))
     for entry in errors:
-        add("/" + "/".join(map(str, entry.path)), entry.message)
+        location = list(map(str, entry.path))
+        if entry.validator == "required":
+            missing = re.match(r"'([^']+)' is a required property", entry.message)
+            if missing:
+                location.append(missing[1])
+        add("/" + "/".join(location), entry.message)
     if errors:
         return receipt
     for field in ("topic", "audience", "prior", "objective", "takeaway", "tone"):
@@ -145,6 +150,15 @@ def inspect(brief):
         receipt["execution_route"] = None
     receipt["queueable"] = receipt["status"] == "ready" and receipt["execution_route"] is not None
     return receipt
+
+
+def validate_brief_file(path):
+    brief = json.loads(path.read_text())
+    report = inspect(brief)
+    if not report["queueable"]:
+        detail = "; ".join(f"{e['field']}: {e['reason']}" for e in report["issues"][:4])
+        raise ValueError(f"{path.name}: {report['status']}; {detail or 'no supported execution route'}")
+    return report
 
 
 def plan_errors(brief, plan):

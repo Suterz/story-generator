@@ -55,12 +55,20 @@ class Readiness(unittest.TestCase):
         story, _ = compile_lesson(self.brief, "drama3-A")
         self.assertEqual(story["min_ms"], 35000)
 
+    def test_a_complete_brief_without_a_supported_route_is_not_queued(self):
+        del self.brief["comparison"]
+        result = inspect(self.brief)
+        self.assertEqual(result["status"], "ready")
+        self.assertFalse(result["queueable"])
+
     def test_question_is_not_an_early_declaration(self):
         story, _ = compile_lesson(self.brief, "drama3-A")
         panels = [{}, {}, {}, {"daily_visual": {"proof": {
             "meters": story["beats"][3]["panel"]["daily"]["data"]["meters"]}}}]
         segment = {"cues": [{"seconds": i*3} for i in range(5)]}
         def check(text):
-            return verify_order(self.brief, segment, [{"word": text, "end": 2}], {"panels": panels})
+            return verify_order(self.brief, segment, [{"word": text, "end": 2},
+                                {"word": "Battery B made better use of its input.", "start": 12, "end": 14}],
+                                {"panels": panels})
         self.assertFalse(check("Which made better use of its input?"))
         self.assertEqual(len(check("Battery B made better use of its input.")), 1)

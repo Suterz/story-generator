@@ -44,10 +44,9 @@ def plan_comparison(brief):
         (1, f"Look at the inputs. {a['name']} takes in {spoken(a['input'])}; "
             f"{b['name']} takes in {spoken(b['input'])} kilowatt-hours.", True, False, None),
         (2, "Divide each return by its own input. "
-            f"For {a['name']}, that's {spoken(a['returned'])} divided by {spoken(a['input'])}, "
-            f"or {spoken(values[0])} percent. "
-            f"For {b['name']}, it's {spoken(values[1])} percent.", True, True, None),
-        (3, f"Now compare the shares. {outcome} {brief['takeaway']}", True, True, None),
+            f"{a['name']} returns {spoken(values[0])} percent. "
+            f"{b['name']} returns {spoken(values[1])} percent.", True, True, None),
+        (3, f"Now compare the shares. {outcome}", True, True, None),
         (3, f"Try one more. {brief['transfer']['question']}", True, True, None),
         (3, f"Here is the check. {brief['transfer']['answer']} {brief['transfer']['reasoning']}", True, True, None),
     ]
@@ -90,6 +89,13 @@ def compile_lesson(brief, voice):
 def verify_order(brief, decoded, audio, manifest):
     """Verify the computed result is in the delivered diagram before the spoken conclusion."""
     faults = []
+    for index, panel in enumerate(manifest["panels"][:3]):
+        inputs = [row for meter in panel.get("daily_visual", {}).get("proof", {}).get("meters", [])
+                  for row in meter["readings"]]
+        if any(row["label"] == "Share returned" for row in inputs):
+            faults.append({"detail": f"Worked ratios appear before the proof cue in panel {index+1}"})
+        if index < 2 and any(row["label"] == "Energy put in" and row["display"] != "?" for row in inputs):
+            faults.append({"detail": f"An input was disclosed before the opening question in panel {index+1}"})
     proof = manifest["panels"][3].get("daily_visual", {}).get("proof", {})
     meters = proof.get("meters", [])
     for obj, meter in zip(brief["comparison"]["objects"], meters):
@@ -111,8 +117,16 @@ def verify_order(brief, decoded, audio, manifest):
     winner = brief["comparison"]["answer"]
     statement = (r"\bboth returned the same share\b" if winner == "tie" else
                  rf"\b{re.escape(winner.casefold())} made better use of its input\b")
-    if re.search(statement, early):
+    alternatives = [rf"\b{re.escape(row['name'].casefold())} made better use of its input\b"
+                    for row in brief["comparison"]["objects"]]
+    alternatives.append(r"\bboth returned the same share\b")
+    if any(re.search(candidate, early) for candidate in alternatives):
         faults.append({"detail": "Delivered audio declares the result before the conclusion cue"})
+    end = decoded["cues"][5]["seconds"] if len(decoded["cues"]) > 5 else float("inf")
+    actual = " ".join(word["word"].strip() for word in audio
+                      if conclusion_start <= (word.get("start", word["end"])+word["end"])/2 < end)
+    if not re.search(statement, re.sub(r"\s+", " ", actual.casefold())):
+        faults.append({"detail": "The expected conclusion is not corroborated in the delivered result interval"})
     return faults
 
 
@@ -135,7 +149,6 @@ def observe_ratio_panel(args, decoded, brief):
         fcntl.flock(lock, fcntl.LOCK_EX)
         observed, = worker([runtime / "venvs/storyboard-vision/bin/python",
                             frames / "src/storyboard_renderer/multi_review.py"], [query], limit=300)
-    normalized = re.sub(r"\s+", "", observed.casefold().replace("÷", "/"))
     confirmed = []
     for item in brief["comparison"]["objects"]:
         value = Fraction(item["returned"], item["input"])*100
@@ -143,8 +156,7 @@ def observe_ratio_panel(args, decoded, brief):
         lines = observed.casefold().replace("÷", "/").splitlines()
         matches = [line for line in lines if item["name"].casefold() in line and phrase in re.sub(r"\s+", "", line)]
         confirmed.append(bool(matches))
-    return {"observed": observed, "frame": proof_frame, "both_equations_transcribed": all(confirmed),
-            "normalized": normalized}
+    return {"observed": observed, "frame": proof_frame, "both_equations_transcribed": all(confirmed)}
 
 
 def run(args):
