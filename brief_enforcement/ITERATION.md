@@ -31,3 +31,19 @@
 These are development results under an exact two-battery route. Broad semantic
 brief validation, unsupported routes, independent whole-film quality,
 false-approval/withhold bounds and the sealed pilot require separate evidence.
+
+## Matched controls
+
+| Change | Result on delivered evidence |
+| --- | --- |
+| Proof before result | In the 53.47 s cut, both worked ratios are visible at 20.83 s. The conclusion beat starts at 32.43 s. The reversed-order, changed-transfer cut is 51.33 s and shows both ratios at 21.10 s, before the result beat at 32.13 s. Both use Drama 3 A. |
+| Exact percentage cue | The original short recording withheld on `80%`; the changed-order recording withheld on separately timed `80` and `%`. Replaying the unchanged speech cleared both. Different percentages and a number without a percent unit still fail. |
+| Typed transfer | The prose gate queued 50 in, 40 out, and a wrong 75% answer. The typed gate withheld it at `/transfer/percent` with expected 80%, before submission. On the changed brief, delivered speech gives 50% and divides 20 by 40. |
+| Independent ASR observation of the transfer | Both old and new exact checks cleared the intact clip. The old check also cleared a version with the answer muted and the identical video stream. The updated check flagged the missing answer at 46.90 s. Seven playable development clips passed the updated transfer check; cases are related variants. |
+| Chapter scope | On the unchanged 226.17 s archive, supplying only the chapter objective failed to rescue the correctly delivered setup in DeepSeek's judgment. Both prompt arms still rejected the actual premature conclusion. This prompt variant is not active. |
+
+The original-brief first attempt reproduced the successful replay MP4
+byte-for-byte. The changed-transfer brief also reached `draft_ready` on
+its first attempt, with the added transfer check applied afterward to the
+same MP4. These are development results. Checkout verification now
+rejects a stale development pin before submission.
