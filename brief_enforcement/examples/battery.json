@@ -1,0 +1,103 @@
+{
+  "schema_version": "daily/3",
+  "topic": "Which battery makes better use of its input?",
+  "audience": "Homeowners comparing two battery demonstrations",
+  "prior": "Can read energy in kilowatt-hours, but may not know what efficiency divides by.",
+  "objective": "Compare energy returned with energy put in for each complete cycle and explain why the ranking can change.",
+  "takeaway": "Compare the fraction returned, rather than the number of kilowatt-hours alone.",
+  "tone": "Curious and conversational; pronounce the quantities clearly.",
+  "intro": {
+    "id": "observe",
+    "description": "Pose a fair comparison with the input readings unknown.",
+    "must_show": "Two batteries with their returned energy; input readings hidden.",
+    "requires": [],
+    "establishes": [
+      "returns_seen"
+    ],
+    "evidence_ids": [
+      "cycles"
+    ]
+  },
+  "lesson": {
+    "id": "inputs",
+    "description": "Reveal why the input values matter.",
+    "must_show": "The same batteries with both input meters revealed.",
+    "requires": [
+      "returns_seen"
+    ],
+    "establishes": [
+      "inputs_revealed"
+    ],
+    "evidence_ids": [
+      "cycles"
+    ]
+  },
+  "mechanism": [
+    {
+      "id": "ratios",
+      "description": "Calculate each return as a share of its own input.",
+      "must_show": "Both division expressions and their percentages.",
+      "requires": [
+        "inputs_revealed"
+      ],
+      "establishes": [
+        "ratios_shown"
+      ],
+      "evidence_ids": [
+        "cycles"
+      ]
+    }
+  ],
+  "result": {
+    "id": "answer",
+    "description": "Answer which returns the larger share and distinguish the amount.",
+    "must_show": "Keep both worked ratios visible while stating the conclusion.",
+    "requires": [
+      "ratios_shown"
+    ],
+    "establishes": [
+      "winner_explained"
+    ],
+    "evidence_ids": [
+      "cycles"
+    ]
+  },
+  "transfer": {
+    "question": "A third battery takes in fifty and returns forty kilowatt-hours. What share is that?",
+    "answer": "Eighty percent.",
+    "reasoning": "Forty divided by fifty is four fifths."
+  },
+  "facts": [
+    {
+      "id": "cycles",
+      "kind": "hypothetical",
+      "claim": "Battery A takes in 100 kWh and returns 75 kWh. Battery B takes in 60 kWh and returns 48 kWh. Both are complete cycles measured at the same electrical boundary."
+    }
+  ],
+  "constraints": [
+    "Do not infer power, capacity, product quality or cause of losses."
+  ],
+  "defaults": "portrait-education-v1",
+  "duration": {
+    "kind": "target",
+    "min_seconds": 35,
+    "max_seconds": 55
+  },
+  "comparison": {
+    "unit": "kWh",
+    "objects": [
+      {
+        "name": "Battery A",
+        "input": 100,
+        "returned": 75
+      },
+      {
+        "name": "Battery B",
+        "input": 60,
+        "returned": 48
+      }
+    ],
+    "answer": "Battery B",
+    "evidence_id": "cycles"
+  }
+}

@@ -42,7 +42,8 @@ BRIEF = obj({"schema_version": {"const": "daily/1"},
 ORDINARY = obj({"schema_version": {"const": "daily/2"}, "topic": TEXT, "audience": TEXT,
                 "objective": TEXT, "facts": array(TEXT), "constraints": array(TEXT),
                 "misconceptions": array(TEXT), "transfer": TEXT, "signature": TEXT,
-                "min_ms": {"enum": [120000, 180000]}},
+                "min_ms": {"enum": [120000, 180000]}, "prior": TEXT, "takeaway": TEXT,
+                "tone": TEXT, "transfer_answer": TEXT},
                ["schema_version", "topic", "audience", "objective"])
 VISUAL = obj({"what": {**TEXT, "maxLength": 200}, "why": {**TEXT, "maxLength": 150},
               "kind": {"enum": ["exact", "authentic", "illustration"]}})
@@ -118,6 +119,9 @@ def adapt(raw, explicit):
     brief = {"schema_version": "daily/2", **{k: raw[k] for k in ("topic", "audience", "objective", "min_ms")},
              "facts": list(raw["sources"].values()), "misconceptions": raw["misconceptions"],
              "constraints": [raw["editorial_direction"]], "transfer": raw["transfer"]["question"]}
+    brief.update({k: raw[k] for k in ("prior", "takeaway", "tone") if k in raw})
+    if "answer" in raw["transfer"]:
+        brief["transfer_answer"] = raw["transfer"]["answer"]
     Draft202012Validator(ORDINARY).validate(brief)
     return brief
 

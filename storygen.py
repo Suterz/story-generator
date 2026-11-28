@@ -822,7 +822,8 @@ def render(args, story):
     receipt = out / "submission.json"
     base = args.video_url.rstrip("/")
     info = {"key": key, "digest": digest, "endpoint": base}
-    route = ("/v2/openings" if story.get("opening_preview") else
+    route = ("/v2/lessons" if story.get("lesson_contract") == "daily/3" else
+             "/v2/openings" if story.get("opening_preview") else
              "/v2/episodes" if "chapter_starts" in story else "/v2/renders")
     if receipt.exists():
         if read(receipt) != info:
@@ -884,6 +885,8 @@ def main():
                                                 "advancing-no-copy-v6", "advancing-grounded-v7",
                                                 "advancing-verified-meters-v8"),
                    default="historical")
+    p.add_argument("--require-ready-brief", action="store_true",
+                   help="use shared production readiness checks rather than the experimental legacy path")
     p.add_argument("--episode-skill", choices=("routed", "baseline", "entities", "purpose", "continuity",
                                                "visual-first", "verification"), default="routed")
     p.add_argument("--validator-python", type=Path, help="Python with the renderer dependencies")
@@ -907,6 +910,12 @@ def main():
     with (args.out / ".run.lock").open("a") as lock:
         fcntl.flock(lock, fcntl.LOCK_EX | fcntl.LOCK_NB)
         try:
+            if (args.command == "run" and args.input.is_file() and not args.raw_text
+                    and (args.require_ready_brief or read(args.input).get("schema_version") == "daily/3")):
+                from brief_enforcement.lesson import run as run_brief_lesson
+
+                run_brief_lesson(args)
+                return
             if (not args.raw_text and args.command == "run" and args.input.is_file()
                     and (args.daily or read(args.input).get("schema_version") in ("daily/1", "daily/2"))):
                 from daily import run_daily

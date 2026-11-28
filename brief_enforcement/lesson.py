@@ -1,0 +1,170 @@
+"""Run an explicitly scoped, exact daily/3 lesson through the ordinary renderer."""
+from argparse import Namespace
+from fractions import Fraction
+import hashlib
+import re
+import subprocess
+from urllib.error import URLError
+
+from .readiness import inspect, plan_errors, stages
+from daily_evidence import digest, persist
+from opening_bindings import spoken_integer
+
+
+def plan_comparison(brief):
+    """Compile the supported two-object teaching pattern from facts, not prose guesses."""
+    comparison = brief["comparison"]
+    if comparison["unit"] != "kWh" or len(brief["mechanism"]) != 1:
+        raise ValueError("the deployed exact comparison supports kWh and one worked-ratio phase")
+    objects = comparison["objects"]
+    if any(not re.fullmatch(r"[A-Za-z][A-Za-z ]{0,18}", r["name"]) for r in objects):
+        raise ValueError("comparison names need short pronounceable labels")
+    if any(max(obj["input"], obj["returned"]) >= 1000 for obj in objects):
+        raise ValueError("reading exceeds the supported spoken integer range")
+    ratios = [Fraction(obj["returned"], obj["input"]) * 100 for obj in objects]
+    if any(p.denominator != 1 or not 0 <= p <= 100 for p in ratios):
+        raise ValueError("comparison needs whole-percent returns between zero and one hundred")
+    values = [int(ratio) for ratio in ratios]
+    phase = stages(brief)
+    schedule = [{"id": s["id"], "establishes": s["establishes"]} for s in phase]
+    if errors := plan_errors(brief, schedule):
+        raise ValueError("; ".join(errors))
+    if "ratios_shown" not in phase[2]["establishes"] or "inputs_revealed" not in phase[1]["establishes"]:
+        raise ValueError("worked ratio must establish ratios_shown, and the lesson must establish inputs_revealed")
+    spoken = spoken_integer
+    a, b = objects
+    title = "Which made better use of its input?"
+    outcome = ("Both returned the same share of their input." if comparison["answer"] == "tie" else
+               f"{comparison['answer']} made better use of its input.")
+    # The argument order is executable: focus two returns, reveal inputs, show
+    # both computed ratios, and only then allow the conclusion and transfer.
+    beats = [
+        (0, f"{a['name']} returns {spoken(a['returned'])} kilowatt-hours.", False, False, 0),
+        (0, f"{b['name']} returns {spoken(b['returned'])} kilowatt-hours. {title}", False, False, 1),
+        (1, f"Look at the inputs. {a['name']} takes in {spoken(a['input'])}; "
+            f"{b['name']} takes in {spoken(b['input'])} kilowatt-hours.", True, False, None),
+        (2, "Divide each return by its own input. "
+            f"For {a['name']}, that's {spoken(a['returned'])} divided by {spoken(a['input'])}, "
+            f"or {spoken(values[0])} percent. "
+            f"For {b['name']}, it's {spoken(values[1])} percent.", True, True, None),
+        (3, f"Now compare the shares. {outcome} {brief['takeaway']}", True, True, None),
+        (3, f"Try one more. {brief['transfer']['question']}", True, True, None),
+        (3, f"Here is the check. {brief['transfer']['answer']} {brief['transfer']['reasoning']}", True, True, None),
+    ]
+    return schedule, beats, values
+
+
+def compile_lesson(brief, voice):
+    schedule, data, ratios = plan_comparison(brief)
+    phase = stages(brief)
+    script, beats, starts = [], [], []
+    for i, (stage, narration, inputs, result, focus) in enumerate(data):
+        id_ = f"lesson-{i+1}"
+        if i in (0, 2):
+            starts.append(id_)
+        script.append({"id": id_, "text": narration, "caption": narration})
+        meters = []
+        for index, obj in enumerate(brief["comparison"]["objects"]):
+            fields = [{"label": "Energy returned", "display": f'{obj["returned"]} kWh', "focus": focus == index},
+                      {"label": "Energy put in", "display": f'{obj["input"]} kWh' if inputs else "?", "focus": False}]
+            if result:
+                fields.append({"label": "Share returned", "display": f'{obj["returned"]}/{obj["input"]} = {ratios[index]}%',
+                               "focus": False})
+            meters.append({"object": obj["name"], "readings": fields})
+        beats.append({"id": id_, "cue": ({"ms": 0} if not i else
+                      {"utterance_id": id_, "phrase": " ".join(narration.split()[:3]), "occurrence": 1}),
+                      "panel": {"op": "new_scene", "scene_id": id_, "objective": phase[stage]["description"],
+                                "instruction": phase[stage]["must_show"], "retry_budget": 0,
+                                "daily": {"kind": "exact", "data": {"operation": "meters", "meters": meters},
+                                          "claims": phase[stage]["evidence_ids"], "obligations": [{"id": phase[stage]["id"]}],
+                                          "route_reason": "Source-bound measurements and sequential ratio proof."}}})
+    duration = brief["duration"]
+    minimum = duration["min_seconds"] if duration["kind"] == "hard" else 20
+    maximum = duration["max_seconds"] if duration["kind"] == "hard" else 300
+    return {"title": brief["topic"], "visual": {"story_context": brief["objective"],
+            "visual_signature": "Portrait educational schematic on light paper", "graphic_theme": "paper"},
+            "script": script, "beats": beats, "chapter_starts": starts, "voice_profile": voice,
+            "lesson_contract": "daily/3", "min_ms": minimum*1000, "max_ms": maximum*1000}, schedule
+
+
+def verify_order(brief, decoded, audio, manifest):
+    """Verify the computed result is in the delivered diagram before the spoken conclusion."""
+    faults = []
+    proof = manifest["panels"][3].get("daily_visual", {}).get("proof", {})
+    meters = proof.get("meters", [])
+    for obj, meter in zip(brief["comparison"]["objects"], meters):
+        percentage = Fraction(obj["returned"], obj["input"]) * 100
+        expected = f'{obj["returned"]}/{obj["input"]} = {percentage}%'
+        if meter["object"] != obj["name"] or not any(
+                row["label"] == "Share returned" and row["display"] == expected for row in meter["readings"]):
+            faults.append({"detail": f"Missing worked fraction for {obj['name']}"})
+    if len(meters) != 2:
+        faults.append({"detail": "Missing two worked ratios in rendered panel receipt"})
+    proof_start = decoded["cues"][3]["seconds"]
+    conclusion_start = decoded["cues"][4]["seconds"]
+    if not proof_start < conclusion_start:
+        faults.append({"detail": "The worked result must precede the conclusion"})
+    early = " ".join(word["word"].strip() for word in audio if word["end"] < conclusion_start)
+    early = re.sub(r"\s+", " ", early.casefold())
+    if "made better use of its input" in early or "returned the same share" in early:
+        faults.append({"detail": "Delivered audio declares the result before the conclusion cue"})
+    return faults
+
+
+def run(args):
+    from pathlib import Path
+    import os
+
+    from review_daily import inspect_media
+    from opening_review import meter_faults
+    from storygen import read, render, validate_native
+
+    out = args.out
+    brief = read(args.input)
+    receipt = inspect(brief)
+    pin = os.getenv("DAILY_FREEZE")
+    identity = {**receipt, "voice": args.voice, "endpoint": args.video_url,
+                "freeze_sha256": hashlib.sha256(Path(pin).read_bytes()).hexdigest() if pin else None}
+    lock = out / "brief-readiness.json"
+    if lock.exists() and read(lock) != identity:
+        raise ValueError("changed brief or execution pin; use a new output directory")
+    persist(lock, identity)
+    final = out / "terminal-outcome.json"
+    if final.exists():
+        print(final.read_text(), end="")
+        return
+    outcome = {"status": receipt["status"], "issues": receipt["issues"], "brief_sha256": digest(brief),
+               "render_submitted": False}
+    if receipt["status"] == "ready":
+        if not receipt.get("queueable"):
+            outcome.update(status="withhold", reason="ready brief; no supported execution route for this teaching pattern")
+        elif not pin:
+            outcome.update(status="withhold", reason="no development or release configuration receipt")
+        elif not (os.getenv("STORYGEN_VALIDATOR_PYTHON") and os.getenv("STORYGEN_RENDERER_SOURCES")):
+            outcome.update(status="withhold", reason="production brief needs native renderer preflight")
+        else:
+            try:
+                story, plan = compile_lesson(brief, args.voice)
+                validate_native(story)
+                persist(out / "story.json", story)
+                persist(out / "teaching-plan.json", plan)
+                result = render(args, story)
+                outcome.update(render_submitted=True, renderer=result)
+                if result["state"] != "succeeded":
+                    outcome.update(status="withhold", reason=result.get("error", result["state"]))
+                else:
+                    manifest = read(out / "manifest.json")
+                    decoded, audio, _ = inspect_media(Namespace(**vars(args)), story, manifest)
+                    marks = {}
+                    faults = meter_faults(out, decoded, manifest, audio, marks) + verify_order(brief, decoded, audio, manifest)
+                    proof = {"faults": faults, "focus": marks, "mp4_sha256": decoded["video_sha256"],
+                             "duration_seconds": decoded["duration"]}
+                    persist(out / "exact-review.json", proof)
+                    outcome.update(status="withhold" if faults else "draft_ready",
+                                   reason=faults[0]["detail"] if faults else "exact checks passed; independent editorial quality unqualified",
+                                   mp4_sha256=proof["mp4_sha256"])
+            except (ValueError, RuntimeError, OSError, KeyError, URLError, subprocess.SubprocessError) as error:
+                outcome.update(status="withhold", reason=str(error), render_submitted=(out / "submission.json").exists())
+    persist(out / "first-outcome.json", outcome)
+    persist(final, outcome)
+    print(final.read_text(), end="")
