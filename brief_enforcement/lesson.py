@@ -138,7 +138,9 @@ def observe_ratio_panel(args, decoded, brief):
     from review_daily import worker
 
     runtime = Path(os.getenv("DAILY_RUNTIME_ROOT", Path.home() / "ai/storyboard-rehearsal/fresh"))
-    frames = Path(os.environ["DAILY_FRAMES_REPO"])
+    frames = getattr(args, "frames_repo", None)
+    if frames is None:
+        frames = Path(os.environ["DAILY_FRAMES_REPO"])
     proof_frame = decoded["cues"][3]["frame"]
     index = decoded["frames"].index(proof_frame) + 1
     image = args.out / f"phone/{index:03d}.png"
@@ -212,7 +214,7 @@ def run(args):
                              "duration_preference_met": target["min_seconds"] <= actual <= target["max_seconds"],
                              "worked_ratio_cue_seconds": decoded["cues"][3]["seconds"],
                              "conclusion_cue_seconds": decoded["cues"][4]["seconds"]}
-                    if not faults and os.getenv("DAILY_VERIFY_PROOF_PIXELS") == "1":
+                    if not faults:
                         proof["decoded_ratio_observation"] = observe_ratio_panel(args, decoded, brief)
                         if not proof["decoded_ratio_observation"]["both_equations_transcribed"]:
                             faults.append({"detail": "the actual proof frame could not be verified for both objects"})
